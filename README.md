@@ -6,14 +6,14 @@
 
 ## 许可与数据来源
 
-- `LICENSE` 中的 MIT 许可仅适用于 Qiuizi 有权授权的项目自有应用源码、自动化测试和构建配置，版权声明为 `Copyright (c) 2026 Qiuizi`。该许可不覆盖古籍数据、第三方组件或下述图标素材。
-- RC 快照中的历史 Tauri 图标位于 `frontend/src-tauri/icons/`。Git 提交身份不能证明素材权利；该快照没有对应的原始图形源文件，因此这些图标不纳入 MIT 授权，公开分发前仍须确认权利或经授权替换。
+- `LICENSE` 中的 MIT 许可适用于 Qiuizi 有权授权的项目自有应用源码、自动化测试、构建配置及原创图标源文件与其生成的 Tauri 图标，版权声明为 `Copyright (c) 2026 Qiuizi`。该许可不覆盖古籍数据或第三方组件。
+- 图标源文件 `frontend/src-tauri/icons-source/yijing-workbench.svg` 为项目原创几何图形，不使用第三方素材、图标库、模板或字体；来源与生成方法见 [`docs/icon-provenance.md`](docs/icon-provenance.md)。旧图标已从公开快照移除。
 - 古籍文本数据的来源、修订链接与适用许可见 [`backend/data/README.md`](backend/data/README.md)。该说明针对所引用的维基文库文本，不为未确认的纸本底本作许可声明。
 - 第三方软件和测试参考数据分别见 [`THIRD_PARTY_NOTICES.txt`](THIRD_PARTY_NOTICES.txt) 与 [`backend/tests/data/NOTICE.md`](backend/tests/data/NOTICE.md)，各自保留适用许可。
 
 ## 发布准备状态
 
-源码版本为 3.2.2，正式应用标识沿用 Stable v3.2.0 的 `cn.yijing.workbench`，产品名为 `易经起卦工作台`。SQLite 数据继续使用同一应用数据目录；3.2.2 与 v3.2.0 基线的数据库迁移模块一致。公开前仍须解决历史图标素材权利，并在隔离 Windows 环境实装最终包，验证安装、启动和数据兼容。尚未创建公开仓库或 GitHub Release。
+源码版本为 3.2.2，正式应用标识沿用 Stable v3.2.0 的 `cn.yijing.workbench`，产品名为 `易经起卦工作台`。SQLite 数据继续使用同一应用数据目录；3.2.2 与 v3.2.0 基线的数据库迁移模块一致。最终安装包仍须在隔离 Windows 环境验证安装、启动和数据兼容。尚未创建公开仓库或 GitHub Release。
 
 RC 3.2.2 GUI 6/6 为用户报告结果；构建时 manifest 记录的 GUI 与安装/启动状态仍为 NOT_TESTED。时间顺序和记录范围见 [docs/rc-3.2.2-acceptance.md](docs/rc-3.2.2-acceptance.md)。
 
@@ -50,4 +50,4 @@ NSIS 安装包生成于 `frontend/src-tauri/target/release/bundle/nsis/`。Tauri
 
 ## 许可
 
-`LICENSE` 仅授权项目自有应用源码、自动化测试和构建配置。古籍数据与第三方依赖分别适用 `backend/data/README.md` 和 `THIRD_PARTY_NOTICES.txt` 中列明的条款；历史图标 `frontend/src-tauri/icons/` 不在 MIT 授权范围内，来源与分发权待确认。
+`LICENSE` 授权项目自有应用源码、自动化测试、构建配置及来源记录中的原创 SVG 和其生成图标。古籍数据与第三方依赖分别适用 `backend/data/README.md` 和 `THIRD_PARTY_NOTICES.txt` 中列明的条款。

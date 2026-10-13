@@ -36,14 +36,15 @@
       "../../LICENSE": "LICENSE",
       "../../THIRD_PARTY_NOTICES.txt": "THIRD_PARTY_NOTICES.txt",
       "../../PRIVACY.md": "PRIVACY.md",
-      "../../backend/data/README.md": "DATA_SOURCES.md"
+      "../../backend/data/README.md": "DATA_SOURCES.md",
+      "../../docs/icon-provenance.md": "ICON_PROVENANCE.md"
     },
     "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
+      "icons-project/32x32.png",
+      "icons-project/128x128.png",
+      "icons-project/128x128@2x.png",
+      "icons-project/icon.icns",
+      "icons-project/icon.ico"
     ],
     "android": {
       "debugApplicationIdSuffix": ".debug"
