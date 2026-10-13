@@ -1,0 +1,20 @@
+{
+  "source": "Hong Kong Observatory Almanac 2025 and Gregorian-Lunar Calendar Conversion Table 2025",
+  "source_url": "https://www.hko.gov.hk/en/gts/astron2025/files/HKO_almanac_2025.pdf",
+  "calendar_table_url": "https://www.hko.gov.hk/en/gts/time/calendar/pdf/files/2025e.pdf",
+  "timezone": "Asia/Hong_Kong",
+  "timezone_offset": "+08:00",
+  "solar_terms": [
+    {
+      "name": "立春",
+      "local_datetime_minute": "2025-02-03T22:10",
+      "month_branch_before": "丑",
+      "month_branch_after": "寅"
+    }
+  ],
+  "day_ganzhi": {
+    "2025-02-03": "癸卯",
+    "2025-02-04": "甲辰"
+  },
+  "note": "香港天文台年历表列出立春在 2025-02-03 22:10 HKT；本测试在公布分钟之前/之后各取一分钟，避免把未公布的秒数当成已知。日干支取同年公历-农历对照表中的日干支。"
+}

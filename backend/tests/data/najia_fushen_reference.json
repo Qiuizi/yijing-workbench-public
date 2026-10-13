@@ -1,0 +1,47 @@
+{
+  "source": {
+    "title": "《增删卜易》卷二·飞伏神章第二十八（合编页固定修订）",
+    "url": "https://zh.wikisource.org/w/index.php?title=增刪卜易&oldid=2572918",
+    "revision_id": 2572918,
+    "checked_date": "2026-09-24",
+    "scope": "仅逐项核对伏神所在爻位、伏神六亲/地支五行及对应飞神；不转录原书吉凶断语。"
+  },
+  "cases": [
+    {
+      "hexagram": "天风姤",
+      "position": 2,
+      "hidden_relative": "妻财",
+      "hidden_branch": "寅",
+      "hidden_element": "木",
+      "flying_branch": "亥",
+      "flying_element": "水"
+    },
+    {
+      "hexagram": "天山遁",
+      "position": 1,
+      "hidden_relative": "子孙",
+      "hidden_branch": "子",
+      "hidden_element": "水",
+      "flying_branch": "辰",
+      "flying_element": "土"
+    },
+    {
+      "hexagram": "山火贲",
+      "position": 2,
+      "hidden_relative": "父母",
+      "hidden_branch": "午",
+      "hidden_element": "火",
+      "flying_branch": "丑",
+      "flying_element": "土"
+    },
+    {
+      "hexagram": "地风升",
+      "position": 4,
+      "hidden_relative": "子孙",
+      "hidden_branch": "午",
+      "hidden_element": "火",
+      "flying_branch": "丑",
+      "flying_element": "土"
+    }
+  ]
+}
