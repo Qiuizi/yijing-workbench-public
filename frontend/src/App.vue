@@ -11,7 +11,9 @@ import SettingsPage from './components/SettingsPage.vue'
 import { api } from './api'
 import { isTauri } from '@tauri-apps/api/core'
 import { specialLineForCast } from './specialLine'
-import type { Divination, HistorySummary } from './types'
+import type { Divination, HistorySummary, NajiaChart } from './types'
+import { divinationMarkdown, markdownFilename } from './markdownExport'
+import { saveMarkdown } from './saveMarkdown'
 
 const question = ref('')
 const mode = ref<'coins' | 'manual'>('coins')
@@ -24,6 +26,25 @@ const loadingRecordId = ref<number | null>(null)
 const activePage = ref<'divination' | 'reading' | 'najia' | 'ai' | 'history' | 'settings'>('divination')
 const navCollapsed = ref(false)
 const mobileNavOpen = ref(false)
+const exporting = ref(false)
+
+function updateSavedChart(recordId: number, chart: NajiaChart) {
+  if (result.value?.id === recordId) result.value.najia_chart = chart
+}
+
+async function exportMarkdown() {
+  if (!result.value || exporting.value) return
+  exporting.value = true
+  try {
+    if (await saveMarkdown(markdownFilename(result.value), divinationMarkdown(result.value))) {
+      ElMessage.success(isTauri() ? 'Markdown 已保存。' : 'Markdown 下载已发起。')
+    }
+  } catch (error) {
+    ElMessage.error(`导出 Markdown 失败：${error instanceof Error ? error.message : String(error)}`)
+  } finally {
+    exporting.value = false
+  }
+}
 
 const pageItems = [
   { id: 'divination', label: '起卦', icon: Compass },
@@ -176,6 +197,7 @@ onMounted(async () => {
       </button>
       <span class="topbar__section">本地工作台</span>
       <div class="topbar__right">
+        <el-button v-if="result && ['divination', 'reading', 'najia'].includes(activePage)" plain size="small" :loading="exporting" @click="exportMarkdown">导出 Markdown</el-button>
         <span class="edition-note">V3.2.2 · 桌面稳定核心 V3.1.4</span>
       </div>
     </header>
@@ -353,7 +375,7 @@ onMounted(async () => {
 
       </div>
       <ReadingPage v-else-if="activePage === 'reading'" :divination="result" @start-casting="selectPage('divination')" />
-      <NajiaPanel v-else-if="activePage === 'najia'" :divination="result" @start-casting="selectPage('divination')" />
+      <NajiaPanel v-else-if="activePage === 'najia'" :divination="result" @chart-updated="updateSavedChart" @start-casting="selectPage('divination')" />
       <AIPage v-else-if="activePage === 'ai'" :divination="result" @start-casting="selectPage('divination')" />
       <HistoryPage v-else-if="activePage === 'history'" :records="historyItems" :loading="historyLoading" :opening-record-id="loadingRecordId" @open="openRecord" @remove="removeRecord" @start-casting="selectPage('divination')" />
       <SettingsPage v-else />

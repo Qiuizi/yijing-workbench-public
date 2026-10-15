@@ -9,6 +9,7 @@ use std::{
 
 use serde::Serialize;
 use tauri::{Manager, State, path::BaseDirectory};
+use tauri_plugin_dialog::DialogExt;
 
 #[derive(Clone, Default)]
 struct BackendState {
@@ -173,6 +174,26 @@ async fn backend_connection(app: tauri::AppHandle, state: State<'_, BackendState
         .map_err(|_| "无法检查本地服务状态".to_string())?
 }
 
+#[tauri::command]
+async fn export_markdown(app: tauri::AppHandle, filename: String, markdown: String) -> Result<bool, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let Some(selected) = app.dialog().file()
+            .set_title("导出 Markdown")
+            .add_filter("Markdown", &["md"])
+            .set_file_name(filename)
+            .blocking_save_file() else {
+                return Ok(false);
+            };
+        let path = selected.into_path().map_err(|_| "无法读取所选保存路径".to_string())?;
+        if !path.extension().and_then(|ext| ext.to_str()).is_some_and(|ext| ext.eq_ignore_ascii_case("md")) {
+            return Err("请使用 .md 文件扩展名保存".to_string());
+        }
+        std::fs::write(&path, markdown.as_bytes())
+            .map_err(|err| format!("无法保存 Markdown 文件：{err}"))?;
+        Ok(true)
+    }).await.map_err(|_| "Markdown 保存任务失败".to_string())?
+}
+
 fn stop_backend(app: &tauri::AppHandle) {
     if let Some(state) = app.try_state::<BackendState>() {
         if let Ok(mut runtime) = state.runtime.lock() {
@@ -199,7 +220,7 @@ pub fn run() {
     .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_log::Builder::new().level(log::LevelFilter::Warn).build())
         .manage(BackendState::default())
-        .invoke_handler(tauri::generate_handler![backend_connection]);
+        .invoke_handler(tauri::generate_handler![backend_connection, export_markdown]);
 
     builder
         .build(tauri::generate_context!())
