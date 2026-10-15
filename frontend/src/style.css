@@ -914,6 +914,7 @@ button, textarea, input { font: inherit; }
 .settings-about__facts > div:last-child { border-bottom: 0; }
 .settings-about__facts dt { color: var(--text-secondary); font-size: 13px; font-weight: 600; }
 .settings-about__facts dd { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+.settings-license-text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; line-height: 1.7; }
 .settings-limit { padding: 13px; background: var(--surface-muted); border: 1px solid var(--border); border-radius: var(--radius-sm); }
 .settings-limit strong { color: var(--text-primary); font-size: 13px; }
 .settings-limit p { color: var(--text-secondary); font-size: 13px; }

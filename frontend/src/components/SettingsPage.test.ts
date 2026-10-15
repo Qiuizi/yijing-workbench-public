@@ -2,6 +2,9 @@ import { createSSRApp, defineComponent, h } from 'vue'
 import { renderToString } from '@vue/server-renderer'
 import { describe, expect, it } from 'vitest'
 import SettingsPage from './SettingsPage.vue'
+import { readFileSync } from 'node:fs'
+import { version as appVersion, bundle } from '../../src-tauri/tauri.conf.json'
+import { version as frontendVersion } from '../../package.json'
 
 async function renderSettings() {
   const app = createSSRApp(SettingsPage)
@@ -23,12 +26,34 @@ describe('SettingsPage grouping', () => {
     expect(html).toContain('WebView2 SmartScreen')
     expect(html).toContain('关闭 AI 后')
     expect(html).toContain('https://privacy.microsoft.com/privacystatement')
-    expect(html).toContain('V3.2.2')
+    expect(html).toContain(`V${appVersion}`)
     expect(html).toContain('关于')
     expect(html).toContain('当前界面版本')
     expect(html).toContain('应用代码许可证')
     expect(html).toContain('未配置')
     expect(html).not.toContain('show-password')
     expect(html).not.toContain('API Key 明文')
+  })
+
+  it('uses the application version and shows the repository LICENSE with separate license scopes', async () => {
+    const html = await renderSettings()
+    expect(appVersion).toBe(frontendVersion)
+    expect(html).toContain(`V${appVersion}`)
+    expect(html).toContain('MIT，仅适用于 Qiuizi 有权授权的项目自有代码')
+    expect(html).toContain('原创 SVG 与生成图标')
+    expect(html).toContain('适用独立来源许可，来源页面标注 CC BY-SA 4.0')
+    expect(html).toContain('不覆盖古籍数据或第三方组件')
+    expect(html).toContain('各自适用独立许可证，详见随附 THIRD_PARTY_NOTICES.txt')
+    expect(html).not.toContain('未发现 LICENSE')
+
+    // Read independently of Vite and the process working directory. The same
+    // source is embedded in the frontend and bundled as LICENSE by Tauri.
+    expect(bundle.resources['../../LICENSE']).toBe('LICENSE')
+    const license = readFileSync(new URL('../../../LICENSE', import.meta.url), 'utf8')
+    const expectedLicense = await renderToString(createSSRApp({
+      render: () => h('pre', { class: 'settings-license-text' }, license),
+    }))
+    expect(html).toContain('<summary>查看项目 LICENSE 全文</summary>')
+    expect(html).toContain(expectedLicense)
   })
 })
