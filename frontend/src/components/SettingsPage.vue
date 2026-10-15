@@ -6,6 +6,8 @@ import type { AIModel, AISettings, AppPreferences } from '../types'
 import { isTauri } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { DEEPSEEK_PLATFORM_TERMS_URL, DEEPSEEK_PRIVACY_URL, MICROSOFT_PRIVACY_URL, requireAIPrivacyAcknowledgement, WEBVIEW2_PRIVACY_URL } from '../aiPrivacyNotice'
+import { version as appVersion } from '../../src-tauri/tauri.conf.json'
+import licenseText from '../../../LICENSE?raw'
 
 const settings = ref<AISettings | null>(null)
 const keyInput = ref('')
@@ -305,12 +307,17 @@ onMounted(refresh)
     <section class="settings-group settings-about" aria-labelledby="settings-about-title">
       <div class="settings-group__heading"><span class="settings-group__index">05</span><div><h3 id="settings-about-title">关于</h3><p>版本与内容来源</p></div></div>
       <dl class="settings-about__facts">
-        <div><dt>当前界面版本</dt><dd>V3.2.2</dd></div>
+        <div><dt>当前界面版本</dt><dd>V{{ appVersion }}</dd></div>
         <div><dt>业务逻辑稳定核心</dt><dd>V3.1.4</dd></div>
         <div><dt>典籍资料</dt><dd>《周易》卦辞、爻辞及特殊爻辞按本地数据所列维基文库页面和修订来源收录。</dd></div>
-        <div><dt>典籍转录许可</dt><dd>来源页面标注 CC BY-SA 4.0；逐卦来源链接与修订号见数据记录。</dd></div>
-        <div><dt>应用代码许可证</dt><dd>仓库未声明项目级许可证（未发现 LICENSE 文件）。</dd></div>
+        <div><dt>典籍转录许可</dt><dd>适用独立来源许可，来源页面标注 CC BY-SA 4.0；逐卦来源链接与修订号见数据记录，不适用项目 MIT 许可。</dd></div>
+        <div><dt>应用代码许可证</dt><dd>MIT，仅适用于 Qiuizi 有权授权的项目自有代码、自动化测试、构建配置及原创 SVG 与生成图标，不覆盖古籍数据或第三方组件。</dd></div>
+        <div><dt>第三方组件许可</dt><dd>各自适用独立许可证，详见随附 THIRD_PARTY_NOTICES.txt。</dd></div>
       </dl>
+      <details class="settings-calendar-details">
+        <summary>查看项目 LICENSE 全文</summary>
+        <pre class="settings-license-text">{{ licenseText }}</pre>
+      </details>
     </section>
   </section>
 </template>
