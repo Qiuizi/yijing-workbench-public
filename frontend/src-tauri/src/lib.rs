@@ -11,6 +11,8 @@ use serde::Serialize;
 use tauri::{Manager, State, path::BaseDirectory};
 use tauri_plugin_dialog::DialogExt;
 
+mod markdown_export;
+
 #[derive(Clone, Default)]
 struct BackendState {
     runtime: Arc<Mutex<BackendRuntime>>,
@@ -188,7 +190,7 @@ async fn export_markdown(app: tauri::AppHandle, filename: String, markdown: Stri
         if !path.extension().and_then(|ext| ext.to_str()).is_some_and(|ext| ext.eq_ignore_ascii_case("md")) {
             return Err("请使用 .md 文件扩展名保存".to_string());
         }
-        std::fs::write(&path, markdown.as_bytes())
+        markdown_export::save(&path, markdown.as_bytes())
             .map_err(|err| format!("无法保存 Markdown 文件：{err}"))?;
         Ok(true)
     }).await.map_err(|_| "Markdown 保存任务失败".to_string())?
