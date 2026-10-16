@@ -11,9 +11,9 @@ import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -381,8 +381,14 @@ def create_app(
         return {**result, "id": record_id, "created_at": created_at}
 
     @app.get("/api/history", response_model=HistoryListResponse)
-    async def list_history(request: Request) -> dict[str, Any]:
-        rows = history.list_recent(request.app.state.db_path)
+    async def list_history(
+        request: Request,
+        q: str = Query(default="", max_length=500),
+        ai_filter: Literal["all", "with-ai", "without-ai"] = Query(default="all"),
+        limit: int = Query(default=20, ge=1, le=100),
+        offset: int = Query(default=0, ge=0, le=1_000_000),
+    ) -> dict[str, Any]:
+        rows, total = history.list_page(request.app.state.db_path, q=q, ai_filter=ai_filter, limit=limit, offset=offset)
         items = []
         for row in rows:
             result = json.loads(row["result_json"])
@@ -395,10 +401,10 @@ def create_app(
                     "changed_name": result["changed_hexagram"]["title"],
                     "moving_positions": result["moving_positions"],
                     "created_at": row["created_at"],
-                    "has_ai_sessions": bool(history.list_ai_sessions(request.app.state.db_path, row["id"])),
+                    "has_ai_sessions": bool(row["has_ai_sessions"]),
                 }
             )
-        return {"items": items, "total": len(items)}
+        return {"items": items, "total": total}
 
     @app.get("/api/history/{record_id}", response_model=DivinationResponse, responses={404: {"model": ErrorResponse}})
     async def get_history(record_id: int, request: Request) -> dict[str, Any]:

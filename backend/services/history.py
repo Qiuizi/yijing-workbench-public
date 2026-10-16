@@ -70,6 +70,41 @@ def list_recent(db_path: Path) -> list[sqlite3.Row]:
         db.close()
 
 
+def list_page(
+    db_path: Path, *, q: str = "", ai_filter: str = "all", limit: int = 20, offset: int = 0,
+) -> tuple[list[sqlite3.Row], int]:
+    """Bounded list and matching count from one read snapshot; no session hydration."""
+    if (
+        ai_filter not in {"all", "with-ai", "without-ai"}
+        or not 1 <= limit <= 100 or not 0 <= offset <= 1_000_000 or len(q) > 500
+    ):
+        raise ValueError("Invalid history query")
+    exists = "EXISTS(SELECT 1 FROM ai_sessions a WHERE a.divination_id = d.id)"
+    clauses = []
+    parameters: list[Any] = []
+    if q.strip():
+        # Literal substring semantics: %, _ and backslash are not wildcards.
+        escaped = q.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        clauses.append("d.question LIKE ? ESCAPE '\\'")
+        parameters.append(f"%{escaped}%")
+    if ai_filter != "all":
+        clauses.append(exists if ai_filter == "with-ai" else f"NOT {exists}")
+    where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+    db = connect(db_path)
+    try:
+        db.execute("BEGIN")
+        total = db.execute(f"SELECT COUNT(*) FROM divinations d {where}", parameters).fetchone()[0]
+        rows = db.execute(
+            f"""SELECT d.id, d.question, d.method, d.result_json, d.created_at,
+                {exists} AS has_ai_sessions FROM divinations d {where}
+                ORDER BY d.created_at DESC, d.id DESC LIMIT ? OFFSET ?""",
+            [*parameters, limit, offset],
+        ).fetchall()
+        return rows, total
+    finally:
+        db.close()
+
+
 def get(db_path: Path, record_id: int) -> sqlite3.Row | None:
     db = connect(db_path)
     try:

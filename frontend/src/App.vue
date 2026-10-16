@@ -14,14 +14,16 @@ import { specialLineForCast } from './specialLine'
 import type { Divination, HistorySummary, NajiaChart } from './types'
 import { divinationMarkdown, markdownFilename } from './markdownExport'
 import { saveMarkdown } from './saveMarkdown'
+import { useHistoryList } from './historyPresentation'
 
 const question = ref('')
 const mode = ref<'coins' | 'manual'>('coins')
 const manualLines = ref<number[]>([7, 7, 7, 7, 7, 7])
 const result = ref<Divination | null>(null)
 const busy = ref(false)
-const historyLoading = ref(false)
-const historyItems = ref<HistorySummary[]>([])
+const { search: historySearch, aiFilter: historyAIFilter, page: historyPage, pageSize: historyPageSize,
+  records: historyItems, total: historyTotal, loading: historyLoading, error: historyError,
+  refresh: loadHistory, goToPage: goToHistoryPage } = useHistoryList(api.history)
 const loadingRecordId = ref<number | null>(null)
 const activePage = ref<'divination' | 'reading' | 'najia' | 'ai' | 'history' | 'settings'>('divination')
 const navCollapsed = ref(false)
@@ -91,18 +93,6 @@ async function startDivination() {
   }
 }
 
-async function loadHistory() {
-  historyLoading.value = true
-  try {
-    const history = await api.history()
-    historyItems.value = history.items
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '读取历史记录失败。')
-  } finally {
-    historyLoading.value = false
-  }
-}
-
 async function selectPage(page: typeof activePage.value) {
   activePage.value = page
   mobileNavOpen.value = false
@@ -137,8 +127,8 @@ async function removeRecord(record: HistorySummary) {
       type: 'warning',
     })
     await api.deleteHistory(record.id)
-    historyItems.value = historyItems.value.filter((item) => item.id !== record.id)
     if (result.value?.id === record.id) result.value = null
+    await loadHistory()
     ElMessage.success('记录已删除。')
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
@@ -377,7 +367,10 @@ onMounted(async () => {
       <ReadingPage v-else-if="activePage === 'reading'" :divination="result" @start-casting="selectPage('divination')" />
       <NajiaPanel v-else-if="activePage === 'najia'" :divination="result" @chart-updated="updateSavedChart" @start-casting="selectPage('divination')" />
       <AIPage v-else-if="activePage === 'ai'" :divination="result" @start-casting="selectPage('divination')" />
-      <HistoryPage v-else-if="activePage === 'history'" :records="historyItems" :loading="historyLoading" :opening-record-id="loadingRecordId" @open="openRecord" @remove="removeRecord" @start-casting="selectPage('divination')" />
+      <HistoryPage v-else-if="activePage === 'history'" v-model:search="historySearch" v-model:ai-filter="historyAIFilter"
+        :records="historyItems" :total="historyTotal" :page="historyPage" :page-size="historyPageSize" :error="historyError"
+        :loading="historyLoading" :opening-record-id="loadingRecordId" @page="goToHistoryPage" @retry="loadHistory()"
+        @open="openRecord" @remove="removeRecord" @start-casting="selectPage('divination')" />
       <SettingsPage v-else />
     </main>
 
