@@ -295,3 +295,12 @@ export interface HistoryList {
   items: HistorySummary[]
   total: number
 }
+
+export type HistoryAIFilter = 'all' | 'with-ai' | 'without-ai'
+
+export interface HistoryQuery {
+  q?: string
+  ai_filter?: HistoryAIFilter
+  limit?: number
+  offset?: number
+}

@@ -1,4 +1,4 @@
-import type { AIModel, AISettings, AISession, AISessionMessage, AIStreamResult, AppPreferences, Divination, HistoryList, NajiaChart, NajiaInput, NajiaOptions } from './types'
+import type { AIModel, AISettings, AISession, AISessionMessage, AIStreamResult, AppPreferences, Divination, HistoryList, HistoryQuery, NajiaChart, NajiaInput, NajiaOptions } from './types'
 import { invoke, isTauri } from '@tauri-apps/api/core'
 
 export class AIStreamError extends Error {
@@ -86,7 +86,12 @@ export const api = {
   castManual: (question: string, lines: number[]) => request<Divination>('/api/divination/manual', {
     method: 'POST', body: JSON.stringify({ question, lines }),
   }),
-  history: () => request<HistoryList>('/api/history'),
+  history: (query: HistoryQuery = {}) => {
+    const params = new URLSearchParams()
+    for (const [key, value] of Object.entries(query)) if (value !== undefined) params.set(key, String(value))
+    const suffix = params.size ? `?${params}` : ''
+    return request<HistoryList>(`/api/history${suffix}`)
+  },
   historyItem: (id: number) => request<Divination>(`/api/history/${id}`),
   deleteHistory: (id: number) => request<void>(`/api/history/${id}`, { method: 'DELETE' }),
   najiaOptions: () => request<NajiaOptions>('/api/najia/options'),

@@ -50,6 +50,15 @@ afterEach(() => {
 })
 
 describe('Tauri desktop API transport', () => {
+  it('encodes server history search and pagination independently', async () => {
+    vi.mocked(isTauri).mockReturnValue(false)
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"items":[],"total":0}')))
+    await api.history({ q: '中文 &%_?', ai_filter: 'without-ai', limit: 20, offset: 40 })
+    const url = new URL(String(vi.mocked(fetch).mock.calls[0][0]), 'http://localhost')
+    expect(url.pathname).toBe('/api/history')
+    expect(Object.fromEntries(url.searchParams)).toEqual({ q: '中文 &%_?', ai_filter: 'without-ai', limit: '20', offset: '40' })
+  })
+
   it('gets the rotating local connection over IPC and sends its bearer token', async () => {
     vi.mocked(isTauri).mockReturnValue(true)
     vi.mocked(invoke).mockResolvedValue({ baseUrl: 'http://127.0.0.1:8123', token: 'test-only-token' } as never)

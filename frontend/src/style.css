@@ -884,6 +884,7 @@ button, textarea, input { font: inherit; }
 .history-filter button { min-height: 34px; padding: 6px 11px; color: var(--text-secondary); background: transparent; border: 1px solid transparent; border-radius: 5px; cursor: pointer; font-size: 13px; }
 .history-filter button[aria-pressed="true"] { color: var(--accent-hover); background: var(--surface); border-color: var(--border); box-shadow: 0 1px 2px rgb(34 36 30 / 4%); font-weight: 600; }
 .history-page__list { min-width: 0; }
+.history-pagination { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 18px; color: var(--text-secondary); font-size: 13px; }
 .history-page__open strong { overflow-wrap: anywhere; }
 .history-item__date, .history-item__hexagrams, .history-item__moving { color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
 .history-item__date { color: var(--text-muted); }

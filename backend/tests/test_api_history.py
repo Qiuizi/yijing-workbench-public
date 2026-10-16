@@ -163,7 +163,7 @@ def test_all_catalog_entries_can_be_queried(tmp_path):
         assert client.get("/api/hexagrams/65").status_code == 404
 
 
-def test_history_lists_records_beyond_one_hundred(tmp_path):
+def test_history_counts_records_beyond_one_hundred_without_loading_all(tmp_path):
     db_path = tmp_path / "long-history.sqlite3"
     history.initialize(db_path)
     start = datetime(2026, 1, 1, tzinfo=timezone.utc)
@@ -186,7 +186,7 @@ def test_history_lists_records_beyond_one_hundred(tmp_path):
         listing = client.get("/api/history")
         assert listing.status_code == 200
         assert listing.json()["total"] == 105
-        assert len(listing.json()["items"]) == 105
+        assert len(listing.json()["items"]) == 20
         assert listing.json()["items"][0]["question"] == "第 105 条记录"
 
 
