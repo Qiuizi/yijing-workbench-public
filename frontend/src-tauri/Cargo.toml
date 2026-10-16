@@ -1,6 +1,6 @@
 [package]
 name = "yijing-workbench"
-version = "3.2.2"
+version = "3.3.0"
 description = "易经起卦工作台"
 authors = []
 license = ""

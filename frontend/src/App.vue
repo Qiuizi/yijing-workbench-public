@@ -15,6 +15,7 @@ import type { Divination, HistorySummary, NajiaChart } from './types'
 import { divinationMarkdown, markdownFilename } from './markdownExport'
 import { saveMarkdown } from './saveMarkdown'
 import { useHistoryList } from './historyPresentation'
+import { version as appVersion } from '../src-tauri/tauri.conf.json'
 
 const question = ref('')
 const mode = ref<'coins' | 'manual'>('coins')
@@ -188,7 +189,7 @@ onMounted(async () => {
       <span class="topbar__section">本地工作台</span>
       <div class="topbar__right">
         <el-button v-if="result && ['divination', 'reading', 'najia'].includes(activePage)" plain size="small" :loading="exporting" @click="exportMarkdown">导出 Markdown</el-button>
-        <span class="edition-note">V3.2.2 · 桌面稳定核心 V3.1.4</span>
+        <span class="edition-note">V{{ appVersion }} · 桌面稳定核心 V3.1.4</span>
       </div>
     </header>
 

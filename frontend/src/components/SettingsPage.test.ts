@@ -5,6 +5,7 @@ import SettingsPage from './SettingsPage.vue'
 import { readFileSync } from 'node:fs'
 import { version as appVersion, bundle } from '../../src-tauri/tauri.conf.json'
 import { version as frontendVersion } from '../../package.json'
+import packageLock from '../../package-lock.json'
 
 async function renderSettings() {
   const app = createSSRApp(SettingsPage)
@@ -38,7 +39,14 @@ describe('SettingsPage grouping', () => {
   it('uses the application version and shows the repository LICENSE with separate license scopes', async () => {
     const html = await renderSettings()
     expect(appVersion).toBe(frontendVersion)
+    expect(packageLock.version).toBe(appVersion)
+    expect(packageLock.packages[''].version).toBe(appVersion)
+    const cargo = readFileSync(new URL('../../src-tauri/Cargo.toml', import.meta.url), 'utf8')
+    const cargoLock = readFileSync(new URL('../../src-tauri/Cargo.lock', import.meta.url), 'utf8')
+    expect(cargo.match(/^version = "([^"]+)"/m)?.[1]).toBe(appVersion)
+    expect(cargoLock.match(/name = "yijing-workbench"\nversion = "([^"]+)"/)?.[1]).toBe(appVersion)
     expect(html).toContain(`V${appVersion}`)
+    expect(html).toContain('V3.1.4')
     expect(html).toContain('MIT，仅适用于 Qiuizi 有权授权的项目自有代码')
     expect(html).toContain('原创 SVG 与生成图标')
     expect(html).toContain('适用独立来源许可，来源页面标注 CC BY-SA 4.0')
