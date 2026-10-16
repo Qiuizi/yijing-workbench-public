@@ -6,7 +6,7 @@ import type { Divination, NajiaChart, NajiaInput, NajiaLine, NajiaOptions, Najia
 import { najiaLineName, najiaStatusTags, readableNajiaResults } from '../najiaPresentation'
 
 const props = defineProps<{ divination: Divination | null }>()
-const emit = defineEmits<{ startCasting: [] }>()
+const emit = defineEmits<{ startCasting: []; chartUpdated: [recordId: number, chart: NajiaChart] }>()
 
 const options = ref<NajiaOptions | null>(null)
 const dayGanzhi = ref('甲子')
@@ -68,6 +68,7 @@ async function createChart() {
     return
   }
   saving.value = true
+  const recordId = props.divination.id
   try {
     const input: NajiaInput = timestampSource.value === 'manual'
       ? { source: 'manual' as const, day_ganzhi: dayGanzhi.value, month_branch: monthBranch.value }
@@ -77,7 +78,8 @@ async function createChart() {
       question_category: analysisEnabled.value.use_god ? questionCategory.value || null : null,
       manual_use_god_candidate: analysisEnabled.value.use_god ? manualUseGodCandidate.value.trim() || null : null,
     }
-    chart.value = await api.createNajiaChart(props.divination.id, input)
+    chart.value = await api.createNajiaChart(recordId, input)
+    emit('chartUpdated', recordId, chart.value)
     ElMessage.success('六爻排盘已生成并保存到这条历史记录。')
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '排盘失败，请检查干支输入。')
