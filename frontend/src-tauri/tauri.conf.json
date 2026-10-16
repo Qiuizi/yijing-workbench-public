@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "易经起卦工作台",
-  "version": "3.2.2",
+  "version": "3.3.0",
   "identifier": "cn.yijing.workbench",
   "build": {
     "frontendDist": "../dist",

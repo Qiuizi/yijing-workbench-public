@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 import json
 import sqlite3
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -10,6 +11,12 @@ from fastapi.testclient import TestClient
 from backend.catalog import load_catalog
 from backend.main import create_app
 from backend.services import history
+
+
+def test_application_version_matches_desktop_metadata(tmp_path):
+    config = json.loads((Path(__file__).parents[2] / "frontend/src-tauri/tauri.conf.json").read_text(encoding="utf-8"))
+    with TestClient(create_app(db_path=tmp_path / "version.sqlite3")) as client:
+        assert client.get("/openapi.json").json()["info"]["version"] == config["version"]
 
 
 def test_manual_divination_and_history_lifecycle(tmp_path):
