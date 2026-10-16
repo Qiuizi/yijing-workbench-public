@@ -44,7 +44,10 @@ describe('SettingsPage grouping', () => {
     const cargo = readFileSync(new URL('../../src-tauri/Cargo.toml', import.meta.url), 'utf8')
     const cargoLock = readFileSync(new URL('../../src-tauri/Cargo.lock', import.meta.url), 'utf8')
     expect(cargo.match(/^version = "([^"]+)"/m)?.[1]).toBe(appVersion)
-    expect(cargoLock.match(/name = "yijing-workbench"\nversion = "([^"]+)"/)?.[1]).toBe(appVersion)
+    for (const newline of ['\n', '\r\n']) {
+      const platformLock = cargoLock.replace(/\r?\n/g, newline)
+      expect(platformLock.match(/name = "yijing-workbench"\r?\nversion = "([^"]+)"/)?.[1]).toBe(appVersion)
+    }
     expect(html).toContain(`V${appVersion}`)
     expect(html).toContain('V3.1.4')
     expect(html).toContain('MIT，仅适用于 Qiuizi 有权授权的项目自有代码')
