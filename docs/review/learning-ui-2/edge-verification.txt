@@ -1,0 +1,1 @@
+{"status": "PASS", "errorRetry": ["catalog", "preview", "detail"], "searchEmpty": true, "manualCast": ["乾为天", "天风姤"], "traditionalReading": true, "najia": true, "aiEntryOnly": true, "markdownDownload": true, "historyReopen": true, "preferencesSave": true, "emulatedTouchDirectOpen": true, "consoleErrors": []}

@@ -304,3 +304,15 @@ export interface HistoryQuery {
   limit?: number
   offset?: number
 }
+
+// Learning is read-only and has no divination, history, or AI session fields.
+export type HexagramSummary = Pick<Hexagram, 'wenwang_order' | 'name' | 'title' | 'binary_code' | 'upper_trigram' | 'lower_trigram'>
+export interface LearningGuide {
+  hexagram_id: number
+  one_liner: string
+  overview: string
+  line_guides: Record<string, string>
+  editorial_version: string
+  references: Array<{ title: string; url: string }>
+  review_status: 'draft' | 'reviewed'
+}

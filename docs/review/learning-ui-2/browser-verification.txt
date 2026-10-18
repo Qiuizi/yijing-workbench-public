@@ -1,0 +1,1 @@
+{"status": "PASS", "details": 64, "viewports": [320, 390, 768, 844, 1024, 1366, 1536], "learningMutations": [], "consoleErrors": [], "restoredDesktopScroll": 273, "restoredMobileScroll": 3609}

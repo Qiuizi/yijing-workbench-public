@@ -1,0 +1,882 @@
+[
+  {
+    "selector": ".learning-brand__name",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 2
+      }
+    ]
+  },
+  {
+    "selector": ".learning-top-nav button",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 2
+      }
+    ]
+  },
+  {
+    "selector": ".learning-top-nav button",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 2
+      }
+    ]
+  },
+  {
+    "selector": ".learning-top-nav button",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 2
+      }
+    ]
+  },
+  {
+    "selector": ".learning-top-nav button",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 2
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-matrix__entry strong",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 4
+      }
+    ]
+  },
+  {
+    "selector": ".learning-preview__heading h2",
+    "actual": [
+      {
+        "familyName": "Yijing Reading Serif",
+        "postScriptName": "yijing-serif-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-preview__original blockquote",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 18
+      }
+    ]
+  },
+  {
+    "selector": ".learning-reader h1",
+    "actual": [
+      {
+        "familyName": "Yijing Reading Serif",
+        "postScriptName": "yijing-serif-regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  {
+    "selector": ".learning-reader__judgment blockquote",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 8
+      }
+    ]
+  },
+  {
+    "selector": ".learning-reader__line-text",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 8
+      }
+    ]
+  },
+  {
+    "selector": ".learning-reader__line-text",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 13
+      }
+    ]
+  },
+  {
+    "selector": ".learning-reader__line-text",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 19
+      }
+    ]
+  },
+  {
+    "selector": ".learning-reader__line-text",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 11
+      }
+    ]
+  },
+  {
+    "selector": ".learning-reader__line-text",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 13
+      }
+    ]
+  },
+  {
+    "selector": ".learning-reader__line-text",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 9
+      }
+    ]
+  },
+  {
+    "selector": ".learning-reader__line-text",
+    "actual": [
+      {
+        "familyName": "Yijing UI Sans",
+        "postScriptName": "yijing-sans-regular",
+        "isCustomFont": true,
+        "glyphCount": 11
+      }
+    ]
+  }
+]

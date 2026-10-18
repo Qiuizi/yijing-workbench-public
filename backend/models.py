@@ -137,13 +137,16 @@ class SpecialLineResponse(BaseModel):
     source_url: str
 
 
-class HexagramResponse(BaseModel):
+class HexagramSummaryResponse(BaseModel):
     wenwang_order: int
     name: str
     title: str
     binary_code: str
     upper_trigram: TrigramResponse
     lower_trigram: TrigramResponse
+
+
+class HexagramResponse(HexagramSummaryResponse):
     judgment: str
     line_texts: list[str]
     text_source: str

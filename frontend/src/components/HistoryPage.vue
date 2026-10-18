@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Clock, Delete, Reading } from '@element-plus/icons-vue'
+import { Clock, Reading } from '@element-plus/icons-vue'
 import type { HistoryAIFilter, HistorySummary } from '../types'
 
 const props = defineProps<{ records: HistorySummary[]; total: number; page: number; pageSize: number; loading: boolean; error: string; openingRecordId?: number | null }>()
@@ -53,7 +53,7 @@ function formatDate(value: string) {
         </button>
         <div class="history-page__actions">
           <el-button plain size="small" :loading="openingRecordId === record.id" :disabled="loading || openingRecordId != null" @click="emit('open', record.id)"><el-icon><Reading /></el-icon>打开</el-button>
-          <el-button text circle :disabled="loading" aria-label="删除记录" @click="emit('remove', record)"><el-icon><Delete /></el-icon></el-button>
+          <details class="history-more"><summary :aria-label="`记录操作：${record.question}`">⋯</summary><div><button type="button" :disabled="loading" @click="emit('remove', record)">删除记录</button></div></details>
         </div>
       </article>
     </div>

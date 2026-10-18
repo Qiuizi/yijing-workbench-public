@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "platform": "Linux Chromium",
+  "scope": "Device scale and CSS viewport simulations only; Windows DirectWrite and WebView2 NOT_TESTED",
+  "results": [
+    {
+      "deviceScaleFactor": 1.25,
+      "cssWidth": 1366,
+      "cssHeight": 900,
+      "status": "PASS"
+    },
+    {
+      "deviceScaleFactor": 1.25,
+      "cssWidth": 1093,
+      "cssHeight": 720,
+      "status": "PASS"
+    },
+    {
+      "deviceScaleFactor": 1.5,
+      "cssWidth": 911,
+      "cssHeight": 600,
+      "status": "PASS"
+    },
+    {
+      "deviceScaleFactor": 2,
+      "cssWidth": 390,
+      "cssHeight": 844,
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "runtime": "Linux Chromium",
+  "WindowsWebView2": "NOT_TESTED",
+  "physicalWindowsFontRasterization": "NOT_TESTED",
+  "physicalTouch": "NOT_TESTED",
+  "desktopScrollStable": true,
+  "hoverKeyboardSelection": true,
+  "desktopViewports": [
+    {
+      "width": 1000,
+      "height": 600,
+      "columns": 6
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "columns": 6
+    },
+    {
+      "width": 1210,
+      "height": 768,
+      "columns": 6
+    },
+    {
+      "width": 1211,
+      "height": 768,
+      "columns": 8
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "columns": 8
+    },
+    {
+      "width": 1366,
+      "height": 480,
+      "columns": 8
+    },
+    {
+      "width": 1366,
+      "height": 600,
+      "columns": 8
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "columns": 8
+    },
+    {
+      "width": 1366,
+      "height": 900,
+      "columns": 8
+    },
+    {
+      "width": 1536,
+      "height": 864,
+      "columns": 8
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "columns": 8
+    }
+  ],
+  "fallbackSimulation": {
+    "status": "PASS",
+    "removedDvhScrollbarDeclarations": 14,
+    "scope": "vh and WebKit scrollbar branch simulation in current Linux Chromium, not a Windows or old-engine test"
+  },
+  "touchEmulation": "PASS",
+  "fontNodes": 80,
+  "consoleErrors": []
+}

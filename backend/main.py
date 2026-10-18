@@ -32,6 +32,7 @@ from backend.models import (
     AISettingsUpdate,
     AISessionCreate,
     HexagramResponse,
+    HexagramSummaryResponse,
     HistoryListResponse,
     ManualDivinationRequest,
     NajiaChartResponse,
@@ -343,6 +344,10 @@ def create_app(
     @app.get("/api/najia/options")
     async def najia_options() -> dict[str, list[str]]:
         return {"day_ganzhi_options": list(SEXAGENARY_CYCLE), "month_branches": list(EARTHLY_BRANCHES)}
+
+    @app.get("/api/hexagrams", response_model=list[HexagramSummaryResponse])
+    async def list_hexagrams(request: Request) -> list[dict[str, Any]]:
+        return sorted(request.app.state.catalog.entries, key=lambda entry: entry["wenwang_order"])
 
     @app.get("/api/hexagrams/{hexagram_id}", response_model=HexagramResponse, responses={404: {"model": ErrorResponse}})
     async def get_hexagram(hexagram_id: int, request: Request) -> dict[str, Any]:

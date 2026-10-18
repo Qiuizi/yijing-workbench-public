@@ -1,0 +1,12 @@
+
+> yijing-workbench@3.3.0 test
+> vitest run
+
+
+ RUN  v4.1.11 /workspace/yijing-workbench-public/frontend
+
+
+ Test Files  17 passed (17)
+      Tests  76 passed (76)
+   Start at  15:14:25
+   Duration  6.46s (transform 1.17s, setup 0ms, import 3.25s, tests 363ms, environment 8ms)
