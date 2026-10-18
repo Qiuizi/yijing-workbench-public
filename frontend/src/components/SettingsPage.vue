@@ -198,6 +198,7 @@ onMounted(refresh)
       <div><span class="section-index">06</span><h2>设置</h2></div>
       <span v-if="settings" class="settings-state" :class="{ 'settings-state--on': settings.ai_enabled }">{{ settings.ai_enabled ? 'AI 已启用' : 'AI 已关闭' }}</span>
     </div>
+    <details class="settings-category" open><summary>基础偏好 <span>起卦方式、时区与默认解读体系</span></summary>
     <section class="settings-group" aria-labelledby="settings-casting-title">
       <div class="settings-group__heading"><span class="settings-group__index">01</span><div><h3 id="settings-casting-title">起卦</h3><p>选择进入起卦页面时默认使用的方式。</p></div></div>
       <div class="settings-field">
@@ -231,6 +232,18 @@ onMounted(refresh)
       <small>当前唯一启用的传统取辞体系：{{ preferences?.ruleset_id ?? 'qiming-tongshi' }} · {{ preferences?.ruleset_version ?? '1.0.0' }}。</small>
     </section>
 
+      <div class="settings-field">
+        <label for="ai-default-mode">默认解读体系</label>
+        <div class="settings-field__row">
+          <el-select id="ai-default-mode" v-model="aiDefaultMode" aria-label="默认 AI 解读体系">
+            <el-option value="classical" label="《周易》经文" />
+            <el-option value="najia" label="六爻纳甲" />
+          </el-select>
+        </div>
+        <small>偏好保存在本机，AI 请求仍需主动触发。</small>
+      </div>
+    <div class="settings-preferences-save"><el-button type="primary" :loading="busy" @click="savePreferences">保存默认偏好</el-button></div></details>
+    <details class="settings-category"><summary>AI 辅助 <span>启用、连接配置与模型</span></summary>
     <section class="settings-group" aria-labelledby="settings-ai-title">
       <div class="settings-group__heading"><span class="settings-group__index">03</span><div><h3 id="settings-ai-title">AI 辅助</h3><p>模型清单从 DeepSeek 读取；密钥由后端保护，页面不会回显。</p></div><span class="settings-state" :class="{ 'settings-state--on': settings?.api_key_configured }">{{ settings?.api_key_configured ? '密钥已配置' : '未配置' }}</span></div>
       <div class="settings-field">
@@ -257,22 +270,16 @@ onMounted(refresh)
         <div><label>AI 辅助解读</label><small>关闭后仍可正常起卦、查看传统原文和纳甲排盘。</small></div>
         <el-button :type="settings?.ai_enabled ? 'success' : 'primary'" :loading="busy" :disabled="!settings?.api_key_configured || !settings?.model_id" @click="toggleAI">{{ settings?.ai_enabled ? '已启用 · 点击关闭' : '点击启用' }}</el-button>
       </div>
-      <div class="settings-field">
-        <label for="ai-default-mode">默认解读体系</label>
-        <div class="settings-field__row">
-          <el-select id="ai-default-mode" v-model="aiDefaultMode" aria-label="默认 AI 解读体系">
-            <el-option value="classical" label="《周易》经文" />
-            <el-option value="najia" label="六爻纳甲" />
-          </el-select>
-          <el-button :loading="busy" @click="savePreferences">保存默认偏好</el-button>
-          <el-button v-if="settings?.api_key_configured" text type="danger" :loading="busy" @click="removeKey">删除本机 API Key</el-button>
-        </div>
-        <small>同一设置操作会保存默认起卦方式与时区。发送前会显示将传给 DeepSeek 的资料并征求确认，不会自动发送其他历史记录。</small>
-      </div>
+      <el-button v-if="settings?.api_key_configured" text type="danger" :loading="busy" @click="removeKey">删除本机 API Key</el-button>
       <div class="settings-limit">
         <strong>AI 内容说明</strong>
         <p>AI 输出是现代语言辅助，不是确定的未来判断；重要医疗、法律、财务或安全决定应依据专业意见和现实证据。</p>
       </div>
+
+    </section>
+
+    </details>
+    <details class="settings-category"><summary>数据与隐私 <span>本地存储、旧库导入与联网说明</span></summary>
       <div class="settings-limit privacy-notice">
         <strong>本地与联网隐私说明</strong>
         <p>起卦记录、偏好设置和 AI 会话保存在本机 SQLite；这不等于应用绝不联网。关闭 AI 后，铜钱起卦、手动起卦、排盘和本地历史仍可使用。</p>
@@ -290,8 +297,6 @@ onMounted(refresh)
           </div>
         </details>
       </div>
-    </section>
-
     <section v-if="isDesktop" class="settings-group" aria-labelledby="settings-data-title">
       <div class="settings-group__heading"><span class="settings-group__index">04</span><div><h3 id="settings-data-title">本地数据</h3><p>导入会先备份，来源文件保持原位。</p></div></div>
       <div class="settings-field">
@@ -304,6 +309,8 @@ onMounted(refresh)
       </div>
     </section>
 
+    </details>
+    <details class="settings-category"><summary>关于应用 <span>版本、许可证与典籍来源</span></summary>
     <section class="settings-group settings-about" aria-labelledby="settings-about-title">
       <div class="settings-group__heading"><span class="settings-group__index">05</span><div><h3 id="settings-about-title">关于</h3><p>版本与内容来源</p></div></div>
       <dl class="settings-about__facts">
@@ -319,5 +326,6 @@ onMounted(refresh)
         <pre class="settings-license-text">{{ licenseText }}</pre>
       </details>
     </section>
+    </details>
   </section>
 </template>

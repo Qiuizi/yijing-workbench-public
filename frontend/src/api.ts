@@ -1,4 +1,4 @@
-import type { AIModel, AISettings, AISession, AISessionMessage, AIStreamResult, AppPreferences, Divination, HistoryList, HistoryQuery, NajiaChart, NajiaInput, NajiaOptions } from './types'
+import type { Hexagram, HexagramSummary, AIModel, AISettings, AISession, AISessionMessage, AIStreamResult, AppPreferences, Divination, HistoryList, HistoryQuery, NajiaChart, NajiaInput, NajiaOptions } from './types'
 import { invoke, isTauri } from '@tauri-apps/api/core'
 
 export class AIStreamError extends Error {
@@ -71,6 +71,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  hexagrams: () => request<HexagramSummary[]>('/api/hexagrams'),
+  hexagram: (id: number) => request<Hexagram>(`/api/hexagrams/${id}`),
   health: () => request<{ status: string }>('/api/health'),
   desktopMigrationStatus: () => request<DesktopMigrationStatus>('/api/desktop/migration/status'),
   importDesktopDatabase: (sourcePath: string) => request<DesktopImportResult>('/api/desktop/migration/import', {
