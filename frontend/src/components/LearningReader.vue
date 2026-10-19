@@ -58,6 +58,7 @@ defineExpose({
           第 {{ String(hexagram.wenwang_order).padStart(2, '0') }} 卦 · 《周易》
         </p>
         <h1 ref="heading" tabindex="-1">{{ hexagram.title }}</h1>
+        <p v-if="approvedGuide?.one_liner" class="learning-reader__one-liner">{{ approvedGuide.one_liner }}</p>
         <p class="learning-reader__trigrams">
           {{ hexagram.upper_trigram.name }}上 ·
           {{ hexagram.lower_trigram.name }}下
@@ -83,7 +84,7 @@ defineExpose({
       <section class="learning-reader__guide" aria-label="编辑导读">
         <template v-if="approvedGuide"
           ><span class="learning-content-label"
-            >编辑导读 · {{ approvedGuide.editorial_version }}</span
+            >编辑导读 · 现代阐释</span
           >
           <h2>本卦在谈什么？</h2>
           <p>{{ approvedGuide.overview }}</p>

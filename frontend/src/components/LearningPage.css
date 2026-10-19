@@ -622,6 +622,12 @@
   letter-spacing: 0;
   outline: none;
 }
+.learning-reader__one-liner {
+  max-width: 560px;
+  margin: 0 0 14px;
+  color: var(--learning-ink);
+  font: 400 16px/1.75 var(--learning-sans);
+}
 .learning-reader__trigrams {
   display: flex;
   gap: 22px;
