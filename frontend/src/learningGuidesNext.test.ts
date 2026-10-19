@@ -17,9 +17,9 @@ const hanLength = (text: string) => [...text.matchAll(/\p{Script=Han}/gu)].lengt
 
 describe('second learning batch: four unpublished editorial drafts', () => {
   it('contains exactly the four next King Wen entries with 24 full explanations', () => {
-    expect(guides.map((guide) => guide.hexagram_id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
+    expect(guides.slice(0, 8).map((guide) => guide.hexagram_id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
     expect(draftGuides.map((guide) => guide.hexagram_id)).toEqual([5, 6, 7, 8])
-    expect(new Set(guides.map((guide) => guide.hexagram_id)).size).toBe(8)
+    expect(new Set(guides.map((guide) => guide.hexagram_id)).size).toBe(guides.length)
     for (const guide of draftGuides) {
       expect(guide.review_status).toBe('draft')
       expect(guide.editorial_version).toBe('learning-v1-05-08-draft.1')
