@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "scope": "Linux Chromium + existing Vue reader; no content approval",
+  "sourceFileUnchanged": true,
+  "sourceSha256": "7df3bc069ebebe95674b3ff6686353144de0a4b510aa23fe4a8cb710d3293da0",
+  "guides": [
+    {
+      "id": 1,
+      "draftHidden": true,
+      "reviewedCopyNotes": 6,
+      "revertedDraftNotes": 0,
+      "classicalAndSpecialLinesIntact": true
+    },
+    {
+      "id": 2,
+      "draftHidden": true,
+      "reviewedCopyNotes": 6,
+      "revertedDraftNotes": 0,
+      "classicalAndSpecialLinesIntact": true
+    },
+    {
+      "id": 3,
+      "draftHidden": true,
+      "reviewedCopyNotes": 6,
+      "revertedDraftNotes": 0,
+      "classicalAndSpecialLinesIntact": true
+    },
+    {
+      "id": 4,
+      "draftHidden": true,
+      "reviewedCopyNotes": 6,
+      "revertedDraftNotes": 0,
+      "classicalAndSpecialLinesIntact": true
+    }
+  ],
+  "reviewedCopyTotalNotes": 24,
+  "consoleErrors": []
+}
