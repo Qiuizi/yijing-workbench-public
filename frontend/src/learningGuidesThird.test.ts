@@ -14,9 +14,9 @@ const han = (text: string) => [...text.matchAll(/\p{Script=Han}/gu)].length
 
 describe('learning guides 09–12 draft and source integrity', () => {
   it('includes exactly four new complete and unapproved guides', () => {
-    expect(guides.map((guide) => guide.hexagram_id)).toEqual(Array.from({ length: 12 }, (_, i) => i + 1))
+    expect(guides.slice(0, 12).map((guide) => guide.hexagram_id)).toEqual(Array.from({ length: 12 }, (_, i) => i + 1))
     expect(thirdBatch.map((guide) => guide.hexagram_id)).toEqual([9, 10, 11, 12])
-    expect(new Set(guides.map((guide) => guide.hexagram_id)).size).toBe(12)
+    expect(new Set(guides.map((guide) => guide.hexagram_id)).size).toBe(guides.length)
     for (const guide of thirdBatch) {
       const original = catalog[guide.hexagram_id - 1]!
       expect(guide.review_status).toBe('draft')
