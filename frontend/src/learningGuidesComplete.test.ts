@@ -46,6 +46,7 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
       expect(han(guide.one_liner)).toBeLessThanOrEqual(30)
       expect(han(guide.overview)).toBeGreaterThanOrEqual(200)
       expect(han(guide.overview)).toBeLessThanOrEqual(350)
+      expect(guide.overview).not.toContain('本篇强调的不是一条永远有效的生活口号')
       expect(guide.references).toHaveLength(3)
       expect(guide.references[1]!.url).toContain('/周易正義/')
       expect(guide.references[1]!.title).toContain('须逐爻校读')
@@ -60,7 +61,7 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
       for (const reference of guide.references) expect(audit).toContain(reference.url)
       for (const line of original.line_texts) expect(audit).toContain(line)
       for (const line of Object.values(guide.line_guides)) {
-        expect(line).not.toMatch(/阅读时需兼顾实际处境和古代占辞|原文没有穷尽事件的全部因果|这仍是占筮语境中的有限判断/)
+        expect(line).not.toMatch(/阅读时需兼顾实际处境和古代占辞|原文没有穷尽事件的全部因果|这仍是占筮语境中的有限判断|这也说明需要回到本卦其他爻位，分别辨识处境/)
         expect(han(line)).toBeGreaterThanOrEqual(60)
         expect(han(line)).toBeLessThanOrEqual(120)
         expect(audit).toContain(line)
