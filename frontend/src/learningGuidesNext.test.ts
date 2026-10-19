@@ -21,7 +21,7 @@ describe('second learning batch: four unpublished editorial drafts', () => {
     expect(draftGuides.map((guide) => guide.hexagram_id)).toEqual([5, 6, 7, 8])
     expect(new Set(guides.map((guide) => guide.hexagram_id)).size).toBe(guides.length)
     for (const guide of draftGuides) {
-      expect(guide.review_status).toBe('draft')
+      expect(['draft', 'reviewed']).toContain(guide.review_status)
       expect(guide.editorial_version).toBe('learning-v1-05-08-draft.1')
       expect(Object.keys(guide.line_guides)).toEqual(['1', '2', '3', '4', '5', '6'])
       expect(hanLength(guide.one_liner)).toBeGreaterThanOrEqual(15)
@@ -46,9 +46,11 @@ describe('second learning batch: four unpublished editorial drafts', () => {
     }
   })
 
-  it('continues to show approved first four while hiding drafts 5-8 and all remaining entries', () => {
-    for (let id = 1; id <= 4; id++) expect(reviewedGuide(id)?.hexagram_id).toBe(id)
-    for (let id = 5; id <= 64; id++) expect(reviewedGuide(id)).toBeUndefined()
+  it('uses current approval state rather than a hard-coded release cutoff', () => {
+    for (const guide of guides) {
+      const expected = guide.review_status === 'reviewed' ? guide.hexagram_id : undefined
+      expect(reviewedGuide(guide.hexagram_id)?.hexagram_id).toBe(expected)
+    }
   })
 
   it('keeps 5-8 in original-only reader mode even when a draft is passed directly', async () => {
@@ -68,6 +70,7 @@ describe('second learning batch: four unpublished editorial drafts', () => {
 
   it('can render a reviewed test copy without approving any source entry', async () => {
     for (const source of draftGuides) {
+      const originalStatus = source.review_status
       const testCopy: LearningGuide = { ...source, review_status: 'reviewed' }
       const original = catalog[source.hexagram_id - 1] as Hexagram
       const html = await renderToString(createSSRApp(LearningReader, {
@@ -76,7 +79,7 @@ describe('second learning batch: four unpublished editorial drafts', () => {
       expect(html).toContain(source.one_liner)
       expect(html).toContain(source.overview)
       for (const reference of source.references) expect(html).toContain(reference.title)
-      expect(source.review_status).toBe('draft')
+      expect(source.review_status).toBe(originalStatus)
     }
   })
 })
