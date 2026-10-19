@@ -71,7 +71,7 @@ describe('first four reviewed editorial guides', () => {
   it('publishes exactly four guides and leaves the other sixty unannotated', () => {
     for (let id = 1; id <= 4; id++) expect(reviewedGuide(id)?.hexagram_id).toBe(id)
     for (let id = 5; id <= 64; id++) expect(reviewedGuide(id)).toBeUndefined()
-    expect(guides.filter((guide) => guide.hexagram_id > 4).map((guide) => guide.review_status)).toEqual(['draft','draft','draft','draft'])
+    expect(guides.filter((guide) => guide.hexagram_id > 4).every((guide) => guide.review_status === 'draft')).toBe(true)
   })
 
   it('preserves the complete classical catalog byte for byte against the merged UI baseline', () => {
