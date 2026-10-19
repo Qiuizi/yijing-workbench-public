@@ -61,8 +61,8 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
       expect(audit).toContain(original.source_url)
       for (const reference of guide.references) expect(audit).toContain(reference.url)
       for (const line of original.line_texts) expect(audit).toContain(line)
-        expect(line).not.toMatch(/阅读时需兼顾实际处境和古代占辞|原文没有穷尽事件的全部因果|这仍是占筮语境中的有限判断/)
       for (const line of Object.values(guide.line_guides)) {
+        expect(line).not.toMatch(/阅读时需兼顾实际处境和古代占辞|原文没有穷尽事件的全部因果|这仍是占筮语境中的有限判断/)
         expect(han(line)).toBeGreaterThanOrEqual(60)
         expect(han(line)).toBeLessThanOrEqual(120)
         expect(audit).toContain(line)
