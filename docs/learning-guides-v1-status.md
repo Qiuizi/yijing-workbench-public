@@ -96,9 +96,9 @@
 
 ## 下一步验收
 
-已做 GitHub 文件级结构检查、前 20 卦不变检查、264 条新稿的篇幅与经文来源配对及审核文档同步。**本 PR 新增 GitHub Actions 自动化工作流**，于 GitHub pull_request 下执行前端 npm test、typecheck、build 与后端 pytest。只有 Jobs 全部 completed/success 方可记录 CI PASS；截至本索引修订时工作流处于 queued，**尚无成功证据**。Windows WebView2/安装版验收仍为 NOT_TESTED。
+已做 GitHub 文件级结构检查、前 20 卦不变检查、264 条新稿的篇幅与经文来源配对及审核文档同步。**本 PR 新增 GitHub Actions 自动化工作流**，于 GitHub pull_request 下执行前端 npm test、typecheck、build 与后端 pytest。只有 Jobs 全部 completed/success 方可记录 CI PASS；PR #13 于 2026-10-20 已合并到 main（squash SHA `80e2d983dff2f49218112fdc8787eeadd39facd0`），对应的 GitHub Actions 运行 `39288072174` 已 `completed/success`（前端 npm test、TypeScript 类型检查及 build、后端 pytest）。Windows WebView2/安装版验收仍为 NOT_TESTED。
 
-最有效的后续流程是：先合并仍为 `draft` 的完整初稿，再按 8–12 卦为一轮核对古注与词义，逐篇经用户审定后独立批准 `reviewed`。不要在本轮批量更改这 60 篇的状态，也不要将草稿批量自动发布。
+PR #13 的完整初稿已合并。后续按 8–12 卦为一轮核对古注与词义，逐篇有证据地审定；必须同时更新 `review_status` 与 `frontend/src/data/learning_approvals.json`，具体标准见 [批准门槛](learning-approval-policy.md)。不能批量标记 60 篇为 `reviewed`。
 
 ## 第二轮定点校勘记录
 
