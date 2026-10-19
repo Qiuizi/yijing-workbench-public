@@ -28,12 +28,10 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
     expect(new Set(newGuides.flatMap((guide) => Object.values(guide.line_guides))).size).toBe(264)
   })
 
-  it('keeps exactly four published guides and sixty unpublished drafts', () => {
+  it('checks current approved guides rather than a hard-coded publication cutoff', () => {
     for (const guide of guides) {
-      expect(guide.review_status).toBe(guide.hexagram_id <= 4 ? 'reviewed' : 'draft')
-      expect(reviewedGuide(guide.hexagram_id)?.hexagram_id).toBe(
-        guide.hexagram_id <= 4 ? guide.hexagram_id : undefined,
-      )
+      const expected = guide.review_status === 'reviewed' ? guide.hexagram_id : undefined
+      expect(reviewedGuide(guide.hexagram_id)?.hexagram_id).toBe(expected)
     }
   })
 
@@ -41,7 +39,7 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
     for (const guide of newGuides) {
       const original = catalog[guide.hexagram_id - 1]!
       const audit = dossiers.get(guide.hexagram_id)!
-      expect(guide.review_status).toBe('draft')
+      expect(['draft', 'reviewed']).toContain(guide.review_status)
       expect(guide.editorial_version).toBe('learning-v1-21-64-initial.1')
       expect(Object.keys(guide.line_guides)).toEqual(['1', '2', '3', '4', '5', '6'])
       expect(han(guide.one_liner)).toBeGreaterThanOrEqual(15)
@@ -74,7 +72,7 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
     for (const guide of newGuides) {
       const original = catalog[guide.hexagram_id - 1] as Hexagram
       const html = await renderToString(createSSRApp(LearningReader, {
-        hexagram: original, guide: guide as LearningGuide,
+        hexagram: original, guide: { ...guide, review_status: 'draft' } as LearningGuide,
       }))
       expect(html).toContain('导读整理中')
       expect(html).toContain(original.judgment)
@@ -86,6 +84,7 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
 
   it('can display isolated editorial review copies without writing approval flags', async () => {
     for (const originalGuide of newGuides) {
+      const originalStatus = originalGuide.review_status
       const testCopy: LearningGuide = { ...originalGuide, review_status: 'reviewed' }
       const html = await renderToString(createSSRApp(LearningReader, {
         hexagram: catalog[originalGuide.hexagram_id - 1] as Hexagram,
@@ -94,7 +93,7 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
       expect(html).toContain(originalGuide.one_liner)
       expect(html).toContain(originalGuide.overview)
       for (const note of Object.values(originalGuide.line_guides)) expect(html).not.toContain(note)
-      expect(originalGuide.review_status).toBe('draft')
+      expect(originalGuide.review_status).toBe(originalStatus)
     }
   })
 })
