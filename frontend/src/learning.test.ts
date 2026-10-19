@@ -20,7 +20,8 @@ describe('read-only learning', () => {
     expect(filterHexagrams(catalog, '', 'upper')).toHaveLength(30)
     expect(filterHexagrams(catalog, '', 'lower')).toHaveLength(34)
     expect(filterHexagrams(catalog, '64', 'upper')).toEqual([])
-    expect(reviewedGuide(1)).toBeUndefined()
+    expect(reviewedGuide(1)?.hexagram_id).toBe(1)
+    expect(reviewedGuide(5)).toBeUndefined()
   })
   it('renders all six lines in the source direction, including asymmetric hexagrams', async () => {
     for (const entry of catalog) {
