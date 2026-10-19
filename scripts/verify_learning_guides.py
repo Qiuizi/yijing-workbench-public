@@ -103,7 +103,7 @@ def main() -> None:
         browser.close()
     assert guide_file.read_bytes() == original_bytes
     assert [guide['hexagram_id'] for guide in all_guides if guide['review_status'] == 'reviewed'] == [1, 2, 3, 4]
-    assert [guide['hexagram_id'] for guide in all_guides if guide['review_status'] == 'draft'] == list(range(5, 21))
+    assert [guide['hexagram_id'] for guide in all_guides if guide['review_status'] == 'draft'] == list(range(5, 65))
     assert not errors, errors
     report = {'status': 'PASS', 'scope': f'{platform.system()} Chromium + published Vue reader; draft safety gate',
               'sourceFileUnchanged': True, 'sourceSha256': hashlib.sha256(original_bytes).hexdigest(),
