@@ -68,15 +68,18 @@ describe('first four reviewed editorial guides', () => {
     }
   })
 
-  it('publishes exactly four guides and leaves the other sixty unannotated', () => {
-    for (let id = 1; id <= 4; id++) expect(reviewedGuide(id)?.hexagram_id).toBe(id)
-    for (let id = 5; id <= 64; id++) expect(reviewedGuide(id)).toBeUndefined()
-    expect(guides.filter((guide) => guide.hexagram_id > 4).every((guide) => guide.review_status === 'draft')).toBe(true)
+  it('shows only approved entries and keeps drafts out of the selector', () => {
+    for (const guide of guides) {
+      const expected = guide.review_status === 'reviewed' ? guide.hexagram_id : undefined
+      expect(reviewedGuide(guide.hexagram_id)?.hexagram_id).toBe(expected)
+    }
   })
 
   it('preserves the complete classical catalog byte for byte against the merged UI baseline', () => {
-    const source = readFileSync(new URL('../../backend/data/hexagrams.json', import.meta.url))
-    expect(createHash('sha256').update(source).digest('hex')).toBe(
+    // git checkout can convert LF to CRLF on Windows without changing any classical text.
+    const source = readFileSync(new URL('../../backend/data/hexagrams.json', import.meta.url), 'utf8')
+      .replace(/\r\n/g, '\n')
+    expect(createHash('sha256').update(source, 'utf8').digest('hex')).toBe(
       '3cce6f7d443fd08ada0e0aa80b306731bf833efe24daacead84444a6566a538f',
     )
   })

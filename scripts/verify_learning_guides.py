@@ -29,7 +29,10 @@ def main() -> None:
     guide_file = ROOT / 'frontend/src/data/learning_guides.json'
     original_bytes = guide_file.read_bytes()
     all_guides = json.loads(original_bytes)
-    guides = [guide for guide in all_guides if guide['review_status'] == 'reviewed']
+    approval_file = ROOT / 'frontend/src/data/learning_approvals.json'
+    approvals = json.loads(approval_file.read_text(encoding='utf-8'))
+    approved_ids = [entry['hexagram_id'] for entry in approvals['approved']]
+    guides = [guide for guide in all_guides if guide['hexagram_id'] in approved_ids and guide['review_status'] == 'reviewed']
     catalog = json.loads((ROOT / 'backend/data/hexagrams.json').read_text())
     errors: list[str] = []
     results = []
@@ -102,12 +105,15 @@ def main() -> None:
                             'classicalAndSpecialLinesIntact': True})
         browser.close()
     assert guide_file.read_bytes() == original_bytes
-    assert [guide['hexagram_id'] for guide in all_guides if guide['review_status'] == 'reviewed'] == [1, 2, 3, 4]
-    assert [guide['hexagram_id'] for guide in all_guides if guide['review_status'] == 'draft'] == list(range(5, 65))
+    assert approved_ids == sorted(set(approved_ids))
+    assert [guide['hexagram_id'] for guide in all_guides if guide['review_status'] == 'reviewed'] == approved_ids
+    assert [guide['hexagram_id'] for guide in all_guides if guide['review_status'] == 'draft'] == [
+        index for index in range(1, 65) if index not in approved_ids
+    ]
     assert not errors, errors
     report = {'status': 'PASS', 'scope': f'{platform.system()} Chromium + published Vue reader; draft safety gate',
               'sourceFileUnchanged': True, 'sourceSha256': hashlib.sha256(original_bytes).hexdigest(),
-              'guides': results, 'reviewedCopyTotalNotes': 24, 'consoleErrors': errors}
+              'guides': results, 'reviewedCopyTotalNotes': 6 * len(approved_ids), 'consoleErrors': errors}
     (args.output_dir / 'browser-verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps(report, ensure_ascii=False))
 

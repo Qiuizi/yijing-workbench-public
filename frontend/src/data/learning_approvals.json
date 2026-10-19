@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "approved": [
+    {
+      "hexagram_id": 1,
+      "approval_pr": "https://github.com/Qiuizi/yijing-workbench-public/pull/8",
+      "audit_document": "docs/learning-guides-review-01-04.md",
+      "approved_on": "2026-10-19"
+    },
+    {
+      "hexagram_id": 2,
+      "approval_pr": "https://github.com/Qiuizi/yijing-workbench-public/pull/8",
+      "audit_document": "docs/learning-guides-review-01-04.md",
+      "approved_on": "2026-10-19"
+    },
+    {
+      "hexagram_id": 3,
+      "approval_pr": "https://github.com/Qiuizi/yijing-workbench-public/pull/8",
+      "audit_document": "docs/learning-guides-review-01-04.md",
+      "approved_on": "2026-10-19"
+    },
+    {
+      "hexagram_id": 4,
+      "approval_pr": "https://github.com/Qiuizi/yijing-workbench-public/pull/8",
+      "audit_document": "docs/learning-guides-review-01-04.md",
+      "approved_on": "2026-10-19"
+    }
+  ]
+}

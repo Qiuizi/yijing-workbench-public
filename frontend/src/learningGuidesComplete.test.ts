@@ -28,12 +28,10 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
     expect(new Set(newGuides.flatMap((guide) => Object.values(guide.line_guides))).size).toBe(264)
   })
 
-  it('keeps exactly four published guides and sixty unpublished drafts', () => {
+  it('checks current approved guides rather than a hard-coded publication cutoff', () => {
     for (const guide of guides) {
-      expect(guide.review_status).toBe(guide.hexagram_id <= 4 ? 'reviewed' : 'draft')
-      expect(reviewedGuide(guide.hexagram_id)?.hexagram_id).toBe(
-        guide.hexagram_id <= 4 ? guide.hexagram_id : undefined,
-      )
+      const expected = guide.review_status === 'reviewed' ? guide.hexagram_id : undefined
+      expect(reviewedGuide(guide.hexagram_id)?.hexagram_id).toBe(expected)
     }
   })
 
@@ -41,13 +39,14 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
     for (const guide of newGuides) {
       const original = catalog[guide.hexagram_id - 1]!
       const audit = dossiers.get(guide.hexagram_id)!
-      expect(guide.review_status).toBe('draft')
+      expect(['draft', 'reviewed']).toContain(guide.review_status)
       expect(guide.editorial_version).toBe('learning-v1-21-64-initial.1')
       expect(Object.keys(guide.line_guides)).toEqual(['1', '2', '3', '4', '5', '6'])
       expect(han(guide.one_liner)).toBeGreaterThanOrEqual(15)
       expect(han(guide.one_liner)).toBeLessThanOrEqual(30)
       expect(han(guide.overview)).toBeGreaterThanOrEqual(200)
       expect(han(guide.overview)).toBeLessThanOrEqual(350)
+      expect(guide.overview).not.toMatch(/本篇强调的不是一条永远有效的生活口号|本篇只是根据经文提出的初步阅读方向|这是根据原文作出的初步编辑说明|吉凶用语属于占筮原有表达|这只是对项目所收录经文的初步解释/)
       expect(guide.references).toHaveLength(3)
       expect(guide.references[1]!.url).toContain('/周易正義/')
       expect(guide.references[1]!.title).toContain('须逐爻校读')
@@ -62,7 +61,7 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
       for (const reference of guide.references) expect(audit).toContain(reference.url)
       for (const line of original.line_texts) expect(audit).toContain(line)
       for (const line of Object.values(guide.line_guides)) {
-        expect(line).not.toMatch(/阅读时需兼顾实际处境和古代占辞|原文没有穷尽事件的全部因果|这仍是占筮语境中的有限判断/)
+        expect(line).not.toMatch(/阅读时需兼顾实际处境和古代占辞|原文没有穷尽事件的全部因果|这仍是占筮语境中的有限判断|这也说明需要回到本卦其他爻位，分别辨识处境|这一细节不能离开全卦的位置关系来判断|对照前后爻位才能看清这一变化的意义/)
         expect(han(line)).toBeGreaterThanOrEqual(60)
         expect(han(line)).toBeLessThanOrEqual(120)
         expect(audit).toContain(line)
@@ -74,7 +73,7 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
     for (const guide of newGuides) {
       const original = catalog[guide.hexagram_id - 1] as Hexagram
       const html = await renderToString(createSSRApp(LearningReader, {
-        hexagram: original, guide: guide as LearningGuide,
+        hexagram: original, guide: { ...guide, review_status: 'draft' } as LearningGuide,
       }))
       expect(html).toContain('导读整理中')
       expect(html).toContain(original.judgment)
@@ -86,6 +85,7 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
 
   it('can display isolated editorial review copies without writing approval flags', async () => {
     for (const originalGuide of newGuides) {
+      const originalStatus = originalGuide.review_status
       const testCopy: LearningGuide = { ...originalGuide, review_status: 'reviewed' }
       const html = await renderToString(createSSRApp(LearningReader, {
         hexagram: catalog[originalGuide.hexagram_id - 1] as Hexagram,
@@ -94,7 +94,7 @@ describe('64-hexagram first-pass V1 learning content coverage', () => {
       expect(html).toContain(originalGuide.one_liner)
       expect(html).toContain(originalGuide.overview)
       for (const note of Object.values(originalGuide.line_guides)) expect(html).not.toContain(note)
-      expect(originalGuide.review_status).toBe('draft')
+      expect(originalGuide.review_status).toBe(originalStatus)
     }
   })
 })

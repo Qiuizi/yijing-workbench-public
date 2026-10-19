@@ -1,0 +1,132 @@
+name: Windows 3.3.0 unsigned release candidate
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'scripts/build_sidecar.ps1'
+      - 'requirements-win.lock.txt'
+      - 'requirements-build.txt'
+      - '.github/workflows/windows-rc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-rc:
+    name: Windows x64 tests and unsigned NSIS candidate
+    runs-on: windows-2022
+    timeout-minutes: 80
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.98.1'
+          targets: x86_64-pc-windows-msvc
+
+      - name: Install frozen Python release dependencies
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install -r requirements-win.lock.txt
+          .\.venv\Scripts\python.exe -m pip install -r requirements-build.txt
+
+      - name: Windows backend regression tests
+        run: .\.venv\Scripts\python.exe -X utf8 -m pytest
+
+      - name: Install frontend locked dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Frontend regression tests
+        working-directory: frontend
+        run: npm test
+
+      - name: Typecheck
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: Find and verify the VS2022 VC143 x64 redist
+        run: |
+          $vsWhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+          if (-not (Test-Path -LiteralPath $vsWhere)) { throw 'vswhere.exe not found on Windows runner' }
+          $installs = @(& $vsWhere -products '*' -property installationPath)
+          $candidates = @()
+          foreach ($install in $installs) {
+            $root = Join-Path $install 'VC\Redist\MSVC'
+            if (-not (Test-Path -LiteralPath $root)) { continue }
+            foreach ($version in @(Get-ChildItem -LiteralPath $root -Directory | Sort-Object Name -Descending)) {
+              $candidate = Join-Path $version.FullName 'x64\Microsoft.VC143.CRT'
+              if ((Test-Path -LiteralPath (Join-Path $candidate 'vcruntime140.dll')) -and
+                  (Test-Path -LiteralPath (Join-Path $candidate 'vcruntime140_1.dll'))) {
+                $candidates += $candidate
+              }
+            }
+          }
+          if ($candidates.Count -eq 0) { throw 'VS2022 Microsoft.VC143.CRT x64 redist not found' }
+          $redist = $candidates[0]
+          foreach ($name in @('vcruntime140.dll','vcruntime140_1.dll')) {
+            $sig = Get-AuthenticodeSignature -LiteralPath (Join-Path $redist $name)
+            if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notmatch 'O=Microsoft Corporation') {
+              throw "Invalid signature: $name"
+            }
+          }
+          "YIJING_VC_REDIST_DIR=$redist" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Output "Verified Microsoft CRT at $redist"
+
+      - name: Build PyInstaller sidecar and Tauri NSIS candidate
+        working-directory: frontend
+        run: npm run desktop:build
+
+      - name: Check candidate binaries and produce SHA-256 manifest
+        run: |
+          $bundleDir = 'frontend\src-tauri\target\release\bundle\nsis'
+          $installers = @(Get-ChildItem -LiteralPath $bundleDir -File -Filter '*setup.exe')
+          if ($installers.Count -ne 1) { throw "Expected one NSIS setup, found $($installers.Count)" }
+          $setup = $installers[0]
+          if ($setup.Name -notmatch '3[._]3[._]0') { throw "Unexpected version in NSIS filename: $($setup.Name)" }
+          $sidecar = 'frontend\src-tauri\binaries\yijing-backend\yijing-backend.exe'
+          if (-not (Test-Path -LiteralPath $sidecar)) { throw 'Missing sidecar binary' }
+          $out = Join-Path $env:RUNNER_TEMP 'yijing-rc-3.3.0'
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          Copy-Item -LiteralPath $setup.FullName -Destination $out
+          $setupHash = (Get-FileHash -LiteralPath $setup.FullName -Algorithm SHA256).Hash
+          $sidecarHash = (Get-FileHash -LiteralPath $sidecar -Algorithm SHA256).Hash
+          $manifest = [ordered]@{
+            version = '3.3.0'
+            source_sha = $env:GITHUB_SHA
+            install_mode = 'currentUser'
+            status = 'unsigned-rc-not-manually-accepted'
+            installer = [ordered]@{
+              filename = $setup.Name
+              bytes = $setup.Length
+              sha256 = $setupHash
+            }
+            sidecar_sha256 = $sidecarHash
+            windows_runner = $env:ImageVersion
+          }
+          ($manifest | ConvertTo-Json -Depth 6) | Set-Content -LiteralPath (Join-Path $out 'manifest-rc.json') -Encoding utf8
+          Write-Output "Candidate $($setup.Name) sha256=$setupHash"
+
+      - name: Upload candidate binaries (not a public Release)
+        uses: actions/upload-artifact@v4
+        with:
+          name: yijing-workbench-3.3.0-windows-x64-unsigned-rc
+          path: ${{ runner.temp }}/yijing-rc-3.3.0/*
+          if-no-files-found: error
+          retention-days: 14
