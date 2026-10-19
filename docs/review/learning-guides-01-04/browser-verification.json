@@ -2,7 +2,7 @@
   "status": "PASS",
   "scope": "Linux Chromium + existing Vue reader; no content approval",
   "sourceFileUnchanged": true,
-  "sourceSha256": "53d28e05d2b59c7c56fe9d51d2f8379c16944e14bc0cec522bf7815941cb7575",
+  "sourceSha256": "7df3bc069ebebe95674b3ff6686353144de0a4b510aa23fe4a8cb710d3293da0",
   "guides": [
     {
       "id": 1,

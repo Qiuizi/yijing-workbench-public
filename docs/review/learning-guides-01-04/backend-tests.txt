@@ -9,4 +9,4 @@
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 =========================== short test summary info ============================
 SKIPPED [1] backend/tests/test_ai_secrets.py:10: DPAPI is a Windows user-scoped API
-186 passed, 1 skipped, 1 warning in 10.47s
+186 passed, 1 skipped, 1 warning in 16.86s

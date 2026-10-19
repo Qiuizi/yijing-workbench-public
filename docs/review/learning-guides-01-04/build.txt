@@ -12,5 +12,5 @@ dist/assets/yijing-sans-bold-B_oLzhUD.woff2       15.66 kB
 dist/assets/yijing-serif-regular-BXfn_Zye.woff2   57.46 kB
 dist/assets/yijing-sans-regular-CLhK27dN.woff2   478.41 kB
 dist/assets/index-CoAzhrX5.css                   461.06 kB │ gzip:  66.36 kB
-dist/assets/index-BgYpaFzg.js                    487.45 kB │ gzip: 171.40 kB
-✓ built in 7.40s
+dist/assets/index-u0TWQ29p.js                    487.71 kB │ gzip: 171.55 kB
+✓ built in 9.05s
