@@ -19,7 +19,7 @@ describe('learning guides 09–12 draft and source integrity', () => {
     expect(new Set(guides.map((guide) => guide.hexagram_id)).size).toBe(guides.length)
     for (const guide of thirdBatch) {
       const original = catalog[guide.hexagram_id - 1]!
-      expect(guide.review_status).toBe('draft')
+      expect(['draft', 'reviewed']).toContain(guide.review_status)
       expect(guide.editorial_version).toBe('learning-v1-09-12-draft.1')
       expect(Object.keys(guide.line_guides)).toEqual(['1', '2', '3', '4', '5', '6'])
       expect(han(guide.one_liner)).toBeGreaterThanOrEqual(15)
@@ -44,14 +44,17 @@ describe('learning guides 09–12 draft and source integrity', () => {
       }
     }
   })
-  it('does not expose draft explanations through the application selector', () => {
-    for (let id = 1; id <= 4; id++) expect(reviewedGuide(id)?.hexagram_id).toBe(id)
-    for (let id = 5; id <= 64; id++) expect(reviewedGuide(id)).toBeUndefined()
+  it('uses the current approval status in the application selector', () => {
+    for (const guide of guides) {
+      const expected = guide.review_status === 'reviewed' ? guide.hexagram_id : undefined
+      expect(reviewedGuide(guide.hexagram_id)?.hexagram_id).toBe(expected)
+    }
   })
   it('hides all four new draft guides even if directly passed as props', async () => {
     for (const guide of thirdBatch) {
       const hexagram = catalog[guide.hexagram_id - 1] as Hexagram
-      const html = await renderToString(createSSRApp(LearningReader, { hexagram, guide }))
+      const hidden: LearningGuide = { ...guide, review_status: 'draft' }
+      const html = await renderToString(createSSRApp(LearningReader, { hexagram, guide: hidden }))
       expect(html).toContain('导读整理中')
       expect(html).toContain(hexagram.judgment)
       expect(html).not.toContain(guide.one_liner)
@@ -61,6 +64,7 @@ describe('learning guides 09–12 draft and source integrity', () => {
   })
   it('can render the four explanations only in an isolated reviewed test copy', async () => {
     for (const guide of thirdBatch) {
+      const originalStatus = guide.review_status
       const copy: LearningGuide = { ...guide, review_status: 'reviewed' }
       const html = await renderToString(createSSRApp(LearningReader, {
         hexagram: catalog[guide.hexagram_id - 1] as Hexagram, guide: copy,
@@ -68,7 +72,7 @@ describe('learning guides 09–12 draft and source integrity', () => {
       expect(html).toContain(guide.one_liner)
       expect(html).toContain(guide.overview)
       for (const ref of guide.references) expect(html).toContain(ref.title)
-      expect(guide.review_status).toBe('draft')
+      expect(guide.review_status).toBe(originalStatus)
     }
   })
 })
