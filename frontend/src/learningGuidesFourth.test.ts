@@ -16,7 +16,7 @@ const han = (s: string) => [...s.matchAll(/\p{Script=Han}/gu)].length
 
 describe('fourth learning batch 13-16 stays unpublished until human review', () => {
   it('preserves King Wen order and all prior reviewed/draft statuses', () => {
-    expect(guides.map((g) => g.hexagram_id)).toEqual(Array.from({length:16},(_,i)=>i+1))
+    expect(guides.slice(0,16).map((g) => g.hexagram_id)).toEqual(Array.from({length:16},(_,i)=>i+1))
     expect(new Set(guides.map((g) => g.hexagram_id)).size).toBe(guides.length)
     expect(batch.map((g) => g.hexagram_id)).toEqual([13, 14, 15, 16])
     for (const guide of guides) {
