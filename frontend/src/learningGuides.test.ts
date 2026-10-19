@@ -4,7 +4,7 @@ import { createSSRApp } from 'vue'
 import { renderToString } from '@vue/server-renderer'
 import { describe, expect, it } from 'vitest'
 import catalog from '../../backend/data/hexagrams.json'
-import drafts from './data/learning_guides.json'
+import guides from './data/learning_guides.json'
 import { reviewedGuide } from './learning'
 import LearningReader from './components/LearningReader.vue'
 import type { Hexagram, LearningGuide } from './types'
@@ -19,26 +19,26 @@ const requiredFields = [
   'editorial_version', 'references', 'review_status',
 ].sort()
 
-describe('first four editorial drafts', () => {
-  it('ships exactly Qian, Kun, Zhun and Meng as complete unapproved LearningGuide records', () => {
-    expect(drafts.map((guide) => guide.hexagram_id)).toEqual([1, 2, 3, 4])
-    expect(new Set(drafts.map((guide) => guide.hexagram_id)).size).toBe(4)
-    for (const guide of drafts) {
+describe('first four reviewed editorial guides', () => {
+  it('ships exactly Qian, Kun, Zhun and Meng as complete reviewed LearningGuide records', () => {
+    expect(guides.map((guide) => guide.hexagram_id)).toEqual([1, 2, 3, 4])
+    expect(new Set(guides.map((guide) => guide.hexagram_id)).size).toBe(4)
+    for (const guide of guides) {
       expect(Object.keys(guide).sort()).toEqual(requiredFields)
-      expect(guide.review_status).toBe('draft')
-      expect(guide.editorial_version).toBe('learning-v1-01-04-draft.1')
+      expect(guide.review_status).toBe('reviewed')
+      expect(guide.editorial_version).toBe('learning-v1-01-04.1')
       expect(Object.keys(guide.line_guides)).toEqual(['1', '2', '3', '4', '5', '6'])
       // Compile-check every other field against the existing interface;
       // the JSON's status value is separately checked above.
-      const checked: LearningGuide = { ...guide, review_status: 'draft' }
+      const checked: LearningGuide = { ...guide, review_status: 'reviewed' }
       expect(checked.hexagram_id).toBe(guide.hexagram_id)
     }
   })
 
   it('keeps the requested reading depth without empty or repeated line explanations', () => {
-    const allLines = drafts.flatMap((guide) => Object.values(guide.line_guides))
+    const allLines = guides.flatMap((guide) => Object.values(guide.line_guides))
     expect(new Set(allLines).size).toBe(24)
-    for (const guide of drafts) {
+    for (const guide of guides) {
       expect(hanLength(guide.one_liner)).toBeGreaterThanOrEqual(15)
       expect(hanLength(guide.one_liner)).toBeLessThanOrEqual(30)
       expect(hanLength(guide.overview)).toBeGreaterThanOrEqual(200)
@@ -51,7 +51,7 @@ describe('first four editorial drafts', () => {
   })
 
   it('uses each canonical pinned source and concrete traditional references', () => {
-    for (const guide of drafts) {
+    for (const guide of guides) {
       const original = catalog[guide.hexagram_id - 1]!
       expect(guide.references[0]!.url).toBe(original.source_url)
       expect(guide.references[0]!.title).toContain(String(original.source_revision_id))
@@ -67,9 +67,10 @@ describe('first four editorial drafts', () => {
     }
   })
 
-  it('keeps all four drafts out of the public selection path and leaves the other sixty unannotated', () => {
-    for (let id = 1; id <= 64; id++) expect(reviewedGuide(id)).toBeUndefined()
-    expect(drafts.filter((guide) => guide.hexagram_id > 4)).toEqual([])
+  it('publishes exactly four guides and leaves the other sixty unannotated', () => {
+    for (let id = 1; id <= 4; id++) expect(reviewedGuide(id)?.hexagram_id).toBe(id)
+    for (let id = 5; id <= 64; id++) expect(reviewedGuide(id)).toBeUndefined()
+    expect(guides.filter((guide) => guide.hexagram_id > 4)).toEqual([])
   })
 
   it('preserves the complete classical catalog byte for byte against the merged UI baseline', () => {
@@ -80,7 +81,7 @@ describe('first four editorial drafts', () => {
   })
 
   it('keeps the complete audit document synchronized with the shipped drafts and original quotations', () => {
-    for (const guide of drafts) {
+    for (const guide of guides) {
       expect(reviewDocument).toContain(guide.one_liner)
       expect(reviewDocument).toContain(guide.overview)
       for (const text of Object.values(guide.line_guides)) expect(reviewDocument).toContain(text)
@@ -95,7 +96,7 @@ describe('first four editorial drafts', () => {
 
   it('does not render actual draft text even when it is passed directly to the reader', async () => {
     for (const original of catalog) {
-      const candidate = drafts.find((guide) => guide.hexagram_id === original.wenwang_order)
+      const candidate = guides.find((guide) => guide.hexagram_id === original.wenwang_order)
       const guide: LearningGuide | undefined = candidate
         ? { ...candidate, review_status: 'draft' }
         : undefined
@@ -108,23 +109,25 @@ describe('first four editorial drafts', () => {
       for (const line of original.line_texts) expect(html).toContain(line)
       if (original.special_line) expect(html).toContain(original.special_line.text)
       if (guide) {
+        expect(html).not.toContain(guide.one_liner)
         expect(html).not.toContain(guide.overview)
         for (const text of Object.values(guide.line_guides)) expect(html).not.toContain(text)
       }
     }
   })
 
-  it('renders the actual overview and references for a reviewed test copy without approving source data', async () => {
-    for (const draft of drafts) {
-      const guide: LearningGuide = { ...draft, review_status: 'reviewed' }
+  it('renders the approved summary, overview and references', async () => {
+    for (const source of guides) {
+      const guide: LearningGuide = { ...source, review_status: 'reviewed' }
       const html = await renderToString(createSSRApp(LearningReader, {
         hexagram: catalog[guide.hexagram_id - 1] as Hexagram,
         guide,
       }))
+      expect(html).toContain(guide.one_liner)
       expect(html).toContain(guide.overview)
       for (const reference of guide.references) expect(html).toContain(reference.title)
       expect(html).not.toContain('导读整理中')
-      expect(draft.review_status).toBe('draft')
+      expect(source.review_status).toBe('reviewed')
     }
   })
 })
