@@ -28,7 +28,8 @@ def main() -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
     guide_file = ROOT / 'frontend/src/data/learning_guides.json'
     original_bytes = guide_file.read_bytes()
-    guides = json.loads(original_bytes)
+    all_guides = json.loads(original_bytes)
+    guides = [guide for guide in all_guides if guide['review_status'] == 'reviewed']
     catalog = json.loads((ROOT / 'backend/data/hexagrams.json').read_text())
     errors: list[str] = []
     results = []
@@ -101,7 +102,8 @@ def main() -> None:
                             'classicalAndSpecialLinesIntact': True})
         browser.close()
     assert guide_file.read_bytes() == original_bytes
-    assert all(guide['review_status'] == 'reviewed' for guide in json.loads(original_bytes))
+    assert [guide['hexagram_id'] for guide in all_guides if guide['review_status'] == 'reviewed'] == [1, 2, 3, 4]
+    assert [guide['hexagram_id'] for guide in all_guides if guide['review_status'] == 'draft'] == [5, 6, 7, 8]
     assert not errors, errors
     report = {'status': 'PASS', 'scope': f'{platform.system()} Chromium + published Vue reader; draft safety gate',
               'sourceFileUnchanged': True, 'sourceSha256': hashlib.sha256(original_bytes).hexdigest(),
