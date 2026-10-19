@@ -76,8 +76,10 @@ describe('first four reviewed editorial guides', () => {
   })
 
   it('preserves the complete classical catalog byte for byte against the merged UI baseline', () => {
-    const source = readFileSync(new URL('../../backend/data/hexagrams.json', import.meta.url))
-    expect(createHash('sha256').update(source).digest('hex')).toBe(
+    // git checkout can convert LF to CRLF on Windows without changing any classical text.
+    const source = readFileSync(new URL('../../backend/data/hexagrams.json', import.meta.url), 'utf8')
+      .replace(/\r\n/g, '\n')
+    expect(createHash('sha256').update(source, 'utf8').digest('hex')).toBe(
       '3cce6f7d443fd08ada0e0aa80b306731bf833efe24daacead84444a6566a538f',
     )
   })
