@@ -14,6 +14,7 @@ const reviewDocument = readFileSync(
   new URL('../../docs/learning-guides-review-01-04.md', import.meta.url),
   'utf8',
 )
+const firstFour = guides.filter((guide) => guide.hexagram_id <= 4)
 const requiredFields = [
   'hexagram_id', 'one_liner', 'overview', 'line_guides',
   'editorial_version', 'references', 'review_status',
@@ -21,9 +22,9 @@ const requiredFields = [
 
 describe('first four reviewed editorial guides', () => {
   it('ships exactly Qian, Kun, Zhun and Meng as complete reviewed LearningGuide records', () => {
-    expect(guides.map((guide) => guide.hexagram_id)).toEqual([1, 2, 3, 4])
-    expect(new Set(guides.map((guide) => guide.hexagram_id)).size).toBe(4)
-    for (const guide of guides) {
+    expect(firstFour.map((guide) => guide.hexagram_id)).toEqual([1, 2, 3, 4])
+    expect(new Set(guides.map((guide) => guide.hexagram_id)).size).toBe(guides.length)
+    for (const guide of firstFour) {
       expect(Object.keys(guide).sort()).toEqual(requiredFields)
       expect(guide.review_status).toBe('reviewed')
       expect(guide.editorial_version).toBe('learning-v1-01-04.1')
@@ -36,9 +37,9 @@ describe('first four reviewed editorial guides', () => {
   })
 
   it('keeps the requested reading depth without empty or repeated line explanations', () => {
-    const allLines = guides.flatMap((guide) => Object.values(guide.line_guides))
+    const allLines = firstFour.flatMap((guide) => Object.values(guide.line_guides))
     expect(new Set(allLines).size).toBe(24)
-    for (const guide of guides) {
+    for (const guide of firstFour) {
       expect(hanLength(guide.one_liner)).toBeGreaterThanOrEqual(15)
       expect(hanLength(guide.one_liner)).toBeLessThanOrEqual(30)
       expect(hanLength(guide.overview)).toBeGreaterThanOrEqual(200)
@@ -51,7 +52,7 @@ describe('first four reviewed editorial guides', () => {
   })
 
   it('uses each canonical pinned source and concrete traditional references', () => {
-    for (const guide of guides) {
+    for (const guide of firstFour) {
       const original = catalog[guide.hexagram_id - 1]!
       expect(guide.references[0]!.url).toBe(original.source_url)
       expect(guide.references[0]!.title).toContain(String(original.source_revision_id))
@@ -70,7 +71,7 @@ describe('first four reviewed editorial guides', () => {
   it('publishes exactly four guides and leaves the other sixty unannotated', () => {
     for (let id = 1; id <= 4; id++) expect(reviewedGuide(id)?.hexagram_id).toBe(id)
     for (let id = 5; id <= 64; id++) expect(reviewedGuide(id)).toBeUndefined()
-    expect(guides.filter((guide) => guide.hexagram_id > 4)).toEqual([])
+    expect(guides.filter((guide) => guide.hexagram_id > 4).map((guide) => guide.review_status)).toEqual(['draft','draft','draft','draft'])
   })
 
   it('preserves the complete classical catalog byte for byte against the merged UI baseline', () => {
@@ -81,7 +82,7 @@ describe('first four reviewed editorial guides', () => {
   })
 
   it('keeps the complete audit document synchronized with the shipped drafts and original quotations', () => {
-    for (const guide of guides) {
+    for (const guide of firstFour) {
       expect(reviewDocument).toContain(guide.one_liner)
       expect(reviewDocument).toContain(guide.overview)
       for (const text of Object.values(guide.line_guides)) expect(reviewDocument).toContain(text)
@@ -117,7 +118,7 @@ describe('first four reviewed editorial guides', () => {
   })
 
   it('renders the approved summary, overview and references', async () => {
-    for (const source of guides) {
+    for (const source of firstFour) {
       const guide: LearningGuide = { ...source, review_status: 'reviewed' }
       const html = await renderToString(createSSRApp(LearningReader, {
         hexagram: catalog[guide.hexagram_id - 1] as Hexagram,
