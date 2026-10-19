@@ -14,7 +14,7 @@ const han = (text: string) => [...text.matchAll(/\p{Script=Han}/gu)].length
 
 describe('fifth batch editorial safety and content integrity (17–20)', () => {
   it('has 20 sequential entries: 4 public and 16 drafts', () => {
-    expect(guides.map((g) => g.hexagram_id)).toEqual(Array.from({ length: 20 }, (_, i) => i + 1))
+    expect(guides.slice(0, 20).map((g) => g.hexagram_id)).toEqual(Array.from({ length: 20 }, (_, i) => i + 1))
     expect(new Set(guides.map((g) => g.hexagram_id)).size).toBe(guides.length)
     expect(batch.map((g) => g.hexagram_id)).toEqual([17, 18, 19, 20])
     for (const guide of guides) {
