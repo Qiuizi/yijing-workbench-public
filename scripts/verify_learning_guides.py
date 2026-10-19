@@ -1,9 +1,8 @@
-"""Check draft visibility and reviewed test copies against the real Vue reader.
+"""Check published guides and the draft safety gate against the real Vue reader.
 
 Run the existing API with an isolated temporary database and the Vite dev server,
-then run this script with Python Playwright installed. It never rewrites the JSON
-or adds an approval route to the app. Status changes only affect in-memory props
-on a test-only component mount in the browser.
+then run this script with Python Playwright installed. It never rewrites the JSON or adds an approval route to the app. Status changes
+only affect an in-memory test-only component mount in the browser.
 """
 from __future__ import annotations
 
@@ -46,10 +45,11 @@ def main() -> None:
             page.goto(f"{args.base_url}/#/learning/{guide['hexagram_id']}", wait_until='networkidle')
             expect(page.locator('.learning-reader h1')).to_have_text(entry['title'])
             reader = page.locator('.learning-reader')
-            expect(reader.locator('.learning-reader__guide')).to_contain_text('导读整理中')
-            assert guide['overview'] not in reader.inner_text()
+            expect(reader.locator('.learning-reader__guide')).to_contain_text(guide['overview'])
+            expect(reader.locator('.learning-reader__one-liner')).to_have_text(guide['one_liner'])
+            assert guide['overview'] in reader.inner_text()
             reader.get_by_role('button', name='全部展开', exact=True).click()
-            assert reader.locator('.learning-reader__line-note p').count() == 0
+            assert reader.locator('.learning-reader__line-note p').count() == 6
             assert reader.locator('.learning-reader__line-text').all_text_contents() == (
                 entry['line_texts'] + ([entry['special_line']['text']] if entry.get('special_line') else [])
             )
@@ -60,7 +60,7 @@ def main() -> None:
               const {default: Reader} = await import('/src/components/LearningReader.vue');
               document.querySelector('#app').style.display = 'none';
               const banner = document.createElement('p');
-              banner.textContent = 'DRAFT / 自动化测试副本：仅模拟 reviewed，源文件仍为 draft';
+              banner.textContent = '测试副本：模拟 reviewed → draft，不更改正式内容';
               banner.style.cssText = 'margin:0;padding:14px 24px;background:#f5ece5;color:#783b2e';
               document.body.append(banner);
               const host = document.createElement('div');
@@ -73,6 +73,7 @@ def main() -> None:
             }''', {'draft': guide, 'entry': entry})
             harness = page.locator('#guide-test-harness')
             expect(harness.locator('.learning-reader__guide')).to_contain_text(guide['overview'])
+            expect(harness.locator('.learning-reader__one-liner')).to_have_text(guide['one_liner'])
             for reference in guide['references']:
                 expect(harness.locator('.learning-reader__guide').get_by_role('link', name=reference['title'] + ' ↗', exact=True)).to_have_attribute('href', reference['url'])
             harness.get_by_role('button', name='全部展开', exact=True).click()
@@ -90,18 +91,19 @@ def main() -> None:
             # including notes that are already expanded.
             page.evaluate("window.__guideTestState.guide.review_status = 'draft'")
             expect(harness.locator('.learning-reader__guide')).to_contain_text('导读整理中')
+            expect(harness.locator('.learning-reader__one-liner')).to_have_count(0)
             expect(harness.locator('.learning-reader__line-note p')).to_have_count(0)
             assert guide['overview'] not in harness.inner_text()
             for explanation in guide['line_guides'].values():
                 assert explanation not in harness.inner_text()
-            results.append({'id': guide['hexagram_id'], 'draftHidden': True,
+            results.append({'id': guide['hexagram_id'], 'publishedGuideVisible': True, 'draftHidden': True,
                             'reviewedCopyNotes': 6, 'revertedDraftNotes': 0,
                             'classicalAndSpecialLinesIntact': True})
         browser.close()
     assert guide_file.read_bytes() == original_bytes
-    assert all(guide['review_status'] == 'draft' for guide in json.loads(original_bytes))
+    assert all(guide['review_status'] == 'reviewed' for guide in json.loads(original_bytes))
     assert not errors, errors
-    report = {'status': 'PASS', 'scope': f'{platform.system()} Chromium + existing Vue reader; no content approval',
+    report = {'status': 'PASS', 'scope': f'{platform.system()} Chromium + published Vue reader; draft safety gate',
               'sourceFileUnchanged': True, 'sourceSha256': hashlib.sha256(original_bytes).hexdigest(),
               'guides': results, 'reviewedCopyTotalNotes': 24, 'consoleErrors': errors}
     (args.output_dir / 'browser-verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
