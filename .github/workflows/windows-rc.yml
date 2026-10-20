@@ -1,11 +1,22 @@
 name: Windows 3.3.0 unsigned release candidate
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'scripts/build_sidecar.ps1'
+      - 'scripts/smoke_packaged_sidecar.ps1'
+      - 'requirements-win.lock.txt'
+      - 'requirements-build.txt'
+      - '.github/workflows/windows-rc.yml'
   pull_request:
     paths:
       - 'frontend/**'
       - 'backend/**'
       - 'scripts/build_sidecar.ps1'
+      - 'scripts/smoke_packaged_sidecar.ps1'
       - 'requirements-win.lock.txt'
       - 'requirements-build.txt'
       - '.github/workflows/windows-rc.yml'
@@ -13,6 +24,12 @@ on:
 
 permissions:
   contents: read
+
+# A successful PR merge-test build is NOT the artifact of main's actual commit.
+# A push to main builds a separate, attributable release candidate.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   windows-rc:
@@ -93,7 +110,15 @@ jobs:
         working-directory: frontend
         run: npm run desktop:build
 
+      - name: Smoke-test the bundled Python sidecar (synthetic profile only)
+        run: |
+          & ./scripts/smoke_packaged_sidecar.ps1 `
+            -SidecarPath 'frontend/src-tauri/binaries/yijing-backend/yijing-backend.exe' `
+            -ReportPath (Join-Path $env:RUNNER_TEMP 'yijing-rc-3.3.0/sidecar-smoke.json')
+
       - name: Check candidate binaries and produce SHA-256 manifest
+        env:
+          YIJING_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
         run: |
           $bundleDir = 'frontend\src-tauri\target\release\bundle\nsis'
           $installers = @(Get-ChildItem -LiteralPath $bundleDir -File -Filter '*setup.exe')
@@ -110,7 +135,12 @@ jobs:
           $manifest = [ordered]@{
             version = '3.3.0'
             source_sha = $env:GITHUB_SHA
+            source_trigger = $env:GITHUB_EVENT_NAME
+            source_ref = $env:GITHUB_REF
+            pr_head_sha = $env:YIJING_PR_HEAD_SHA
             install_mode = 'currentUser'
+            sidecar_smoke = 'PASS'
+            gui_upgrade_tested = $false
             status = 'unsigned-rc-not-manually-accepted'
             installer = [ordered]@{
               filename = $setup.Name

@@ -8,6 +8,20 @@
 - `frontend/src/data/learning_approvals.json`：独立发布批准台账。正式选择器 `reviewedGuide` **同时检查台账和状态**，缺一不可。
 - 历史 01–04 卦由 PR #8 批准，台账记录 PR、日期和审核文档。其余 05–64 卦保持 `draft`，不因已合并 PR #13 而自动批准。
 
+## 两种“来源验证”不能混为一谈
+
+仓库 `backend/data/README.md` 已记录：2026-09-24 曾用维基文库 MediaWiki API 按 64 个固定修订号核对 **64 卦卦辞、384 条爻辞及乾坤特殊爻辞，共 450 项经典来源文本**。这是项目现有的、**有日期的来源核对记录**，不应笼统写成“固定 oldid 从未验证”。
+
+但该历史记录不等于我们此次重新从 API 取得全部页面和扫描影像作独立复核，更不等于现代导读的王弼、孔颖达、朱熹训释经过逐条学术核验。**已记录经典来源核对 ≠ 新一轮独立版本校勘 ≠ 现代导读发布批准**。遇到《大畜》等当前网站文本与旧版差异，原本的经典 JSON 不可自动覆盖。
+
+目前额外提供 `scripts/prepare_learning_review.py`，可生成 64 份 Markdown 审稿包，把每卦原文、六爻说明、固定修订和古注入口并列；该导出不改动审定状态。示例运行：
+
+```bash
+python scripts/prepare_learning_review.py --output review-packets
+```
+
+每份文件名为 `hexagram-001.md` 等 ASCII 名称，可在 Obsidian 查看；也可从 CI 中取回 `yijing-64-hexagram-review-markdown` Artifact。勾选审核清单本身不等于批准，还须按下述规定操作台账和 PR。
+
 ## 每一卦的必要校读
 
 1. **原始内容定位**：确认文王卦序、本卦、卦辞、六爻、上下卦，以及本项目固定的 `source_url` 与 `source_revision_id`；不因外部页面版本变化覆盖经典数据。
