@@ -20,6 +20,25 @@
 
 本记录中的运行状态、测试数量来自 [GitHub Windows Run 39292710601](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39292710601)。2026-10-20 下载 Artifact ZIP 后，已实际读取包内 manifest 并独立对 EXE 重新计算 SHA-256：**结果与 manifest、CI 日志一致**。特别注意 PR 合并测试提交的 `source_sha` 与 PR `head_sha` 的差异，发布不得偷换为当前 main 已复验。自动构建的 PASS 只来自 GitHub Actions 作业状态和步骤结果，不能冒充在实体 Windows 账户执行了安装或升级。候选产物是有时效的 Artifact，尚未成为公开 Release。
 
+## A2. 更新内容后的最新候选核验（2026-10-20）
+
+上文 A 表格记录的是 PR #14 的候选产物，不能与后续构建混为一谈。PR #15、PR #16 内容修订已合并到主分支（主分支源码合并 SHA 分别为 `8d2603cb3185326174b2a711e86cb7db069c285f`、`85ee5da906c7ab18e9766e4680587b89b144b681`）。
+
+对 PR #16 的 Windows 工作流 [Run 39348813774](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39348813774) 已核实：
+
+| 字段 | 结果 |
+| --- | --- |
+| CI / 测试 / 构建 | `completed/success`：Windows Python 回归、前端测试、类型检查、VC143 验证、PyInstaller/Tauri/NSIS、Artifact 上传均成功 |
+| 下载的 Artifact | `yijing-workbench-3.3.0-windows-x64-unsigned-rc`，Artifact ID `12232527619`，ZIP 16,079,482 bytes，保留至 2026-11-03 UTC |
+| 安装包文件 | `易经起卦工作台_3.3.0_x64-setup.exe`，16,094,605 bytes |
+| EXE SHA-256 | `A1C566C4D602CE6F7BD46F8F6AD9192406C4C35BCBDE1F78F9F306B56B0052F1` |
+| 二次核验 | 下载 GitHub Artifact ZIP，读取 `manifest-rc.json` 并独立对 ZIP 内 EXE 计算 SHA-256，文件大小和哈希与 manifest 完全一致 |
+| manifest `source_sha` | `32c8d07db0a4193f9cf2dd30877855558fe9413c`，这是 **pull_request 触发的测试合并提交**，不是 PR 分支 head 或最终 main 合并提交 |
+| sidecar SHA-256 | `7DE9A5F56C9E101E19E9F74A0657A38EE0D2F02C0394C078FF46DB20B661C0AA`（只记录 manifest 数值，未独立提取 sidecar 二进制复算） |
+| 发布状态 | `unsigned-rc-not-manually-accepted`：未签名、尚无实体 Windows 新装/升级、GUI、DPAPI 人工验收；**不得作为正式 Release** |
+
+**注意：**此候选证明 PR #16 的临时测试合并树可以在托管 Windows 环境构建。正式 Release 必须从指定的正式源码提交重新构建，或有明确的同一源码/二进制验证及人工安装升级验收；不能把此 Artifact 自动标记成已经验收的 v3.3.0。
+
 ## B. 隔离 Windows 账户的人工验收（不可由 Linux/CI 自动推断）
 
 使用测试账户及**合成**占卜历史，先备份，绝不上传私人的 SQLite、API Key 或 DPAPI 密文；不替换主账户正在使用的稳定版。
