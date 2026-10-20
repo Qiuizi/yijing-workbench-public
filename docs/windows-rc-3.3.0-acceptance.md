@@ -1,6 +1,6 @@
 # v3.3.0 Windows x64 候选包验收记录
 
-**状态：等待候选包 CI 及 Windows 实机检查，未通过正式发布门槛。**
+**状态：GitHub Windows 候选包 CI 已通过；隔离 Windows 实机安装/升级与 GUI/DPAPI 人工验收尚未完成，未通过正式发布门槛。**
 
 候选构建由 [Windows CI](../.github/workflows/windows-rc.yml) 以 Python 3.12、Node 24、Rust 1.98.1、固定 Python Windows 快照、签名的 Microsoft VC143 运行库生成。工作流**只上传有时效的 GitHub Actions Artifact**，不自动打 Tag、签名或创建 Release。
 
@@ -8,15 +8,17 @@
 
 | 字段 | 结果 |
 | --- | --- |
-| 源码提交 SHA | NOT_TESTED |
-| Actions Run URL | NOT_TESTED |
-| Windows 后端 pytest | NOT_TESTED |
-| Windows 前端测试/类型检查 | NOT_TESTED |
-| PyInstaller sidecar / Tauri / NSIS | NOT_TESTED |
-| 安装包文件名、字节数 | NOT_TESTED |
-| 安装包 SHA-256 | NOT_TESTED |
-| Microsoft VC143 DLL 签名/哈希 | NOT_TESTED |
-| Artifact manifest | NOT_TESTED |
+| 源码提交 SHA | 以 Actions Run 39292710601 的 `head_sha` 及随包 `manifest-rc.json` 为准；本记录不猜测具体哈希 |
+| Actions Run URL | [39292710601](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39292710601) · completed/success |
+| Windows 后端 pytest | PASS（GitHub job 的 Windows backend regression tests 步骤） |
+| Windows 前端测试/类型检查 | PASS（Frontend regression tests / Typecheck） |
+| PyInstaller sidecar / Tauri / NSIS | PASS（Build PyInstaller sidecar and Tauri NSIS candidate） |
+| 安装包文件名、字节数 | 工作流已生成并上传未签名安装包；包内实际文件名与字节数须从 manifest 核对。Artifact 压缩包大小为 16,074,400 bytes，不等于安装包大小 |
+| 安装包 SHA-256 | 已由 workflow 生成 manifest-rc.json，但尚未从 Artifact 独立读取具体哈希，待核对 |
+| Microsoft VC143 DLL 签名/哈希 | PASS（workflow 的官方 VC143 CRT 签名校验；实际哈希尚未单独登记） |
+| Artifact manifest | PASS（生成并上传步骤成功）；Artifact ID `12205683488`，大小 16,074,400 bytes，有效期至 2026-11-02 UTC。具体 manifest 内容待独立检查 |
+
+自动构建的 PASS 只来自 GitHub Actions 作业状态和步骤结果，不能冒充在实体 Windows 账户执行了安装或升级。候选产物是有时效的 Artifact，尚未成为公开 Release。
 
 ## B. 隔离 Windows 账户的人工验收（不可由 Linux/CI 自动推断）
 
