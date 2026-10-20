@@ -76,18 +76,18 @@ def packet(guide: dict, classical: dict, approval: dict | None) -> str:
     dossier = audit_dossier(hid)
     intro.extend([
         "",
-        f"- [现有审核档案](../../{dossier})",
+        f"- [现有审核档案](https://github.com/Qiuizi/yijing-workbench-public/blob/main/{dossier})",
     ])
     if 13 <= hid <= 20:
-        intro.append("- [王注孔疏与《本义》对照](../../docs/learning-guides-dualcommentary-13-20.md)")
+        intro.append("- [王注孔疏与《本义》对照](https://github.com/Qiuizi/yijing-workbench-public/blob/main/docs/learning-guides-dualcommentary-13-20.md)")
     if 21 <= hid <= 24:
-        intro.append("- [王注孔疏与《本义》对照](../../docs/learning-guides-dualcommentary-21-24.md)")
+        intro.append("- [王注孔疏与《本义》对照](https://github.com/Qiuizi/yijing-workbench-public/blob/main/docs/learning-guides-dualcommentary-21-24.md)")
     if hid == 25:
-        intro.append("- [无妄逐爻校读](../../docs/learning-guides-source-audit-25.md)")
+        intro.append("- [无妄逐爻校读](https://github.com/Qiuizi/yijing-workbench-public/blob/main/docs/learning-guides-source-audit-25.md)")
     if 26 <= hid <= 28:
-        intro.append("- [王注孔疏与《本义》对照](../../docs/learning-guides-dualcommentary-26-28.md)")
+        intro.append("- [王注孔疏与《本义》对照](https://github.com/Qiuizi/yijing-workbench-public/blob/main/docs/learning-guides-dualcommentary-26-28.md)")
     if 29 <= hid <= 32:
-        intro.append("- [王注孔疏与《本义》对照](../../docs/learning-guides-dualcommentary-29-32.md)")
+        intro.append("- [王注孔疏与《本义》对照](https://github.com/Qiuizi/yijing-workbench-public/blob/main/docs/learning-guides-dualcommentary-29-32.md)")
     intro.extend([
         "",
         "## 维护者审核门槛（每项均需可追溯证据）",
