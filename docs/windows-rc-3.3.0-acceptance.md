@@ -39,6 +39,14 @@
 
 **注意：**此候选证明 PR #16 的临时测试合并树可以在托管 Windows 环境构建。正式 Release 必须从指定的正式源码提交重新构建，或有明确的同一源码/二进制验证及人工安装升级验收；不能把此 Artifact 自动标记成已经验收的 v3.3.0。
 
+## A3. 自动验收覆盖扩充：主分支可追溯候选与 sidecar 启动
+
+2026-10-20 起，Windows RC 工作流新增 **`push` 到 `main`** 的自动构建路径。先前仅有 `pull_request` 构建的 `GITHUB_SHA` 为合并测试提交，不能直接说成最终 main 构建。新增的 `manifest-rc.json` 会记录 `source_trigger`、`source_ref`、`source_sha`、PR head 及 `sidecar_smoke` 状态。仅当 `source_trigger=push`、`source_ref=refs/heads/main` 且 SHA 与 GitHub main 指定提交一致时，才可称为基于正式主分支的候选构建。
+
+还将启动**打包后的** `yijing-backend.exe` 并使用一次性合成数据库执行 loopback API 冒烟验收：带令牌健康接口 200、无令牌/错误令牌 401、64 卦目录完整、私有历史为空。导出的 `sidecar-smoke.json` 随 Artifact 保存；不写个人 SQLite 或 API Key。
+
+**当前状态：新流程的主分支运行尚待 GitHub Actions 实际 completed/success；不得提前填写通过。** 即使以上成功，也不会自动做安装器 GUI、WebView2、DPAPI、历史升级或卸载检查。它们仍属下方 B 的人工验收。
+
 ## B. 隔离 Windows 账户的人工验收（不可由 Linux/CI 自动推断）
 
 使用测试账户及**合成**占卜历史，先备份，绝不上传私人的 SQLite、API Key 或 DPAPI 密文；不替换主账户正在使用的稳定版。
