@@ -34,6 +34,14 @@
 
 Windows 3.3.0 自动候选流程见 [独立 RC 验收记录](windows-rc-3.3.0-acceptance.md)：构建工作流可以在隔离 GitHub Windows runner 生成安装包及哈希，不会自动公开发布；仍需要单独进行 Windows 真实账户升级、GUI、DPAPI 等人工验收。学习导读的内容批准标准另见 [审核门槛](learning-approval-policy.md)。
 
+## 候选源码与构建证据的区分
+
+2026-10-20 此前已有多轮 GitHub Actions Windows 2022 运行完成 Python/前端回归、打包和 SHA-256 候选产物上传；对应已留存记录见 [Windows RC 验收表](windows-rc-3.3.0-acceptance.md)。其 `source_sha` 多为 PR 临时合并提交，不代表当前 main 的同 SHA 正式发布产物。
+
+现已加入从 `main` 的真实 `push` 提交构建新候选，以及打包后端 sidecar 的令牌鉴权、健康检查与合成历史冒烟。**新流程实际运行结果必须单独记录，不预先宣称通过**；即使自动 CI 通过，也不能取代 Windows 真实账户 GUI、WebView2、DPAPI、备份恢复和从 v3.2.2 升级的人工验收。
+
+学习导读另可通过 `python scripts/prepare_learning_review.py --output review-packets` 生成 64 个独立 Markdown 审核包；已有的 4 个批准条目保持可见，其余 60 条不会因生成材料自动公开。
+
 ## 验证状态与最终待验收
 
 用户说明已有开发功能已完成 Windows 功能验收；该说明作为用户手工验收背景记录。本轮 Cloud 不重复或扩展该结论，也不将它当作以下最终候选包检查已经完成。
