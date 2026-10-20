@@ -8,17 +8,17 @@
 
 | 字段 | 结果 |
 | --- | --- |
-| 源码提交 SHA | 以 Actions Run 39292710601 的 `head_sha` 及随包 `manifest-rc.json` 为准；本记录不猜测具体哈希 |
+| 源码提交 SHA | Artifact manifest 的 `source_sha=83028f50f0d75879b7294d6b7943dcf3d8fcff2c`（PR 触发时的 `GITHUB_SHA` 合并测试提交）；运行详情的分支 `head_sha=7be8f2464eb8b3505c5c4e0a2f1d0bd9e0b73080`。两者不是同一个 SHA；本候选不等于当前 main 构建 |
 | Actions Run URL | [39292710601](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39292710601) · completed/success |
-| Windows 后端 pytest | PASS（GitHub job 的 Windows backend regression tests 步骤） |
-| Windows 前端测试/类型检查 | PASS（Frontend regression tests / Typecheck） |
+| Windows 后端 pytest | PASS：187 passed、1 warning（Actions job 原始日志） |
+| Windows 前端测试/类型检查 | PASS：107/107 Vitest；Typecheck success（Actions job 日志） |
 | PyInstaller sidecar / Tauri / NSIS | PASS（Build PyInstaller sidecar and Tauri NSIS candidate） |
-| 安装包文件名、字节数 | 工作流已生成并上传未签名安装包；包内实际文件名与字节数须从 manifest 核对。Artifact 压缩包大小为 16,074,400 bytes，不等于安装包大小 |
-| 安装包 SHA-256 | 已由 workflow 生成 manifest-rc.json，但尚未从 Artifact 独立读取具体哈希，待核对 |
+| 安装包文件名、字节数 | `易经起卦工作台_3.3.0_x64-setup.exe`，EXE **16,089,518 bytes**；Artifact ZIP 16,074,400 bytes，分别独立计数 |
+| 安装包 SHA-256 | **`6EBA34016332FAA0B761038929BFFF715D1CCBECDBA410348D1E096F6DC70EC8`**；已下载 Artifact ZIP 并对其中 EXE **独立计算 SHA-256，结果与 manifest 及 CI 日志三方一致** |
 | Microsoft VC143 DLL 签名/哈希 | PASS（workflow 的官方 VC143 CRT 签名校验；实际哈希尚未单独登记） |
-| Artifact manifest | PASS（生成并上传步骤成功）；Artifact ID `12205683488`，大小 16,074,400 bytes，有效期至 2026-11-02 UTC。具体 manifest 内容待独立检查 |
+| Artifact manifest | **已下载核验**：Artifact ID `12205683488`，ZIP 大小 16,074,400 bytes，保留至 2026-11-02 UTC；manifest `version=3.3.0`、`install_mode=currentUser`、`status=unsigned-rc-not-manually-accepted`；sidecar SHA-256 为 `83AB9E7E5FE4AE88304B8C82EE6F3B19B7ABF7C1903ECEF06EC847375116CCF6`（sidecar 未单独提取复算） |
 
-自动构建的 PASS 只来自 GitHub Actions 作业状态和步骤结果，不能冒充在实体 Windows 账户执行了安装或升级。候选产物是有时效的 Artifact，尚未成为公开 Release。
+本记录中的运行状态、测试数量来自 [GitHub Windows Run 39292710601](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39292710601)。2026-10-20 下载 Artifact ZIP 后，已实际读取包内 manifest 并独立对 EXE 重新计算 SHA-256：**结果与 manifest、CI 日志一致**。特别注意 PR 合并测试提交的 `source_sha` 与 PR `head_sha` 的差异，发布不得偷换为当前 main 已复验。自动构建的 PASS 只来自 GitHub Actions 作业状态和步骤结果，不能冒充在实体 Windows 账户执行了安装或升级。候选产物是有时效的 Artifact，尚未成为公开 Release。
 
 ## B. 隔离 Windows 账户的人工验收（不可由 Linux/CI 自动推断）
 
