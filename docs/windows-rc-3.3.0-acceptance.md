@@ -8,17 +8,17 @@
 
 | 字段 | 结果 |
 | --- | --- |
-| 源码提交 SHA | 以 Actions Run 39292710601 的 `head_sha` 及随包 `manifest-rc.json` 为准；本记录不猜测具体哈希 |
+| 源码提交 SHA | `7be8f2464eb8b3505c5c4e0a2f1d0bd9e0b73080`（运行详情 head_sha；候选包来源于 PR #14 分支该提交，而非当前 main） |
 | Actions Run URL | [39292710601](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39292710601) · completed/success |
-| Windows 后端 pytest | PASS（GitHub job 的 Windows backend regression tests 步骤） |
-| Windows 前端测试/类型检查 | PASS（Frontend regression tests / Typecheck） |
+| Windows 后端 pytest | PASS：187 passed、1 warning（Actions job 原始日志） |
+| Windows 前端测试/类型检查 | PASS：107/107 Vitest；Typecheck success（Actions job 日志） |
 | PyInstaller sidecar / Tauri / NSIS | PASS（Build PyInstaller sidecar and Tauri NSIS candidate） |
-| 安装包文件名、字节数 | 工作流已生成并上传未签名安装包；包内实际文件名与字节数须从 manifest 核对。Artifact 压缩包大小为 16,074,400 bytes，不等于安装包大小 |
-| 安装包 SHA-256 | 已由 workflow 生成 manifest-rc.json，但尚未从 Artifact 独立读取具体哈希，待核对 |
+| 安装包文件名、字节数 | 日志显示 `易经起卦工作台_3.3.0_x64-setup.exe`；实际 EXE 字节数仍待从 manifest 读取。Artifact ZIP 大小 16,074,400 bytes，不能混同于 EXE 大小 |
+| 安装包 SHA-256 | `6EBA34016332FAA0B761038929BFFF715D1CCBECDBA410348D1E096F6DC70EC8`（Actions job `Check candidate binaries and produce SHA-256 manifest` 日志明确输出；尚待下载后独立重新计算） |
 | Microsoft VC143 DLL 签名/哈希 | PASS（workflow 的官方 VC143 CRT 签名校验；实际哈希尚未单独登记） |
 | Artifact manifest | PASS（生成并上传步骤成功）；Artifact ID `12205683488`，大小 16,074,400 bytes，有效期至 2026-11-02 UTC。具体 manifest 内容待独立检查 |
 
-自动构建的 PASS 只来自 GitHub Actions 作业状态和步骤结果，不能冒充在实体 Windows 账户执行了安装或升级。候选产物是有时效的 Artifact，尚未成为公开 Release。
+本记录中源码 SHA、测试通过数量、安装包文件名及哈希均来自 [GitHub Windows Run 39292710601](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39292710601) 的运行详情或 job 日志，尚未独立打开并散列重算 Artifact 中的二进制。自动构建的 PASS 只来自 GitHub Actions 作业状态和步骤结果，不能冒充在实体 Windows 账户执行了安装或升级。候选产物是有时效的 Artifact，尚未成为公开 Release。
 
 ## B. 隔离 Windows 账户的人工验收（不可由 Linux/CI 自动推断）
 
