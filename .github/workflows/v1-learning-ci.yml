@@ -6,6 +6,7 @@ on:
       - 'frontend/**'
       - 'backend/**'
       - 'docs/learning-guides*'
+      - 'scripts/prepare_learning_review.py'
       - 'requirements.txt'
       - 'pyproject.toml'
       - '.github/workflows/v1-learning-ci.yml'
@@ -54,3 +55,12 @@ jobs:
         run: python -m pip install -r requirements.txt
       - name: Run pytest
         run: python -m pytest
+      - name: Build 64 independent editorial review packets (no approvals changed)
+        run: python scripts/prepare_learning_review.py --output "$RUNNER_TEMP/yijing-review-packets"
+      - name: Upload editable review packets (draft-only work material, not published)
+        uses: actions/upload-artifact@v4
+        with:
+          name: yijing-64-hexagram-review-markdown
+          path: ${{ runner.temp }}/yijing-review-packets/*.md
+          if-no-files-found: error
+          retention-days: 14
