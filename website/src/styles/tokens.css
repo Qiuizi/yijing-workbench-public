@@ -1,0 +1,63 @@
+/* ============================================================
+   墨玉金石 · design tokens
+   ink-jade & bronze-gold-stone — restrained, eastern, editorial
+   ============================================================ */
+:root {
+  /* skeleton — ink & bronze */
+  --ink-950: #0d1614;
+  --ink-900: #14201d;
+  --ink-850: #182420;
+  --bronze-800: #1d2b27;
+  --bronze-750: #22322c;
+  --bronze-700: #2a3a32;
+  --bronze-600: #3a4b41;
+
+  /* rice paper */
+  --paper: #f6f2e9;
+  --paper-bright: #fffdf8;
+  --paper-dim: #ece6d8;
+
+  /* bronze gold */
+  --gold-300: #d6b979;
+  --gold-400: #c9a227;
+  --gold-500: #b18d1e;
+  --gold-600: #967819;
+
+  /* cinnabar — the single tiny accent */
+  --cinnabar: #a94736;
+  --cinnabar-deep: #8a3728;
+
+  /* ink on paper */
+  --ink-text: #2b332e;
+  --ink-text-soft: #4a544d;
+  --ink-text-muted: #6f776f;
+
+  /* gold on dark shell */
+  --shell-text: #e9e4d6;
+  --shell-text-soft: #b9c0b7;
+
+  /* typography — system CJK serif / sans only, no external fonts */
+  --font-serif: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', 'Times New Roman', serif;
+  --font-sans: 'Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC', 'Segoe UI', sans-serif;
+  --font-num: Georgia, 'Times New Roman', 'Noto Serif SC', serif;
+
+  /* 8pt baseline spacing */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 80px;
+  --s-10: 104px;
+  --s-11: 128px;
+
+  --hairline: 1px;
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --maxw: 1200px;
+
+  color-scheme: dark;
+}

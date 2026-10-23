@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="og-title og-desc">
+  <title id="og-title">易经起卦工作台 · Yijing Workbench</title>
+  <desc id="og-desc">社交分享封面：墨绿底、铜金细线框、产品名与既济卦爻线母题。</desc>
+  <rect width="1200" height="630" fill="#14201d"/>
+  <rect x="44" y="44" width="1112" height="542" rx="24" fill="none" stroke="#C9A227" stroke-width="3"/>
+  <rect x="60" y="60" width="1080" height="510" rx="14" fill="none" stroke="#C9A227" stroke-width="1" opacity="0.4"/>
+  <g fill="#D6B979">
+    <rect x="800" y="192" width="140" height="26" rx="13"/>
+    <rect x="960" y="192" width="140" height="26" rx="13"/>
+    <rect x="800" y="236" width="300" height="26" rx="13"/>
+    <rect x="800" y="280" width="140" height="26" rx="13"/>
+    <rect x="960" y="280" width="140" height="26" rx="13"/>
+    <rect x="800" y="324" width="300" height="26" rx="13"/>
+    <rect x="800" y="368" width="140" height="26" rx="13"/>
+    <rect x="960" y="368" width="140" height="26" rx="13"/>
+    <rect x="800" y="412" width="300" height="26" rx="13"/>
+  </g>
+  <text x="120" y="250" font-family="'Noto Serif SC','Source Han Serif SC','Songti SC','STSong','SimSun',serif" font-size="84" fill="#F6F2E9">易经起卦工作台</text>
+  <text x="124" y="322" font-family="'Georgia','Times New Roman',serif" font-size="36" style="letter-spacing:3px" fill="#D6B979">YIJING WORKBENCH</text>
+  <line x1="124" y1="344" x2="384" y2="344" stroke="#C9A227" stroke-width="2"/>
+  <text x="124" y="392" font-family="'Noto Serif SC','Source Han Serif SC','Songti SC','STSong','SimSun',serif" font-size="28" fill="#F6F2E9" opacity="0.85">起卦 · 排盘 · 观辞 —— 本地优先</text>
+  <text x="124" y="448" font-family="'Georgia','Times New Roman',serif" font-size="22" style="letter-spacing:1px" fill="#C9A227" opacity="0.7">v3.3.0 · LOCAL-FIRST</text>
+</svg>
