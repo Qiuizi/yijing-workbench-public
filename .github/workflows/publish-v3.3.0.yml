@@ -1,0 +1,157 @@
+# Single-purpose, risk-accepted public release.
+# Release assets are the existing, independently checked e5f613c main CI build.
+# NEVER silently rebuild them or treat untested installer/upgrade as PASS.
+name: Publish v3.3.0 (explicitly accepted untested risks)
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/publish-v3.3.0.yml'
+      - 'docs/release-v3.3.0.md'
+      - 'docs/windows-rc-3.3.0-acceptance.md'
+      - 'docs/release-notes-v3.3.0.md'
+      - 'README.md'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v3.3.0.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: yijing-publish-v3.3.0
+  cancel-in-progress: false
+
+jobs:
+  verify-and-publish:
+    if: github.repository == 'Qiuizi/yijing-workbench-public'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify package version and that build inputs are unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, subprocess
+          source = 'e5f613c5456cbd1dbb428c73bfb5234747133fb9'
+          relevant = ['frontend/', 'backend/', 'requirements.txt',
+                      'requirements-build.txt', 'requirements-win.lock.txt',
+                      'scripts/build_sidecar.ps1', 'scripts/smoke_packaged_sidecar.ps1',
+                      '.github/workflows/windows-rc.yml']
+          changed = subprocess.check_output(['git','diff','--name-only',source,'HEAD'], text=True).splitlines()
+          unexpected = [p for p in changed if any(p == prefix or p.startswith(prefix) for prefix in relevant)]
+          assert not unexpected, f'Cannot publish previous executable after build inputs changed: {unexpected}'
+          assert json.load(open('frontend/package.json',encoding='utf-8'))['version'] == '3.3.0'
+          assert json.load(open('frontend/src-tauri/tauri.conf.json',encoding='utf-8'))['version'] == '3.3.0'
+          assert subprocess.run(['git','merge-base','--is-ancestor',source,'HEAD']).returncode == 0
+          print('Build inputs unchanged since binary source; checked:', changed)
+          PY
+
+      - name: Retrieve exact main-build candidate from GitHub Actions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/v3.3.0-rc"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/39373256162" > "$RUNNER_TEMP/v3.3.0-run.json"
+          gh run download 39373256162 \
+            -R "$GITHUB_REPOSITORY" \
+            -n yijing-workbench-3.3.0-windows-x64-unsigned-rc \
+            -D "$RUNNER_TEMP/v3.3.0-rc"
+
+      - name: Independently validate original bytes, manifest and smoke record
+        env:
+          GITHUB_RUN_JSON: ${{ runner.temp }}/v3.3.0-run.json
+          INPUT_DIR: ${{ runner.temp }}/v3.3.0-rc
+          OUTPUT_DIR: ${{ runner.temp }}/v3.3.0-release
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json, os, shutil
+
+          expected_source = 'e5f613c5456cbd1dbb428c73bfb5234747133fb9'
+          expected_sha = '0620A0497C76B25524275F21516F7D69A5AC2291BD362F8094F99E267693EBC8'
+          run = json.loads(Path(os.environ['GITHUB_RUN_JSON']).read_text())
+          assert run['event'] == 'push' and run['head_sha'] == expected_source
+          assert run['status'] == 'completed' and run['conclusion'] == 'success'
+
+          source_dir = Path(os.environ['INPUT_DIR'])
+          target = Path(os.environ['OUTPUT_DIR'])
+          target.mkdir(parents=True, exist_ok=True)
+          m = json.loads((source_dir/'manifest-rc.json').read_text(encoding='utf-8-sig'))
+          assert m['version'] == '3.3.0'
+          assert m['source_sha'] == expected_source
+          assert m['source_trigger'] == 'push' and m['source_ref'] == 'refs/heads/main'
+          assert m['install_mode'] == 'currentUser'
+          assert m['status'] == 'unsigned-rc-not-manually-accepted'
+          assert m['sidecar_smoke'] == 'PASS'
+          assert m['gui_upgrade_tested'] is False
+          originals = list(source_dir.glob('*setup.exe'))
+          assert len(originals) == 1, f'Expected exactly one NSIS installer: {originals}'
+          installer = originals[0]
+          assert installer.name == m['installer']['filename']
+          assert installer.stat().st_size == m['installer']['bytes'] == 16096623
+          sha = hashlib.sha256(installer.read_bytes()).hexdigest().upper()
+          assert sha == m['installer']['sha256'].upper() == expected_sha, (sha, m['installer'])
+          smoke = json.loads((source_dir/'sidecar-smoke.json').read_text(encoding='utf-8-sig'))
+          assert smoke['status'] == 'PASS' and smoke['desktop_gui_installer_upgrade_tested'] is False
+          assert smoke['synthetic_temp_profile'] is True
+          name = 'yijing-workbench-3.3.0-x64-setup.exe'
+          shutil.copyfile(installer, target/name)
+          shutil.copyfile(source_dir/'manifest-rc.json', target/'manifest-rc.json')
+          shutil.copyfile(source_dir/'sidecar-smoke.json', target/'sidecar-smoke.json')
+          (target/'SHA256SUMS.txt').write_text(f'{sha}  {name}\n', encoding='utf-8')
+          (target/'PROVENANCE.md').write_text(
+              '# v3.3.0 release provenance\n\n'
+              f'- Build source commit: `{expected_source}`\n'
+              f'- Release tag commit: `{os.environ["GITHUB_SHA"]}` (later changes are documentation/release workflow only)\n'
+              '- Windows CI run: https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39373256162\n'
+              f'- Original NSIS filename: `{installer.name}`\n'
+              f'- Release filename: `{name}` (renamed without changing bytes)\n'
+              f'- Installer bytes: {installer.stat().st_size}\n'
+              f'- SHA-256: `{sha}`\n'
+              '- Original manifest preserved with candidate status unsigned-rc-not-manually-accepted.\n'
+              '- Public release authorized with acknowledged NOT_TESTED items; no GUI/upgrade result has been fabricated.\n'
+              '- Installer is unsigned. No user database or secret is included in uploaded evidence.\n',
+              encoding='utf-8')
+          print('Verified source, smoke tests, binary size and SHA-256:', sha)
+          PY
+
+      - name: Publish v3.3.0 as latest formal release (only on main push)
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v3.3.0 -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo 'v3.3.0 Release already exists; refusing to overwrite assets or notes.'
+            exit 1
+          fi
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v3.3.0" >/dev/null 2>&1; then
+            echo 'v3.3.0 tag already exists; refusing to retag.'
+            exit 1
+          fi
+          dir="$RUNNER_TEMP/v3.3.0-release"
+          gh release create v3.3.0 \
+            "$dir/yijing-workbench-3.3.0-x64-setup.exe" \
+            "$dir/SHA256SUMS.txt" \
+            "$dir/manifest-rc.json" \
+            "$dir/sidecar-smoke.json" \
+            "$dir/PROVENANCE.md" \
+            -R "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "易经起卦工作台 v3.3.0 (Windows x64)" \
+            --notes-file docs/release-v3.3.0.md \
+            --latest
+          gh release view v3.3.0 -R "$GITHUB_REPOSITORY" --json tagName,isDraft,isPrerelease,assets,url
