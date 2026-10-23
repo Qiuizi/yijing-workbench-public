@@ -4976,7 +4976,7 @@ dependencies = [
 
 [[package]]
 name = "yijing-workbench"
-version = "3.3.0"
+version = "3.3.1"
 dependencies = [
  "getrandom 0.3.4",
  "log",

@@ -1,4 +1,4 @@
-name: Windows 3.3.0 unsigned release candidate
+name: Windows 3.3.1 unsigned release candidate
 
 on:
   push:
@@ -114,7 +114,7 @@ jobs:
         run: |
           & ./scripts/smoke_packaged_sidecar.ps1 `
             -SidecarPath 'frontend/src-tauri/binaries/yijing-backend/yijing-backend.exe' `
-            -ReportPath (Join-Path $env:RUNNER_TEMP 'yijing-rc-3.3.0/sidecar-smoke.json')
+            -ReportPath (Join-Path $env:RUNNER_TEMP 'yijing-rc-3.3.1/sidecar-smoke.json')
 
       - name: Check candidate binaries and produce SHA-256 manifest
         env:
@@ -124,16 +124,16 @@ jobs:
           $installers = @(Get-ChildItem -LiteralPath $bundleDir -File -Filter '*setup.exe')
           if ($installers.Count -ne 1) { throw "Expected one NSIS setup, found $($installers.Count)" }
           $setup = $installers[0]
-          if ($setup.Name -notmatch '3[._]3[._]0') { throw "Unexpected version in NSIS filename: $($setup.Name)" }
+          if ($setup.Name -notmatch '3[._]3[._]1') { throw "Unexpected version in NSIS filename: $($setup.Name)" }
           $sidecar = 'frontend\src-tauri\binaries\yijing-backend\yijing-backend.exe'
           if (-not (Test-Path -LiteralPath $sidecar)) { throw 'Missing sidecar binary' }
-          $out = Join-Path $env:RUNNER_TEMP 'yijing-rc-3.3.0'
+          $out = Join-Path $env:RUNNER_TEMP 'yijing-rc-3.3.1'
           New-Item -ItemType Directory -Force -Path $out | Out-Null
           Copy-Item -LiteralPath $setup.FullName -Destination $out
           $setupHash = (Get-FileHash -LiteralPath $setup.FullName -Algorithm SHA256).Hash
           $sidecarHash = (Get-FileHash -LiteralPath $sidecar -Algorithm SHA256).Hash
           $manifest = [ordered]@{
-            version = '3.3.0'
+            version = '3.3.1'
             source_sha = $env:GITHUB_SHA
             source_trigger = $env:GITHUB_EVENT_NAME
             source_ref = $env:GITHUB_REF
@@ -156,7 +156,7 @@ jobs:
       - name: Upload candidate binaries (not a public Release)
         uses: actions/upload-artifact@v4
         with:
-          name: yijing-workbench-3.3.0-windows-x64-unsigned-rc
-          path: ${{ runner.temp }}/yijing-rc-3.3.0/*
+          name: yijing-workbench-3.3.1-windows-x64-unsigned-rc
+          path: ${{ runner.temp }}/yijing-rc-3.3.1/*
           if-no-files-found: error
           retention-days: 14

@@ -125,7 +125,7 @@ def create_app(
 
     app = FastAPI(
         title="易经起卦工作台",
-        version="3.3.0",
+        version="3.3.1",
         description="本地起卦、卦象资料与历史记录 API",
         lifespan=lifespan,
     )
