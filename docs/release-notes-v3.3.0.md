@@ -1,6 +1,6 @@
 # 易经起卦工作台 v3.3.0 更新说明
 
-**发布候选草稿，尚未发布。** 当前源码版本为 3.3.0；正式下载入口仍为 [v3.2.2 Release](https://github.com/Qiuizi/yijing-workbench-public/releases/tag/v3.2.2)。本轮不生成安装包、Tag 或 GitHub Release。
+**历史发布准备与验证细节（非最新版发布说明）。** 维护者于 2026-10-23 明确接受未完成的实机安装/升级与打包版 GUI 风险并决定正式发布。实际公开版本请查阅 [v3.3.0 完整正式发布说明与风险披露](release-v3.3.0.md) 和 [Release](https://github.com/Qiuizi/yijing-workbench-public/releases/tag/v3.3.0)。以下沿用部分早期候选阶段的验证记录，不能据此推断缺失的验收已通过。
 
 ## 本次更新
 
@@ -23,7 +23,7 @@
 
 - Windows x64；沿用当前用户安装模式及应用标识 `cn.yijing.workbench`。
 - 需要 Microsoft Edge WebView2 Evergreen Runtime。若尚未安装，默认安装流程需要联网下载 Microsoft 官方 bootstrapper。
-- 沿用未签名安装包方案；Windows 可能显示未知发布者或 SmartScreen 提示。候选包实际签名状态、文件版本及 SHA-256 应在 Windows 构建后核对，本草稿不提供尚未生成的安装包或校验值。
+- 沿用未签名安装包方案；Windows 可能显示未知发布者或 SmartScreen 提示。本次官方发布所用的未签名安装包已于 Windows CI 构建，其 SHA-256 为 `0620A0497C76B25524275F21516F7D69A5AC2291BD362F8094F99E267693EBC8`。
 - DeepSeek 不属于安装或离线使用的必需条件。
 
 ## 现有数据与升级注意事项
@@ -32,13 +32,13 @@
 
 “旧版数据导入”仍只允许导入到空白桌面档案，不是向已有档案合并数据的功能。DPAPI 保护的密钥与 Windows 用户相关，跨用户复制数据不能视为密钥可用的保证。沿用数据目录及通过合成数据测试不等于已完成正式包升级验收。
 
-Windows 3.3.0 自动候选流程见 [独立 RC 验收记录](windows-rc-3.3.0-acceptance.md)：构建工作流可以在隔离 GitHub Windows runner 生成安装包及哈希，不会自动公开发布；仍需要单独进行 Windows 真实账户升级、GUI、DPAPI 等人工验收。学习导读的内容批准标准另见 [审核门槛](learning-approval-policy.md)。
+Windows 3.3.0 自动候选流程见 [独立 RC 验收记录](windows-rc-3.3.0-acceptance.md)：Windows RC 工作流本身只生成有时效的 Artifact、不自动发布；正式发布由独立的 [风险接受发布工作流](../.github/workflows/publish-v3.3.0.yml) 完成。Windows 真实账户升级、打包版 GUI、DPAPI 跨用户隔离仍未验证，见 [验收记录 E 节](windows-rc-3.3.0-acceptance.md)。学习导读的内容批准标准另见 [审核门槛](learning-approval-policy.md)。
 
 ## 候选源码与构建证据的区分
 
 2026-10-20 此前已有多轮 GitHub Actions Windows 2022 运行完成 Python/前端回归、打包和 SHA-256 候选产物上传；对应已留存记录见 [Windows RC 验收表](windows-rc-3.3.0-acceptance.md)。其 `source_sha` 多为 PR 临时合并提交，不代表当前 main 的同 SHA 正式发布产物。
 
-现已加入从 `main` 的真实 `push` 提交构建新候选，以及打包后端 sidecar 的令牌鉴权、健康检查与合成历史冒烟。**新流程实际运行结果必须单独记录，不预先宣称通过**；即使自动 CI 通过，也不能取代 Windows 真实账户 GUI、WebView2、DPAPI、备份恢复和从 v3.2.2 升级的人工验收。
+已通过真实 `push(main)` 的 [CI run 39373256162](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39373256162)，并完成打包 sidecar 的鉴权、健康检查与合成历史冒烟。**不能**因此宣称完成 Windows GUI、WebView2、DPAPI 跨用户、数据备份恢复或 v3.2.2 覆盖升级的人工验收。维护者明确接受这些风险后决定正式发布。
 
 学习导读另可通过 `python scripts/prepare_learning_review.py --output review-packets` 生成 64 个独立 Markdown 审核包；已有的 4 个批准条目保持可见，其余 60 条不会因生成材料自动公开。
 
@@ -57,4 +57,4 @@ Cloud Python 环境满足 `requirements.txt` 的版本范围，但 FastAPI 等 9
 - 使用合成历史验证升级前后记录数、详情、原文与排盘、AI 会话、偏好设置和重启持久化；检查同用户 DPAPI 凭据兼容路径，不上传真实密钥或私人数据库。
 - 在最终候选包中复核起卦、解卦、六爻排盘、“关于”页、历史快速搜索/筛选/翻页/删除/打开返回，以及 Markdown 取消、覆盖确认、中文路径、真实落盘与写入失败提示。
 
-v3.2.2 的历史安装/升级验收结果不代表 v3.3.0 最终安装或完整回归已经通过。最终验收后再由维护者决定合并和发布。
+v3.2.2 的历史安装/升级验收结果不代表 v3.3.0 最终安装或完整回归已经通过。原先要求完成全部实机验收后才发布；但 2026-10-23 维护者明确接受剩余风险并决定正式发布，相关项目依然 NOT_TESTED，详见正式发布说明。
