@@ -1,10 +1,10 @@
 # 易经起卦工作台
 
-**v3.2.2 已正式发布**：[公开源码仓库](https://github.com/Qiuizi/yijing-workbench-public) · [正式 Release](https://github.com/Qiuizi/yijing-workbench-public/releases/tag/v3.2.2) · [Windows x64 安装包下载](https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.2.2/yijing-workbench-3.2.2-x64-setup.exe)。应用包括 Vue 3 / TypeScript 前端、FastAPI 本地后端、SQLite 历史记录、Tauri Windows 桌面应用及 PyInstaller sidecar。
+**v3.3.0 正式发布（维护者明确接受未完成的实机验收风险）**：[v3.3.0 Release](https://github.com/Qiuizi/yijing-workbench-public/releases/tag/v3.3.0) · [Windows x64 安装包](https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.0/yijing-workbench-3.3.0-x64-setup.exe) · [SHA256SUMS](https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.0/SHA256SUMS.txt)。**安装包尚未实测 GUI、升级/卸载、原生 Markdown 保存与打包版重启；正式发布不等于这些检查通过。** 参见 [完整风险披露与发布说明](docs/release-v3.3.0.md)。签名前 Windows 可能显示未知发布者警告。
 
-功能包括铜钱起卦、手动起卦、卦辞爻辞阅读、六爻纳甲排盘、SQLite 历史记录、备份和可选 DeepSeek 辅助解读。DeepSeek AI 是可选联网功能，需用户自行配置并主动调用；起卦、阅读、排盘和本地历史可独立使用。数据处理范围见 [PRIVACY.md](PRIVACY.md)。
+应用基于 Vue 3 / TypeScript、FastAPI、SQLite、Tauri 2 和 PyInstaller。包含铜钱/手动起卦、传统取辞、六爻纳甲、历史记录、Markdown 导出、64 卦图鉴和可选 DeepSeek AI。现代学习导读只有 01–04 卦正式显示，05–64 卦依然为 `draft`，不会公开；审核标准见 [批准门槛](docs/learning-approval-policy.md)。
 
-当前源码正在准备 **v3.3.0 发布候选**，包含单条 Markdown 导出、历史记录服务端搜索/AI 筛选/分页、“关于”页修复，以及六十四卦学习图鉴与原文阅读。64 卦现代编辑导读均有初稿，但目前仅前 4 卦有审核批准记录并正式显示；其余 60 卦仍为 `draft`，不会在阅读页公开。内容审核标准见 [批准门槛](docs/learning-approval-policy.md)，Windows 构建与实机验收见 [3.3.0 RC 验收表](docs/windows-rc-3.3.0-acceptance.md)。更新说明与最终验收范围见 [v3.3.0 发布说明草稿](docs/release-notes-v3.3.0.md)。v3.3.0 尚未发布安装包；上方下载链接仍指向已发布的稳定版 v3.2.2，其手工安装/升级验收不代表 v3.3.0 最终验收。
+**谨慎升级：** 从 v3.2.2 到 v3.3.0 的实际覆盖安装与数据恢复尚未验证，安装前请自行备份历史数据。希望使用已完成人工升级验收的版本，可继续下载 [v3.2.2](https://github.com/Qiuizi/yijing-workbench-public/releases/tag/v3.2.2)。详见 [3.3.0 验收记录](docs/windows-rc-3.3.0-acceptance.md) 和 [隐私说明](PRIVACY.md)。
 
 ## 许可与数据来源
 
@@ -23,7 +23,13 @@
 
 ## 普通用户安装
 
-下载 [v3.2.2 Windows x64 NSIS 安装程序](https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.2.2/yijing-workbench-3.2.2-x64-setup.exe)，并核对 [SHA256SUMS.txt](https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.2.2/SHA256SUMS.txt)。文件大小为 15,428,837 bytes，SHA-256 为：
+**当前 v3.3.0 安装包：**[下载 Windows x64](https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.0/yijing-workbench-3.3.0-x64-setup.exe)，16,096,623 bytes；SHA-256：
+
+    0620A0497C76B25524275F21516F7D69A5AC2291BD362F8094F99E267693EBC8
+
+**注意：** 本次发布明确接受安装包 GUI、覆盖升级与原生导出未实测的风险。为避免覆盖重要历史，升级前先备份数据；不要将 GitHub CI 合成数据测试当作实际升级保证。
+
+**历史已验收版 v3.2.2：** 下载 [v3.2.2 Windows x64 NSIS 安装程序](https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.2.2/yijing-workbench-3.2.2-x64-setup.exe)，并核对 [SHA256SUMS.txt](https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.2.2/SHA256SUMS.txt)。文件大小为 15,428,837 bytes，SHA-256 为：
 
     B594507662D2B0263D1909972211F26B088B26EA182065C96B54B53889AB9F8F
 
@@ -51,7 +57,7 @@
     npm run typecheck
     cd ..
 
-v3.3.0 发布准备的 Linux 验证为后端 184 PASS、1 项 Windows DPAPI 测试 SKIP，前端 66 PASS，类型检查和前端生产构建 PASS。测试使用临时数据库和模拟 AI 服务，不需个人数据库或真实 API Key；不替代 Windows 构建、安装和升级验收。
+2026-10-23 本地源码验证记录为后端 pytest 188 passed、前端 Vitest 107 passed，类型检查与前端构建 PASS；Windows CI run 39373256162 还对打包后的 sidecar 进行了鉴权和目录冒烟测试。测试使用临时数据库和模拟 AI 服务，不需个人数据库或真实 API Key；不替代 Windows 构建、安装和升级验收。
 
 开发时，在仓库根目录启动后端，使用独立的临时数据库：
 
