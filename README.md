@@ -180,7 +180,7 @@ npm run build   # 产出 dist/，由 .github/workflows/pages.yml 部署
 v3.3.0（2026-10-23）：
 
 - 新增 64 卦图鉴与原文阅读。
-- 新增审核门控导读：64 卦现代导读均为 draft，仅 01–04 卦通过审核并在应用内可见，05–64 卦只显示经典原文与「导读整理中」，见 [docs/learning-approval-policy.md](docs/learning-approval-policy.md)。
+- **v3.3.0 当时的打包状态**：仅 01–04 卦可见，05–64 为 `draft`；现有 v3.3.0 Windows 安装程序仍是这份旧二进制。**2026-10-24 GitHub 源码新状态**：维护者已明确批准 05–64 卦编辑导读公开，当前源码 64/64 均为 `reviewed` 且有独立批准台账；这属于编辑发布批准，**不是** 420 个古注定位点都已完成学术核读。见 [批准决议](docs/learning-guides-review-05-64.md)、[发布门槛与例外](docs/learning-approval-policy.md)。下一次桌面重新构建与发布后用户才能看到新增导读。
 - 新增单条 Markdown 导出。
 - 历史记录新增搜索、AI 筛选与每页 20 条分页。
 - 关于页正确显示版本、MIT 许可范围与 LICENSE 正文。
