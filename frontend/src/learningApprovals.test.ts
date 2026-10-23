@@ -23,6 +23,21 @@ describe('editorial approval ledger and publication safety', () => {
     }
   })
 
+  it('makes every approved 05–64 guide actually visible through the unchanged dual gate', () => {
+    expect(approvals.approved.map((row) => row.hexagram_id)).toEqual(
+      Array.from({ length: 64 }, (_, i) => i + 1),
+    )
+    for (let id = 1; id <= 64; id++) {
+      expect(guides[id - 1]?.review_status).toBe('reviewed')
+      expect(reviewedGuide(id)?.hexagram_id).toBe(id)
+    }
+    for (const entry of approvals.approved.slice(4)) {
+      expect(entry.approval_pr).toBe('https://github.com/Qiuizi/yijing-workbench-public/pull/35')
+      expect(entry.audit_document).toBe('docs/learning-guides-review-05-64.md')
+      expect(entry.approved_on).toBe('2026-10-24')
+    }
+  })
+
   it('requires both a recorded approval and reviewed status to show editorial text', () => {
     const approvedIds = new Set(approvals.approved.map((entry) => entry.hexagram_id))
     expect(guides).toHaveLength(64)
