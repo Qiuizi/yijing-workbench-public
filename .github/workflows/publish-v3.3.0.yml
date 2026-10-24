@@ -3,18 +3,10 @@
 # NEVER silently rebuild them or treat untested installer/upgrade as PASS.
 name: Publish v3.3.0 (explicitly accepted untested risks)
 
+# Archived: v3.3.0 is already public. Do not re-run this obsolete publish job
+# for later README changes; the legacy version guard correctly rejects them.
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/publish-v3.3.0.yml'
-      - 'docs/release-v3.3.0.md'
-      - 'docs/windows-rc-3.3.0-acceptance.md'
-      - 'docs/release-notes-v3.3.0.md'
-      - 'README.md'
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/publish-v3.3.0.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -26,7 +18,8 @@ concurrency:
 
 jobs:
   verify-and-publish:
-    if: github.repository == 'Qiuizi/yijing-workbench-public'
+    # Historical release is immutable. Archived job intentionally disabled.
+    if: false
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:

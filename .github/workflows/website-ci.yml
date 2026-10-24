@@ -1,0 +1,31 @@
+name: Website PR build and internal link checks
+
+on:
+  pull_request:
+    paths:
+      - 'website/**'
+      - '.github/workflows/website-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  website-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - name: Install dependencies
+        working-directory: website
+        run: npm ci
+      - name: Typecheck and production build
+        working-directory: website
+        run: npm run build
+      - name: Check HTML/CSS internal links against GitHub Pages base
+        run: node website/scripts/check-links.mjs --dir website/dist --base /yijing-workbench-public/

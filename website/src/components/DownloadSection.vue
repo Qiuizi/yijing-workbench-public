@@ -6,7 +6,7 @@ import { GITHUB_API, LINKS, RELEASE_STATIC } from '../links'
 defineProps<{ t: Dictionary }>()
 
 interface ExeAsset { name: string; size: number; url: string }
-interface ReleaseInfo { tag: string; date: string; exe: ExeAsset; sumsUrl: string; htmlUrl: string }
+interface ReleaseInfo { tag: string; date: string; exe: ExeAsset; sumsUrl: string; provenanceUrl: string; htmlUrl: string; sha256: string }
 
 const status = ref<'loading' | 'loaded' | 'fallback'>('loading')
 const release = ref<ReleaseInfo>({
@@ -14,7 +14,9 @@ const release = ref<ReleaseInfo>({
   date: RELEASE_STATIC.date,
   exe: { name: RELEASE_STATIC.assetName, size: RELEASE_STATIC.bytes, url: LINKS.download },
   sumsUrl: LINKS.checksums,
+  provenanceUrl: LINKS.provenance,
   htmlUrl: LINKS.releaseTag,
+  sha256: RELEASE_STATIC.sha256,
 })
 
 let ctrl: AbortController | null = null
@@ -23,7 +25,7 @@ const copied = ref(false)
 
 async function copySha() {
   try {
-    await navigator.clipboard.writeText(RELEASE_STATIC.sha256)
+    await navigator.clipboard.writeText(release.value.sha256)
     copied.value = true
     setTimeout(() => { copied.value = false }, 2000)
   } catch {
@@ -37,7 +39,9 @@ function fallbackRelease(): ReleaseInfo {
     date: RELEASE_STATIC.date,
     exe: { name: RELEASE_STATIC.assetName, size: RELEASE_STATIC.bytes, url: LINKS.download },
     sumsUrl: LINKS.checksums,
+    provenanceUrl: LINKS.provenance,
     htmlUrl: LINKS.releaseTag,
+    sha256: RELEASE_STATIC.sha256,
   }
 }
 
@@ -51,18 +55,32 @@ async function load() {
     })
     if (!res.ok) throw new Error('bad status ' + res.status)
     const data = await res.json()
-    const exe = data.assets.find((a: { name: string }) => a.name.toLowerCase().endsWith('.exe'))
-    const sums = data.assets.find((a: { name: string }) => a.name === 'SHA256SUMS.txt')
+    // The EXE, version, checksums link and SHA-256 must belong to the SAME release.
+    const tag = String(data?.tag_name ?? '')
+    if (!/^v\d+\.\d+\.\d+$/.test(tag) || !Array.isArray(data.assets)) {
+      throw new Error('invalid release response')
+    }
+    const name = `yijing-workbench-${tag.slice(1)}-x64-setup.exe`
+    const exe = data.assets.find((asset: { name?: string }) => asset.name === name)
+    const sums = data.assets.find((asset: { name?: string }) => asset.name === 'SHA256SUMS.txt')
+    const provenance = data.assets.find((asset: { name?: string }) => asset.name === 'PROVENANCE.md')
+    const sha256 = String(exe?.digest ?? '').match(/^sha256:([0-9a-f]{64})$/i)?.[1]?.toUpperCase()
+    const prefix = `https://github.com/Qiuizi/yijing-workbench-public/releases/download/${tag}/`
+    if (!exe || !sums || !provenance || !sha256 ||
+        !Number.isSafeInteger(exe.size) || exe.size <= 0 ||
+        exe.browser_download_url !== prefix + name ||
+        sums.browser_download_url !== prefix + 'SHA256SUMS.txt' ||
+        provenance.browser_download_url !== prefix + 'PROVENANCE.md') {
+      throw new Error('unverified release metadata')
+    }
     release.value = {
-      tag: data.tag_name || RELEASE_STATIC.tag,
-      date: String(data.published_at || RELEASE_STATIC.date).slice(0, 10),
-      exe: {
-        name: exe?.name || RELEASE_STATIC.assetName,
-        size: exe?.size || RELEASE_STATIC.bytes,
-        url: exe?.browser_download_url || LINKS.download,
-      },
-      sumsUrl: sums?.browser_download_url || LINKS.checksums,
-      htmlUrl: data.html_url || LINKS.releaseTag,
+      tag,
+      date: String(data.published_at ?? RELEASE_STATIC.date).slice(0, 10),
+      exe: { name, size: exe.size, url: exe.browser_download_url },
+      sumsUrl: sums.browser_download_url,
+      provenanceUrl: provenance.browser_download_url,
+      htmlUrl: `https://github.com/Qiuizi/yijing-workbench-public/releases/tag/${tag}`,
+      sha256,
     }
     status.value = 'loaded'
   } catch {
@@ -80,7 +98,7 @@ const sizeMiB = computed(() => (release.value.exe.size / 1048576).toFixed(1) + '
 const sizeBytes = computed(() => release.value.exe.size.toLocaleString('en-US') + ' bytes')
 
 const shaGroups = computed(() => {
-  const s = RELEASE_STATIC.sha256
+  const s = release.value.sha256
   const parts: string[] = []
   for (let i = 0; i < s.length; i += 8) parts.push(s.slice(i, i + 8))
   return parts.join(' ')
@@ -127,11 +145,11 @@ const shaGroups = computed(() => {
         </div>
 
         <div class="dl-card__links">
-          <a class="dl-card__link" :href="LINKS.provenance">{{ t.download.provenanceBtn }}</a>
+          <a class="dl-card__link" :href="release.provenanceUrl">{{ t.download.provenanceBtn }}</a>
           <span aria-hidden="true">·</span>
           <a class="dl-card__link" :href="LINKS.releases">{{ t.download.historyLink }}</a>
           <span aria-hidden="true">·</span>
-          <a class="dl-card__link" :href="release.htmlUrl">Release v3.3.0</a>
+          <a class="dl-card__link" :href="release.htmlUrl">Release {{ release.tag }}</a>
         </div>
 
         <div class="dl-card__notes">

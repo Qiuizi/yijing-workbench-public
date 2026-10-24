@@ -1,6 +1,6 @@
 # Windows v3.3.1 构建计划与身份校验（2026-10-24）
 
-**状态：待 GitHub Actions 真正运行与记录产物后填写。此文件不表示构建、Windows GUI 或升级已经验收通过。**
+**当前状态（2026-10-24）：Windows main push 构建、独立 SHA-256 校验及 v3.3.1 正式 Release 已完成。实际 Windows 安装、覆盖升级、原生文件保存与打包 GUI 仍是 NOT_TESTED。**
 
 ## 为什么需要新版本
 
@@ -31,5 +31,23 @@
 ## 阻碍和后续
 
 - CI 不替代实机 GUI、覆盖升级、卸载、原生 Markdown 文件保存或 DPAPI 跨账户验收；未做的要标 NOT_TESTED。
-- 本 PR **不**创建 v3.3.1 Tag/正式 Release，**不**修改旧 v3.3.0 Release 资产；只有真正检查完候选文件哈希、manifest 和来源后才考虑正式发布。
+- 原构建 PR **并未**创建 Tag/Release；之后独立核验候选字节、Manifest 和来源后，才由 [PR #37](https://github.com/Qiuizi/yijing-workbench-public/pull/37) 的受控工作流正式发布 v3.3.1。旧 v3.3.0 Release 资产未修改。
 - 若 GitHub Actions 尚在运行，需明确报告状态，不能虚构成功或安装包地址。
+
+## 2026-10-24 独立验收和 Release 结果
+
+| 项目 | 核实结果 |
+| --- | --- |
+| main push 源码 SHA | `f6f102f1f87bcc6aebba0ad7eac822ad9b25e882` |
+| Windows runner | [Run 39995846568](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39995846568)，completed/success |
+| Artifact | `yijing-workbench-3.3.1-windows-x64-unsigned-rc`，ID `12520670700` |
+| 原始 NSIS EXE | `易经起卦工作台_3.3.1_x64-setup.exe`，**16,097,113 bytes** |
+| 安装包 SHA-256 | `3CAECBE2CE7684805BA5FBE2D8F60767101CCD71565A4EC37BACB2181B086B74` |
+| 独立复核 | 下载原始 GitHub Actions ZIP 后重新提取 EXE 计算，与 `manifest-rc.json` 内 SHA-256 完全相同 |
+| 原始 Manifest 来源 | version=3.3.1，source_trigger=push，refs/heads/main，sidecar_smoke=PASS，gui_upgrade_tested=false |
+| 正式发布工作流 | [Run 40058914967](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/40058914967)，completed/success |
+| 最新 Release | [v3.3.1](https://github.com/Qiuizi/yijing-workbench-public/releases/tag/v3.3.1)，正式、非预发布 |
+| 发布资产 | 5 个文件，安装程序资产 digest 与原 EXE SHA-256 一致 |
+| 尚未完成 | 实机安装/升级/卸载、打包版 GUI/重启、原生 Markdown 保存、DPAPI 跨账户 |
+
+正式 Release 的 EXE 仅将原 CI 中文文件名更改为 ASCII 的 `yijing-workbench-3.3.1-x64-setup.exe`，文件内容不变。最初的 `manifest-rc.json` 中状态 `unsigned-rc-not-manually-accepted` 按实际自动化验收范围保留，**不意味着后来补做了实机验收**。
