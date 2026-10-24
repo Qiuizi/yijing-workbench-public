@@ -5,18 +5,18 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-v3.3.0-c9a227" alt="version v3.3.0">
+  <img src="https://img.shields.io/badge/version-v3.3.1-c9a227" alt="version v3.3.1">
   <img src="https://img.shields.io/badge/license-MIT-a94736" alt="license MIT">
   <img src="https://img.shields.io/badge/platform-Windows%20x64-14201d" alt="platform Windows x64">
   <img src="https://img.shields.io/badge/website-live-0d1614" alt="website live">
-  <img src="https://img.shields.io/badge/release-2026--10--23-1d2b27" alt="release 2026-10-23">
+  <img src="https://img.shields.io/badge/release-2026--10--24-1d2b27" alt="release 2026-10-23">
 </p>
 
 <p align="center">
   <a href="https://qiuizi.github.io/yijing-workbench-public/">官网</a> ·
-  <a href="https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.0/yijing-workbench-3.3.0-x64-setup.exe">下载</a> ·
-  <a href="https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.0/SHA256SUMS.txt">校验值</a> ·
-  <a href="docs/release-notes-v3.3.0.md">文档</a>
+  <a href="https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.1/yijing-workbench-3.3.1-x64-setup.exe">下载</a> ·
+  <a href="https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.1/SHA256SUMS.txt">校验值</a> ·
+  <a href="docs/release-v3.3.1.md">文档</a>
 </p>
 
 本地优先的周易起卦工具：铜钱或手动起卦、卦辞爻辞原文阅读、六爻纳甲排盘与 64 卦图鉴全部本地完成，历史保存在本机 SQLite；可选 DeepSeek 解读，自备 Key、主动调用、可完全关闭，原文出处可溯。
@@ -48,21 +48,21 @@
 
 ## 安装 (Install)
 
-最新版本 v3.3.0（2026-10-23）。Windows x64 NSIS 安装包，当前用户安装，应用标识 `cn.yijing.workbench`：
+最新版本 v3.3.1（2026-10-24）。Windows x64 NSIS 安装包，当前用户安装，应用标识 `cn.yijing.workbench`：
 
-- 安装包：[yijing-workbench-3.3.0-x64-setup.exe](https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.0/yijing-workbench-3.3.0-x64-setup.exe)（16,096,623 bytes，15.4 MiB）
-- 校验文件：[SHA256SUMS.txt](https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.0/SHA256SUMS.txt)
+- 安装包：[yijing-workbench-3.3.1-x64-setup.exe](https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.1/yijing-workbench-3.3.1-x64-setup.exe)（16,097,113 bytes，约 15.4 MiB）
+- 校验文件：[SHA256SUMS.txt](https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.1/SHA256SUMS.txt)
 
 下载后校验 SHA-256：
 
 ```powershell
-Get-FileHash .\yijing-workbench-3.3.0-x64-setup.exe -Algorithm SHA256
+Get-FileHash .\yijing-workbench-3.3.1-x64-setup.exe -Algorithm SHA256
 ```
 
 期望值：
 
 ```text
-0620A0497C76B25524275F21516F7D69A5AC2291BD362F8094F99E267693EBC8
+3CAECBE2CE7684805BA5FBE2D8F60767101CCD71565A4EC37BACB2181B086B74
 ```
 
 前置条件：
@@ -74,25 +74,14 @@ Get-FileHash .\yijing-workbench-3.3.0-x64-setup.exe -Algorithm SHA256
 
 ## 当前版本状态与风险 (Status & Risks)
 
-**v3.3.0 已发布。** 打包源码提交为 `e5f613c5456cbd1dbb428c73bfb5234747133fb9`；Release Tag v3.3.0 仅额外包含发布文档与发布工作流，与二进制源码 SHA 不同。
+**v3.3.1 已正式发布。** Windows x64 安装包来自 [main push 构建 Run 39995846568](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39995846568)，二进制源码 `f6f102f1f87bcc6aebba0ad7eac822ad9b25e882`；Release Tag 是之后仅增补发布文档/工作流的提交，两者区别已写入构建来源记录。
 
-已验证：
+- **导读已获编辑发布批准**：64/64 个 `reviewed`、64/64 条独立批准台账，导读包含 384 条逐爻说明；批准是公开许可，不代表王弼、孔颖达、朱熹古注及影印版本的逐处校勘已全部完成。见 [批准决议](docs/learning-guides-review-05-64.md) 与 [Issue #28](https://github.com/Qiuizi/yijing-workbench-public/issues/28)。
+- **自动化 PASS**：Windows 后端 pytest、前端 Vitest、类型检查、签名的 VC143 运行库核验、PyInstaller sidecar 与 Tauri NSIS 构建；打包侧车在**合成数据**环境下的令牌鉴权、64 卦目录和空白历史冒烟测试。安装包的独立 SHA-256 与 CI 原始 Manifest 和 GitHub 发布资产摘要一致。
+- **NOT_TESTED（仍有风险）**：v3.3.1 实机安装/覆盖升级/卸载恢复、打包版 GUI/关于页与重启、原生 Markdown 文件落盘、DPAPI 跨 Windows 用户解密、使用真实密钥联网。
+- **安装前**：关闭旧版，先备份历史数据库、设置和重要导出。安装包尚未签名，可能触发未知发布者与 Windows SmartScreen；运行需 WebView2 Evergreen Runtime。
 
-- Windows CI（[Run 39373256162](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39373256162)，push(main) 构建）：Windows 后端、前端、类型检查、VC143 运行库签名校验、PyInstaller sidecar、Tauri NSIS 打包均 PASS；打包后 sidecar 令牌鉴权/健康检查/64 卦目录/空白历史 smoke PASS。
-- 本地源码回归：pytest 188 passed、Vitest 107 passed、TypeScript 与 Vite build 通过。
-- 2026-10-23 轻量验收：与该源码一致的后端合成数据 21/21 PASS、DPAPI 合成密钥 5/5 PASS、源码 Vite GUI 功能测试 PASS；用户原有数据归位后逐文件哈希 0 差异。
-
-未测试（未测试不等于通过）：
-
-- 安装包本体的真实 Windows GUI 启动。
-- 全新安装、从 v3.2.2 覆盖升级、卸载回滚的实机验收。
-- 打包版的关于页、原生 Markdown 保存与重启持久化。
-
-`manifest-rc.json` 中 `status=unsigned-rc-not-manually-accepted`、`gui_upgrade_tested=false` 原样保留；维护者是在上述安装包本体实机验收未完成的情况下明确接受风险后发布。安装包未签名，Windows 可能提示未知发布者或 SmartScreen；缺少 WebView2 Evergreen Runtime 的机器可能需要联网安装官方运行库。
-
-需要更保守的选择时，可继续使用 [v3.2.2](https://github.com/Qiuizi/yijing-workbench-public/releases/tag/v3.2.2)。
-
-完整验收与 NOT_TESTED 明细见 [docs/windows-rc-3.3.0-acceptance.md](docs/windows-rc-3.3.0-acceptance.md)。
+详见 [v3.3.1 发布说明](docs/release-v3.3.1.md) 与 [v3.3.1 构建记录](docs/windows-rc-3.3.1-build.md)。旧版 [v3.3.0](https://github.com/Qiuizi/yijing-workbench-public/releases/tag/v3.3.0) 仍可下载，原文件保持不变。
 
 ## 技术架构 (Architecture)
 
@@ -162,7 +151,7 @@ npm run dev     # 本地预览
 npm run build   # 产出 dist/，由 .github/workflows/pages.yml 部署
 ```
 
-测试数字出处：pytest 188 passed、Vitest 107 passed、TypeScript 与 Vite build 通过，来自与 v3.3.0 打包源码一致的本地源码回归；Windows 打包与 sidecar smoke 来自 [Run 39373256162](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39373256162)。
+当前正式 v3.3.1 的 Windows 打包及各项回归以 [Run 39995846568](https://github.com/Qiuizi/yijing-workbench-public/actions/runs/39995846568) 为准；v3.3.0 的历史测试记录仍在原发布说明中。
 
 ## 隐私与数据处理 (Privacy)
 
@@ -177,10 +166,16 @@ npm run build   # 产出 dist/，由 .github/workflows/pages.yml 部署
 
 ## 更新记录 (Changelog)
 
+v3.3.1（2026-10-24）：
+
+- 64 卦现代导读和 384 条逐爻说明已获维护者编辑批准并由新 Windows 安装包提供；完整古籍校勘仍有待办。
+- 修正《小畜》《泰》《大过》的注释归属问题，并修改 25 条重复模板式逐爻说明。
+- [正式 Release](https://github.com/Qiuizi/yijing-workbench-public/releases/tag/v3.3.1) · [发布说明](docs/release-v3.3.1.md)。
+
 v3.3.0（2026-10-23）：
 
 - 新增 64 卦图鉴与原文阅读。
-- **v3.3.0 当时的打包状态**：仅 01–04 卦可见，05–64 为 `draft`；现有 v3.3.0 Windows 安装程序仍是这份旧二进制。**2026-10-24 GitHub 源码新状态**：维护者已明确批准 05–64 卦编辑导读公开，当前源码 64/64 均为 `reviewed` 且有独立批准台账；这属于编辑发布批准，**不是** 420 个古注定位点都已完成学术核读。见 [批准决议](docs/learning-guides-review-05-64.md)、[发布门槛与例外](docs/learning-approval-policy.md)。下一次桌面重新构建与发布后用户才能看到新增导读。
+- v3.3.0 原安装包只有 01–04 卦现代导读可见，05–64 当时仍为草稿。维护者之后批准了全量编辑公开，并已在 v3.3.1 重新打包发行。
 - 新增单条 Markdown 导出。
 - 历史记录新增搜索、AI 筛选与每页 20 条分页。
 - 关于页正确显示版本、MIT 许可范围与 LICENSE 正文。
@@ -196,4 +191,4 @@ v3.2.2：上一稳定版本，见 [v3.2.2 Release](https://github.com/Qiuizi/yij
 
 ---
 
-v3.3.0 · 作者 Qiuizi · 版权 © 2026 Qiuizi · [MIT License](LICENSE)
+v3.3.1 · 作者 Qiuizi · 版权 © 2026 Qiuizi · [MIT License](LICENSE)
