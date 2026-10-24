@@ -26,9 +26,9 @@ export const zh = {
     slogan: '以古法起卦，以原文为归。',
     sub:
       '一款本地优先的 Windows 桌面应用。铜钱起卦、六爻纳甲与六十四卦原文阅读皆在本机完成；卦爻辞转录自维基文库《周易》，逐字可溯。',
-    ctaPrimary: '下载 v3.3.0',
+    ctaPrimary: '下载 v3.3.1',
     ctaSecondary: '查看 GitHub',
-    badgeVersion: 'v3.3.0',
+    badgeVersion: 'v3.3.1',
     badgePlatform: 'Windows x64',
     badgeLocal: '完全本地',
     shotLabel: '结果概览',
@@ -79,7 +79,7 @@ export const zh = {
     sourceLabel: '来源：',
     sourceText: '维基文库《周易》（固定修订版）',
     statusLabel: '导读状态：',
-    statusText: '审核通过仅 01–04 卦，其余为草稿，应用内不公开。',
+    statusText: '现代导读 64/64 均已获维护者批准公开，完整古籍注疏校勘仍在进行。',
     selectHint: '点击或按回车选择一卦，方向键移动焦点。',
     noResult: '未找到匹配的卦。',
     regionLabel: '当前卦象',
@@ -106,7 +106,7 @@ export const zh = {
       '当前安装包未签名，Windows 可能提示「未知发布者」或触发 SmartScreen。请核对下方 SHA-256 后再运行。',
     webviewTitle: 'WebView2 运行时',
     webviewNote: '需要 Microsoft Edge WebView2 Evergreen Runtime；多数 Windows 10 / 11 已预装。',
-    installNote: 'NSIS 安装器，默认仅当前用户安装。',
+    installNote: 'NSIS 安装器，仅当前用户安装。真实安装、覆盖升级和原生文件保存尚未实机验收，升级前请备份数据。',
   },
   openSource: {
     overline: '05 — 开源 · OPEN SOURCE',
@@ -122,7 +122,7 @@ export const zh = {
   },
   footer: {
     tagline: '以古法起卦，以原文为归。',
-    version: 'v3.3.0',
+    version: 'v3.3.1',
     author: 'Qiuizi',
     copyright: '© 2026 Qiuizi',
     links: { repo: '仓库', release: 'Release', license: '许可', privacy: '隐私', source: '古籍来源' },

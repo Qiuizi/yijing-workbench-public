@@ -29,9 +29,9 @@ export const en: Dictionary = {
     slogan: 'Cast by the old method, read from the original text.',
     sub:
       'A local-first Windows desktop app. Coin casting, najia, and the full 64-hexagram source text all run on-device; judgments and line texts are transcribed from the Wikisource Yijing, word for word.',
-    ctaPrimary: 'Download v3.3.0',
+    ctaPrimary: 'Download v3.3.1',
     ctaSecondary: 'View on GitHub',
-    badgeVersion: 'v3.3.0',
+    badgeVersion: 'v3.3.1',
     badgePlatform: 'Windows x64',
     badgeLocal: 'Fully local',
     shotLabel: 'Result overview',
@@ -82,7 +82,7 @@ export const en: Dictionary = {
     sourceLabel: 'Source: ',
     sourceText: 'Wikisource Yijing (pinned revision)',
     statusLabel: 'Reading guides: ',
-    statusText: 'Only 01–04 are approved; the rest are drafts and are not published in the app.',
+    statusText: 'All 64 modern guides are approved for editorial publication; full classical commentary collation is ongoing.',
     selectHint: 'Click or press Enter to select; arrow keys move focus.',
     noResult: 'No matching hexagram.',
     regionLabel: 'Selected hexagram',
@@ -109,7 +109,7 @@ export const en: Dictionary = {
       'The installer is unsigned, so Windows may show an unknown-publisher prompt or SmartScreen. Verify the SHA-256 below before running.',
     webviewTitle: 'WebView2 runtime',
     webviewNote: 'Requires the Microsoft Edge WebView2 Evergreen Runtime; most Windows 10/11 already have it.',
-    installNote: 'NSIS installer, installs for the current user only.',
+    installNote: 'Current-user NSIS installer. Real installation, in-place upgrade and native file saving remain untested. Back up data before upgrading.',
   },
   openSource: {
     overline: '05 — Open Source · 开源',
@@ -125,7 +125,7 @@ export const en: Dictionary = {
   },
   footer: {
     tagline: 'Cast by the old method, read from the original text.',
-    version: 'v3.3.0',
+    version: 'v3.3.1',
     author: 'Qiuizi',
     copyright: '© 2026 Qiuizi',
     links: { repo: 'Repository', release: 'Release', license: 'License', privacy: 'Privacy', source: 'Classical source' },
