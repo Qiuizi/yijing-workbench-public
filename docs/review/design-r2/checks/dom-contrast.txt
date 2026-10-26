@@ -1,22 +1,24 @@
 
-=== site:home:light === 0 处低于阈值
+=== site:home:light === 扫描 272 个文字节点 · 违规 0 · 未评估 0
 
-=== site:home:dark === 0 处低于阈值
+=== site:home:dark === 扫描 272 个文字节点 · 违规 0 · 未评估 0
 
-=== app:home:light === 0 处低于阈值
+=== app:home:light === 扫描 22 个文字节点 · 违规 0 · 未评估 0
 
-=== app:home:dark === 0 处低于阈值
+=== app:home:dark === 扫描 22 个文字节点 · 违规 0 · 未评估 0
 
-=== app:history:dark === 0 处低于阈值
+=== app:history:dark === 扫描 51 个文字节点 · 违规 0 · 未评估 0
 
-=== app:history:light === 0 处低于阈值
+=== app:history:light === 扫描 51 个文字节点 · 违规 0 · 未评估 0
 
-=== app:settings:dark === 0 处低于阈值
+=== app:settings:dark === 扫描 113 个文字节点 · 违规 0 · 未评估 0
 
-=== app:settings:light === 0 处低于阈值
+=== app:settings:light === 扫描 113 个文字节点 · 违规 0 · 未评估 0
 
-=== app:learning:dark === 0 处低于阈值
+=== app:learning:dark === 扫描 154 个文字节点 · 违规 0 · 未评估 0
 
-=== app:learning:light === 0 处低于阈值
+=== app:learning:light === 扫描 154 个文字节点 · 违规 0 · 未评估 0
 
-总计 0 处
+总计：10 页 · 违规 0 · 未评估 0（AA：正文 4.5 / 大字 3.0）
+
+PASS exit=0

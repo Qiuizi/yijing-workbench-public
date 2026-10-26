@@ -120,7 +120,6 @@ const icons: Record<string, string> = {
   letter-spacing: .12em;
   font-variant-numeric: tabular-nums;
   color: var(--text-3);
-  opacity: .7;
 }
 .feature h3 {
   font-size: var(--t-h3);

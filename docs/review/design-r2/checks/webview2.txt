@@ -1,0 +1,16 @@
+PASS  运行在真实 WebView2（UA 含 Edg/）  — Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) C
+PASS  应用已挂载（非白屏）  — viewport=1320x880 dpr=2
+PASS  首启为浅色（无存储偏好）  — theme=light stored=null
+PASS  点击顶栏按钮切到夜间  — {"theme":"dark","darkClass":true,"stored":"dark","bodyBg":"rgb(18, 26, 22)","sidebarBg":"rgb(27, 38, 32)","fontBase":"13.5px"}
+PASS  主题写入 localStorage  — dark
+PASS  实机起卦并渲染结果页  — {"tabs":4,"heading":"WebView2 实机验收：夜间模式"}
+PASS  实机排盘表格生成 6 爻  — {"rows":6,"bg":"rgb(27, 38, 32)"}
+PASS  实机 message-box 打开且为暗色表面  — {"present":true,"bg":"rgb(23, 33, 28)","lum":0.014,"titleContrast":12.53,"teleported":true}
+PASS  实机 message-box 标题对比 ≥ 4.5  — 12.53
+
+9/9 通过（phase=inspect）
+PASS  重启后仍为夜间（持久化）  — theme=dark stored=dark
+PASS  重启后仍是真实 WebView2  — Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+
+2/2 通过（phase=persistence）
+EXIT=0

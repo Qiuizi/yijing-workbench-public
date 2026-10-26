@@ -51,7 +51,6 @@ function closeDrawer() {
           <strong>{{ t.hero.title }}</strong>
           <small>
             <span class="brand__latin">YIJING WORKBENCH</span>
-            <span class="brand__dot" aria-hidden="true">·</span>
             <span class="brand__ver">{{ t.hero.badgeVersion }}</span>
           </small>
         </span>
@@ -141,8 +140,13 @@ function closeDrawer() {
   letter-spacing: .13em;
   color: var(--text-3);
 }
-.brand__ver { font-variant-numeric: tabular-nums; letter-spacing: .06em; color: var(--bronze); }
-.brand__dot { opacity: .5; }
+.brand__ver {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .06em;
+  color: var(--bronze);
+  padding-left: 7px;
+  border-left: 1px solid var(--line-strong);
+}
 
 .nav-desktop { display: flex; align-items: center; gap: 4px; margin-left: auto; }
 .nav-desktop a {
@@ -246,6 +250,6 @@ function closeDrawer() {
 }
 
 @media (max-width: 420px) {
-  .brand__latin, .brand__dot { display: none; }
+  .brand__latin { display: none; }
 }
 </style>

@@ -1,0 +1,40 @@
+{
+  "pages": [
+    {
+      "name": "app:home",
+      "nodes": 22,
+      "shrunk": 10,
+      "minLight": 10.5,
+      "minDark": 10.5
+    },
+    {
+      "name": "app:history",
+      "nodes": 51,
+      "shrunk": 21,
+      "minLight": 10,
+      "minDark": 10
+    },
+    {
+      "name": "app:settings",
+      "nodes": 113,
+      "shrunk": 19,
+      "minLight": 10,
+      "minDark": 10
+    },
+    {
+      "name": "app:learning",
+      "nodes": 154,
+      "shrunk": 68,
+      "minLight": 11,
+      "minDark": 11
+    },
+    {
+      "name": "site:home",
+      "nodes": 272,
+      "shrunk": 145,
+      "minLight": 9.5,
+      "minDark": 9.5
+    }
+  ],
+  "problems": []
+}

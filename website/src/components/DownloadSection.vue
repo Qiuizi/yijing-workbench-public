@@ -165,9 +165,7 @@ const shaGroups = computed(() => {
 
         <div class="dl-slab__links">
           <a class="dl-link" :href="release.provenanceUrl">{{ t.download.provenanceBtn }}</a>
-          <span class="dl-sep" aria-hidden="true">·</span>
           <a class="dl-link" :href="LINKS.releases">{{ t.download.historyLink }}</a>
-          <span class="dl-sep" aria-hidden="true">·</span>
           <a class="dl-link" :href="release.htmlUrl">Release {{ release.tag }}</a>
         </div>
 
@@ -213,11 +211,9 @@ const shaGroups = computed(() => {
   overflow: hidden;
   padding: clamp(20px, 2.6vw, 30px);
   border-radius: var(--radius-lg);
-  /* 底色必须落在 background-color 上：纯渐变会让「有效背景」不可测（也影响高对比模式） */
+  /* 底色只走 background-color：装饰性渐变放 ::before，
+     这样「有效背景」可被审计工具精确计算，高对比模式下也不会塌。 */
   background-color: var(--shell-bg);
-  background-image:
-    radial-gradient(90% 120% at 8% 0%, rgba(211, 181, 124, .08), transparent 58%),
-    linear-gradient(180deg, color-mix(in srgb, var(--shell-bg-2) 92%, transparent), transparent 72%);
   border: 1px solid rgba(211, 181, 124, .16);
   box-shadow:
     inset 0 1px 0 rgba(233, 228, 214, .07),
@@ -231,13 +227,16 @@ const shaGroups = computed(() => {
   border-color: rgba(211, 181, 124, .22);
 }
 
-/* 外缘一圈极淡的暖光，替代粗边框 */
+/* 暖光与内高光都是装饰层：不参与文字背景计算 */
 .dl-slab::before {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
+  background-image:
+    radial-gradient(90% 120% at 8% 0%, rgba(211, 181, 124, .08), transparent 58%),
+    linear-gradient(180deg, rgba(28, 39, 33, .55), transparent 72%);
   box-shadow: inset 0 0 0 1px rgba(233, 228, 214, .03);
 }
 
@@ -350,13 +349,12 @@ const shaGroups = computed(() => {
 .dl-slab__links {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 16px;
   align-items: center;
   padding: var(--s-4) 0;
   border-top: 1px solid var(--line);
   color: var(--text-2);
 }
-.dl-sep { opacity: .4; }
 .dl-link {
   color: var(--bronze);
   font-size: var(--t-xs);

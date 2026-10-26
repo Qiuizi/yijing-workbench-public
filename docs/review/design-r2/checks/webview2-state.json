@@ -1,0 +1,40 @@
+{
+  "env": {
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+    "dpr": 2,
+    "size": [
+      1320,
+      880
+    ],
+    "theme": "light",
+    "colorScheme": "light",
+    "bodyBg": "rgb(247, 245, 239)",
+    "stored": null,
+    "hasShell": true
+  },
+  "afterToggle": {
+    "theme": "dark",
+    "darkClass": true,
+    "stored": "dark",
+    "bodyBg": "rgb(18, 26, 22)",
+    "sidebarBg": "rgb(27, 38, 32)",
+    "fontBase": "13.5px"
+  },
+  "cast": {
+    "heading": "WebView2 实机验收：夜间模式下这一版的层级是否稳定？",
+    "tabs": 4,
+    "cardBg": "rgb(27, 38, 32)",
+    "lineColor": "rgb(216, 211, 194)"
+  },
+  "najia": {
+    "rows": 6,
+    "bg": "rgb(27, 38, 32)"
+  },
+  "confirmBox": {
+    "present": true,
+    "bg": "rgb(23, 33, 28)",
+    "lum": 0.014,
+    "titleContrast": 12.53,
+    "teleported": true
+  }
+}

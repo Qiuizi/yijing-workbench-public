@@ -221,7 +221,8 @@
   --t-body: 15px;
   --t-sm: 13.5px;
   --t-xs: 12px;
-  --t-micro: 11px;
+  /* 微字（≤12px）夜间保持原尺寸：再小就伤可读性 */
+  --t-micro: 11.5px;
   --lh-body: 1.74;
 }
 

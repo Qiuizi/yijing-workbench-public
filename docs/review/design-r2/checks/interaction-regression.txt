@@ -7,7 +7,7 @@ PASS  site: 图库方向键切换  — 05/9
 PASS  site: SHA 复制反馈  — {"copied":true,"text":"已复制"}
 PASS  site: 英文页完整  — {"lang":"en","title":"Yijing Workbench","nav":4,"theme":true}
 PASS  app: 顶栏主题按钮切换  — {"theme":"dark","darkClass":true,"stored":"dark","bg":"rgb(18, 26, 22)"}
-PASS  app: 起卦链路（问句 / 四标签 / 双卦卡）  — {"heading":"回归测试：是否应该继续打磨这一版界面？","tabs":4,"cards":2,"date":"当前结果 · 10/26 19:57"}
+PASS  app: 起卦链路（问句 / 四标签 / 双卦卡）  — {"heading":"回归测试：是否应该继续打磨这一版界面？","tabs":4,"cards":2,"date":"当前结果 · 10/26 21:17"}
 PASS  app: 六爻排盘页可打开  — {"controls":1,"generate":true,"active":"六爻排盘"}
 PASS  app: 排盘表 6 爻生成  — {"rows":6,"lastCell":"青龙"}
 PASS  app: 设置页含外观分组  — ["起卦","历法","外观","AI 辅助","关于"]

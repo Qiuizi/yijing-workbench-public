@@ -58,15 +58,22 @@ before 由 `git archive HEAD` 快照 + 复用依赖启动，同视口、同合�
 | 对比度（token） | 66 组全过 | `checks/contrast.txt` |
 | 对比度（DOM 实测） | 10 个页面/主题组合 0 处低于 AA（修复前 38 处） | `checks/dom-contrast.txt` |
 | 交互回归 | 15/15，控制台 0 错误 | `checks/interaction-regression.txt` |
-| 夜间字号 | 18 个元素均下降 | `checks/type-scale.txt` |
+| 夜间字号 | 逐元素比对，0 处不合规（首跑 54 处已修） | `checks/type-readability.txt` |
 
-三个零依赖脚本（`scripts/shoot.mjs`、`ui-regression.mjs`、`measure-type.mjs`）用 Node 22 自带 WebSocket 直连 CDP，不新增 npm 依赖、不改锁文件。
+八个零依赖脚本（`shoot` / `ui-regression` / `measure-type` / `audit-contrast` / `audit-contrast.selftest` / `ep-overlay-check` / `type-readability` / `webview2-check`）用 Node 22 自带 WebSocket 直连 CDP，不新增 npm 依赖、不改锁文件。
 
 ## 审计抓到的三个真问题（已修）
 
 1. 官网墨玉块用 `background: linear-gradient(...)` 当底色，`background-color` 是透明的 —— 视觉没问题，但有效背景不可测、高对比模式下会塌。已改 `background-color` + `background-image` 分层。
 2. 夜间历史列表问句仍是早期的 `#44453e`，对深底 **1.7:1**。已改 `var(--text-primary)`，分隔线一并 token 化。
 3. Element Plus 把 `--el-radio-button-*` 定义在 `.el-radio-button` 自身，`:root` 级改写无效，选中项白字压浅赭 **3.39:1**。已改为同层级改写，并统一禁用态文字（原本白字压浅底不可见）。
+
+## 验收收尾（第二轮把关）
+
+- **审计脚本改成真门禁**：原来的 `audit-contrast.mjs` 无论如何都 `exit(0)`。现在 0=通过 / 1=违规 / 2=执行失败 / 3=未评估，`--min` 明确为统一阈值；反向测试 5/5（合规 0、低对比 1、渐变 3、不可达 2、空页面 2）。用它跑出 8 处真违规并修掉（11px 编号 + opacity 3.29、墨玉块纯渐变底不可测、装饰「·」「/」2.0–2.5）。
+- **Element Plus 浮层实开验收 64/64**：新增 dev 自检页 + `scripts/ep-overlay-check.mjs`，dialog / drawer / message-box / select / message 在深浅两套主题下量表面色、对比度、Teleport、遮罩、主题切换、滚动锁、焦点。修掉两个真缺陷：夜间按钮焦点环只有约 2.2:1（EP 用 primary-light-5，改 `--accent` 后 6.20）；单选选中项仍是 EP 的白字（3.39 → 5.75）。
+- **夜间字号按可读性重做**：新增 `scripts/type-readability.mjs`，54 处不合规 → 0（官网微字 11.5→11、`.field-hint` 掉到 11.5px、settings 辅助说明 12→11.5 全部回收）。夜间仍保留「标题 −2px / 正文 −1px」。
+- **真实 WebView2 实机**：隔离 identifier 重建 exe，`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port` 起 CDP，Edg/155、dpr=2、1320×880 CSS（截图 2640×1760）下通过 9/9 + 重启持久化 2/2；真实用户库 sha256 未变。
 
 ## 未完成与风险
 

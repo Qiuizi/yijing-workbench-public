@@ -15,7 +15,9 @@ PR：[#40](https://github.com/Qiuizi/yijing-workbench-public/pull/40) · 分支 
 | 硬分隔 | 官网去掉 5 条整幅 border，改「上一区块色调溶解 + ±3% 色阶差」；页脚由整块暗底改为墨玉封底卡 |
 | 品牌区 | 官网 / 桌面端 / 学习页统一为「六爻既济 + 朱色变爻」标记，双线边栏取篆刻意 |
 | 夜间模式 | 官网 + 桌面端均可切换、持久化、跟随系统、首屏不闪；夜间字号整体降一档（实测 −0.5 ~ −2px） |
-| 对比度 | 两端 66 组前景/背景全部达 WCAG AA（正文对 ≥7:1），见 `checks/contrast.txt` |
+| 对比度 | token 66 组 + DOM 实测 1118 个文字节点，全部达 WCAG AA（严格 4.5 亦全过） |
+| 浮层 | Element Plus 五类浮层在深浅两套主题下实开验收 64/64 |
+| 实机 | 真实 Tauri/WebView2（Edg/155，dpr=2）通过 9+2 项检查 |
 | 回归 | typecheck / build / 单测 108 项 / 链接检查 / 交互回归 15 项 全部通过；控制台 0 错误 |
 | 改动规模 | 90 个文件，+4242 / −697 行（含 37 张截图与校验记录） |
 
@@ -224,18 +226,111 @@ app : page title 32→30 (−2) · field label 16→15 (−1) · textarea 15→1
 | 对比度（DOM 实测） | `node scripts/audit-contrast.mjs` | 10 个页面/主题组合 **0 处**低于 AA（修复前 38 处） | `checks/dom-contrast.txt` |
 | 交互回归 | `node scripts/ui-regression.mjs` | 15/15 通过，控制台 0 错误 | `checks/interaction-regression.txt` |
 | 字号降档 | `node scripts/measure-type.mjs` | 两端 16 个元素均下降 | `checks/type-scale.txt` |
+| 字号可读性（本轮） | `node scripts/type-readability.mjs` | 5 页逐元素比对，0 处不合规 | `checks/type-readability.txt` |
 
-> DOM 审计的做法：遍历所有文字节点，向上逐层合成有效背景（含半透明与 `background-color`），按字号/字重选 4.5 或 3.0 阈值。它抓到了 token 校验抓不到的三类问题：官网墨玉块用纯渐变当底色（有效背景不可测，已改 `background-color`）、夜间历史列表问句仍是 `#44453e`（1.7:1）、Element Plus 的 `--el-radio-button-*` 定义在组件自身导致白色文字压浅赭（3.39:1）。修复前后记录见 `checks/dom-contrast-before.txt` / `checks/dom-contrast.txt`。
+> DOM 审计的做法：遍历所有文字节点，向上逐层合成有效背景（含半透明与 `background-color`），按字号/字重选 4.5 或 3.0 阈值。它抓到了 token 校验抓不到的三类问题：官网墨玉块用纯渐变当底色（有效背景不可测，已改 `background-color`）、夜间历史列表问句仍是 `#44453e`（1.7:1）、Element Plus 的 `--el-radio-button-*` 定义在组件自身导致白色文字压浅赭（3.39:1）。修复记录见 `checks/dom-contrast-before.txt`（旧版脚本、38 处，含误报）与 `checks/dom-contrast.txt`（本轮修复后 0 处）。
+
+> 版本说明：`dom-contrast-before.txt` 由**上一版**审计脚本生成（该版本无论结果如何都返回 0，且不区分「未评估」），只作历史对照；当前门禁语义见 12.1。
 
 交互回归覆盖：主题按钮切换并持久化、`color-scheme` 同步、图鉴 64 格选中与搜索收敛、图库 9 张点击与方向键、SHA 复制反馈、英文页文案与导航、桌面端起卦链路（问句/4 标签/双卦卡）、排盘页与 6 爻表格生成、设置页外观分组与切回浅色、两端控制台无错误。
 
-> 说明：`scripts/shoot.mjs`、`ui-regression.mjs`、`measure-type.mjs` 都是零依赖脚本（Node 22 自带 WebSocket + CDP），不新增 npm 依赖、不改锁文件。
+> 说明：`scripts/shoot.mjs`、`ui-regression.mjs`、`measure-type.mjs`、`audit-contrast.mjs`、`audit-contrast.selftest.mjs`、`ep-overlay-check.mjs`、`type-readability.mjs`、`webview2-check.mjs` 都是零依赖脚本（Node 22 自带 WebSocket + CDP），不新增 npm 依赖、不改锁文件。
 
 ---
 
-## 12. 未完成项与风险
+## 12. 验收收尾（PR #40 最终质量验收）
 
-1. **真实 Tauri 窗口 / WebView2 未在真机截图验证**。本轮改用同内核 Chromium（CDP）逐视口取证；WebView2 的字体渲染与 DPI 缩放仍是 `NOT_TESTED`。
+本轮不新增视觉设计，只做质量闭环：修审计工具、补真实缺陷、补实机验证。
+
+### 12.1 审计脚本：从「永远通过」改成真门禁
+
+原 `scripts/audit-contrast.mjs` 无论检测到什么，最后都 `process.exit(0)`，等于没有门禁。现在：
+
+| 退出码 | 含义 | 触发条件 |
+| --- | --- | --- |
+| 0 | 通过 | 全部页面完成审计，0 违规，0 未评估 |
+| 1 | 违规 | 存在低于阈值的文字节点 |
+| 2 | 执行失败 | Chrome 启动/CDP/页面加载/脚本异常，或页面没完成扫描（body 为空、0 个文字节点、主题未生效） |
+| 3 | 未评估 | 无违规，但有无法准确计算背景的文字（渐变态/图片底/找不到不透明背景）——不算通过 |
+
+其他修正：`--min` 明确为「统一阈值，覆盖 AA 的分级规则」（默认仍按 AA：正文 4.5、大字 3.0）；每页导航前先回 `about:blank`，避免 SPA 的 hash 跳转不触发 load 事件；Chrome 与 CDP 在成功/失败路径都清理，`kill` 的 ESRCH 竞态不再覆盖退出码；`--url name=url@theme` 支持任意页面审计。
+
+**反向测试**（`scripts/audit-contrast.selftest.mjs`，本地起静态服务造 5 种页面）：
+
+```
+PASS  合规页面 → 0            exit=0
+PASS  低对比度文字 → 1        exit=1
+PASS  渐变背景文字 → 3        exit=3（未评估不算通过）
+PASS  页面不可达 → 2          exit=2
+PASS  页面无内容 → 2          exit=2（不得报 0 违规）
+5/5 反向用例符合预期
+```
+
+本轮审计用它跑出 8 处真违规并修掉：`.feature__num` 11px + `opacity .7` 只有 3.29；下载区/封底用纯渐变当底色导致「有效背景」不可测（改 `background-color` + `::before` 装饰层，墨玉块回归可计算）；三处装饰性「·」「/」分隔符分别只有 2.0–2.5:1（删掉「·」，页码斜杠改 `--text-3`，品牌副题改用 1px 竖线）。修完 10 页 1118 节点 0 违规 0 未评估，`--min 4.5` 严格模式同样 0 违规。
+
+### 12.2 Element Plus 浮层：实开验收 64/64
+
+新增开发期自检页 `frontend/dev/overlay-inspect.html`（`?theme=dark`，不进生产构建）+ 自动化 `scripts/ep-overlay-check.mjs`：真实点开 dialog / drawer / message-box / select 下拉 / message，量计算样式并在两套主题下各截一张图。
+
+| 检查面 | 结果 |
+| --- | --- |
+| 表面色 | 夜间 lum 0.014 / 0.022（dialog、drawer、message-box、select popper、message 全为深墨，无白底） |
+| 文字对比 | 弹层标题 12.53、正文 7.69、主按钮 5.22、选项 4.61 — 全部 ≥ 4.5 |
+| Teleport | message-box overlay 直挂 body；select 下拉挂在 `#el-popper-container-*`（已脱离组件子树） |
+| 遮罩 | dialog `rgba(0,0,0,.5)` / 夜间 `rgba(9,15,12,.62)`，覆盖满视口 |
+| 主题切换 | 已打开的 message-box 从 `rgb(23,33,28)` → `rgb(253,251,246)`，实时跟随 |
+| 滚动锁 | drawer 关闭后 `el-popup-parent--hidden` 已移除 |
+| 状态 | 单选选中 5.75/5.22；禁用按钮 5.72/5.1；禁用选择器 5.11/5.95；复选框勾选态可见 |
+
+**发现并修掉两个真实缺陷**：
+1. **夜间焦点环几乎不可见**：EP 用 `--el-button-outline-color: primary-light-5`，夜间混成 `rgb(103,73,59)`，对深底约 **2.2:1**（低于 1.4.11 的 3:1）。改为 `--el-button-outline-color: var(--accent)` 后浅色 3.53、夜间 6.20。
+2. 单选选中项仍是 EP 的 `#fff`（上一轮只改了 `:root` 级变量，被组件自身的 `--el-radio-button-*` 覆盖），3.39:1；改为在 `.el-radio-button` 同层级改写后 5.75/5.22。
+
+真实应用内的删除确认（`ElMessageBox.confirm`）另存截图：`after/app-delete-confirm-dark.png`。
+
+### 12.3 夜间字号：按可读性重做，54 处不合规 → 0
+
+新增 `scripts/type-readability.mjs`：同一元素浅/夜两套主题逐个比对计算字号，规则是「≤12px 的微字不得再缩」「夜间阅读文字不低于 12px」「字差不超过 2px」。首跑 54 处不合规，全部是上一轮「整体降一档」的副作用：
+
+- 官网 `--t-micro` 11.5→11px（缩略图标签、眉标、下载区标签等 50 处）→ 微字保持原尺寸，只缩标题与正文；
+- 桌面端 `.field-hint` 13→11.5px（掉到 12px 以下）→ 改 12.5px；
+- 设置页辅助说明 12→11.5px、以及 `em` 相对缩放的 11.67→11.25px → 统一保住 12px 下限。
+
+结论：夜间仍是「标题 −2px、正文 −1px」，但 9–12px 的微标签、输入提示、错误与状态文字不再缩小；字差 ≤2px，无布局跳动（`checks/type-readability.txt`）。
+
+### 12.4 真实 Windows / WebView2（不再是 NOT_TESTED）
+
+用隔离 identifier（`cn.yijing.workbench.qaverify`）重建 `yijing-workbench.exe`，以 `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9223` 启动真实 WebView2，再用 CDP 附着取证（不依赖 PrintWindow，直接拿渲染器像素）：
+
+| 检查 | 结果 |
+| --- | --- |
+| 运行时 | UA 含 `Edg/155.0.4283.62`，真实 WebView2 而非浏览器模拟 |
+| 缩放 | `devicePixelRatio = 2`，CSS 视口 1320×880，截图 2640×1760 物理像素 |
+| 首启主题 | 浅色、无存储偏好 → 点顶栏按钮切夜间，`data-theme=dark` 且写入 localStorage |
+| 起卦与结果 | 实机输入问句 → 4 标签 + 双卦卡；夜间爻线与卡片层级正常 |
+| 排盘 | 实机生成 6 爻表格，表头底色 `rgb(27,38,32)` |
+| 弹窗 | 实机 message-box：表面 `rgb(23,33,28)`，标题对比 12.53，Teleport 到 body |
+| 重启持久化 | 关闭进程后重启，仍为夜间（`theme=dark stored=dark`） |
+
+数据隔离：全程只写 `%LOCALAPPDATA%\cn.yijing.workbench.qaverify`，测试后删除；真实库 `%LOCALAPPDATA%\cn.yijing.workbench\history.sqlite3` 未改动（sha256 `B0A8D304…343452`，282624 bytes）。`tauri.conf.json` 的 identifier 已还原。
+
+### 12.5 本轮回归全量结果
+
+| 项目 | 结果 | 记录 |
+| --- | --- | --- |
+| 前端 typecheck / test / build | 通过 / 108 用例 / 通过 | `checks/typecheck-frontend.txt`、`test-frontend.txt`、`build-frontend.txt` |
+| 官网 typecheck / build / 链接 | 通过 / 通过 / 6 内部链接 0 缺失 | `checks/typecheck-website.txt`、`build-website.txt`、`check-links.txt` |
+| token 对比度 | 66 组全过 | `checks/contrast.txt` |
+| DOM 对比度 | 10 页 1118 节点，0 违规 0 未评估（严格 4.5 亦 0） | `checks/dom-contrast.txt`、`dom-contrast-strict.txt` |
+| 审计反向测试 | 5/5 | `checks/audit-selftest.txt` |
+| 浮层验收 | 64/64 | `checks/ep-overlay.txt` |
+| 夜间字号 | 0 处不合规 | `checks/type-readability.txt` |
+| 交互回归 | 15/15 | `checks/interaction-regression.txt` |
+| 实机 WebView2 | 9/9 + 2/2 | `checks/webview2.txt` |
+
+## 13. 未完成项与风险
+
+1. ~~真实 Tauri 窗口 / WebView2 未在真机截图验证~~ —— 已在 12.4 补齐（Edg/155，dpr=2，9+2 项通过）。仍未覆盖：多显示器拖拽、系统缩放中途切换、WebView2 缺失时的 Bootstrapper 路径。
 2. **深色下 Element Plus 浮层只做变量桥接**（`--el-bg-color` 等），未逐组件截图核对 `el-dialog` / `el-message-box` / `el-select` 下拉；DOM 审计也只覆盖了当前渲染出的节点（抽屉与下拉未展开取样）。
 3. **桌面端仍有大量写死 px 字号**（`style.css` 273 条、`LearningPage.css` 88 条）。夜间降档只覆盖了阅读面 30 余条规则与全部 token 化文本；微标签（9–11px）有意不降。彻底方案是把组件字号全部迁到 `--text-*`，属于下一轮的结构性工作。
 4. **学习页仍有一批 9–12px 小字**（文王序、页码、脚注）。夜间未调整，仅调色；更细的可读性优化需要与 Qiuizi 确认是否允许放大版面。
@@ -243,3 +338,17 @@ app : page title 32→30 (−2) · field label 16→15 (−1) · textarea 15→1
 6. **GitHub Pages 线上未验证**：只验证了 `/yijing-workbench-public/` 基径下的生产产物，线上是否更新需合并后由 `pages.yml` 确认。
 7. **`prefers-reduced-motion` 覆盖**：两端均已把动画降到 0.01ms，但没有做「关闭墨晕」的独立开关——墨晕本身是纯渐变透明度，降级后即静态。
 8. **未做 A/B 或可用性测试**：字号、间距的取舍来自对比度与版式规则，不是用户实测数据。
+
+---
+
+## 14. v3.3.2 发布前门禁（本轮不执行）
+
+本轮不建 Tag、不覆盖 v3.3.1 安装包、不发布新安装程序。合并后的正式发布是独立操作，前置条件：
+
+1. 从**最终 main SHA** 重新构建 Windows 安装包（不得复用本轮 QA 用的 exe：它带临时 identifier `…qaverify`）。
+2. 用独立脚本核验 EXE 的 SHA-256，并与 Manifest / SHA256SUMS.txt 逐字一致。
+3. Windows 安装与升级实测：干净安装、覆盖升级（保留历史记录与设置）、卸载残留检查。
+4. 主题切换与数据保全：升级后 localStorage 外观偏好、`history.sqlite3`、DPAPI 保护的 API Key 均不受影响。
+5. 新 Release 的 EXE、校验和、PROVENANCE 三者同源且版本号一致（`tauri.conf.json` / `package.json` / `Cargo.toml` / `Cargo.lock`）。
+6. 官网 `RELEASE_STATIC` 与 GitHub Release 的 tag、文件名、字节数、SHA-256 四项对齐后再部署 Pages。
+7. 若本次合并不改版本号，则不应产生新 Release —— 发布与前一轮的 v3.3.1 资产保持互不影响。

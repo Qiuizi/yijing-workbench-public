@@ -1,0 +1,67 @@
+PASS  [light] dialog 已打开
+PASS  [light] dialog 表面色符合主题  — bg=rgb(253,251,246) lum=0.965
+PASS  [light] dialog 标题/正文对比度 ≥ 4.5  — title=14.23 body=7.23
+PASS  [light] dialog 主按钮文字 ≥ 4.5  — fg/bg=5.75 bg=rgb(160,74,56)
+PASS  [light] dialog 遮罩覆盖视口（fixed）
+PASS  [light] 遮罩存在且有颜色  — rgba(0, 0, 0, 0.5)
+PASS  [light] drawer 已打开
+PASS  [light] drawer 表面色符合主题  — bg=rgb(253,251,246) lum=0.965
+PASS  [light] drawer 标题/正文对比度 ≥ 4.5  — title=14.23 body=14.23
+PASS  [light] drawer 关闭后释放滚动锁  — (none)
+PASS  [light] message-box 已打开
+PASS  [light] message-box 表面色符合主题  — bg=rgb(253,251,246) lum=0.965
+PASS  [light] message-box 标题/正文/按钮对比度 ≥ 4.5  — title=14.23 msg=7.23 confirm=5.75 cancel=7.23
+PASS  [light] message-box Teleport 到 body
+PASS  [light] message-box 警告图标存在  — el-icon el-message-box__status el-message-box-icon--warning
+PASS  [light] 浮层跟随主题切换  — rgb(253, 251, 246) → rgb(23, 33, 28)
+PASS  [light] select 下拉已展开  — items=4
+PASS  [light] select 下拉表面色符合主题  — bg=rgb(255,254,251) lum=0.991
+PASS  [light] select 选项文字 ≥ 4.5  — contrast=5.13
+PASS  [light] select 选中项与普通项可区分  — selected=rgb(242, 238, 228) normal=rgba(0, 0, 0, 0)
+PASS  [light] select 下拉已 Teleport 出组件子树  — el-popper-container-7608
+PASS  [light] select 悬停态可区分  — rgba(0, 0, 0, 0) → rgb(242, 238, 228)
+PASS  [light] message 已弹出
+PASS  [light] message 表面色符合主题  — bg=rgb(240,249,235) lum=0.923
+PASS  [light] message 文字 ≥ 4.5  — contrast=13.63
+PASS  [light] 焦点环与页面底对比 ≥ 3  — ring=rgb(160, 74, 56) ratio=3.53
+PASS  [light] 键盘焦点可见  — active=probe-focus focus-visible=true outline=2px solid rgb(160, 74, 56)
+PASS  [light] 按钮文字对比度 ≥ 4.5  — 5.75
+PASS  [light] 单选选中态对比度 ≥ 4.5  — rgb(253, 251, 246) on rgb(160, 74, 56) = 5.75
+PASS  [light] 禁用按钮仍可读（≥ 3.0）  — 5.72
+PASS  [light] 禁用选择器占位符可读（≥ 3.0）  — 5.11
+PASS  [light] 复选框已勾选  — rgb(160, 74, 56)
+PASS  [dark] dialog 已打开
+PASS  [dark] dialog 表面色符合主题  — bg=rgb(23,33,28) lum=0.014
+PASS  [dark] dialog 标题/正文对比度 ≥ 4.5  — title=12.53 body=7.69
+PASS  [dark] dialog 主按钮文字 ≥ 4.5  — fg/bg=5.22 bg=rgb(196,120,95)
+PASS  [dark] dialog 遮罩覆盖视口（fixed）
+PASS  [dark] 遮罩存在且有颜色  — rgba(9, 15, 12, 0.62)
+PASS  [dark] drawer 已打开
+PASS  [dark] drawer 表面色符合主题  — bg=rgb(23,33,28) lum=0.014
+PASS  [dark] drawer 标题/正文对比度 ≥ 4.5  — title=12.53 body=12.53
+PASS  [dark] drawer 关闭后释放滚动锁  — (none)
+PASS  [dark] message-box 已打开
+PASS  [dark] message-box 表面色符合主题  — bg=rgb(23,33,28) lum=0.014
+PASS  [dark] message-box 标题/正文/按钮对比度 ≥ 4.5  — title=12.53 msg=7.69 confirm=5.22 cancel=7.69
+PASS  [dark] message-box Teleport 到 body
+PASS  [dark] message-box 警告图标存在  — el-icon el-message-box__status el-message-box-icon--warning
+PASS  [dark] 浮层跟随主题切换  — rgb(23, 33, 28) → rgb(253, 251, 246)
+PASS  [dark] select 下拉已展开  — items=4
+PASS  [dark] select 下拉表面色符合主题  — bg=rgb(32,44,37) lum=0.022
+PASS  [dark] select 选项文字 ≥ 4.5  — contrast=4.61
+PASS  [dark] select 选中项与普通项可区分  — selected=rgb(27, 38, 32) normal=rgba(0, 0, 0, 0)
+PASS  [dark] select 下拉已 Teleport 出组件子树  — el-popper-container-7448
+PASS  [dark] select 悬停态可区分  — rgba(0, 0, 0, 0) → rgb(27, 38, 32)
+PASS  [dark] message 已弹出
+PASS  [dark] message 表面色符合主题  — bg=rgb(32,44,37) lum=0.022
+PASS  [dark] message 文字 ≥ 4.5  — contrast=10.99
+PASS  [dark] 焦点环与页面底对比 ≥ 3  — ring=rgb(196, 120, 95) ratio=6.2
+PASS  [dark] 键盘焦点可见  — active=probe-focus focus-visible=true outline=2px solid rgb(196, 120, 95)
+PASS  [dark] 按钮文字对比度 ≥ 4.5  — 5.22
+PASS  [dark] 单选选中态对比度 ≥ 4.5  — rgb(19, 26, 22) on rgb(196, 120, 95) = 5.22
+PASS  [dark] 禁用按钮仍可读（≥ 3.0）  — 5.1
+PASS  [dark] 禁用选择器占位符可读（≥ 3.0）  — 5.95
+PASS  [dark] 复选框已勾选  — rgb(196, 120, 95)
+
+64/64 通过
+EXIT=0

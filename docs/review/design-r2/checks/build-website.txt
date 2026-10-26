@@ -7,9 +7,9 @@ transforming...
 [32m✓[39m 52 modules transformed.
 rendering chunks...
 computing gzip size...
-[2mdist/[22m[32mindex.html                [39m[1m[2m  2.12 kB[22m[1m[22m[2m │ gzip:  0.99 kB[22m
+[2mdist/[22m[32mindex.html                [39m[1m[2m  2.12 kB[22m[1m[22m[2m │ gzip:  0.98 kB[22m
 [2mdist/[22m[32men/index.html             [39m[1m[2m  2.15 kB[22m[1m[22m[2m │ gzip:  0.84 kB[22m
-[2mdist/[22m[35massets/main-BILQ65BK.css  [39m[1m[2m 39.78 kB[22m[1m[22m[2m │ gzip:  8.22 kB[22m
-[2mdist/[22m[36massets/main-CwoWFcDr.js   [39m[1m[2m123.93 kB[22m[1m[22m[2m │ gzip: 44.12 kB[22m
-[32m✓ built in 7.07s[39m
+[2mdist/[22m[35massets/main-B13WsbXR.css  [39m[1m[2m 40.06 kB[22m[1m[22m[2m │ gzip:  8.22 kB[22m
+[2mdist/[22m[36massets/main-qlWIEDdR.js   [39m[1m[2m123.72 kB[22m[1m[22m[2m │ gzip: 44.06 kB[22m
+[32m✓ built in 7.16s[39m
 EXIT=0

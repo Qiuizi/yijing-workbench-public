@@ -133,7 +133,7 @@ function onKeydown(e: KeyboardEvent) {
   color: var(--accent);
   font-variant-numeric: tabular-nums;
 }
-.gallery__main-cap-index i { font-style: normal; opacity: .45; }
+.gallery__main-cap-index i { font-style: normal; color: var(--text-3); }
 .gallery__main-cap-text { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
 .gallery__main-cap-text strong { font-size: var(--t-sm); color: var(--text-1); letter-spacing: .03em; }
 .gallery__main-cap-text span { font-size: var(--t-xs); color: var(--text-2); }

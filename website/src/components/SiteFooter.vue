@@ -58,7 +58,6 @@ defineProps<{ locale: 'zh' | 'en'; t: Dictionary }>()
   border-radius: var(--radius-lg);
   color: var(--shell-text);
   background-color: var(--shell-bg);
-  background-image: radial-gradient(80% 120% at 6% 0%, rgba(211, 181, 124, .07), transparent 55%);
   border: 1px solid rgba(211, 181, 124, .14);
   box-shadow:
     inset 0 1px 0 rgba(233, 228, 214, .06),
@@ -68,6 +67,15 @@ defineProps<{ locale: 'zh' | 'en'; t: Dictionary }>()
 :root[data-theme='dark'] .footer__slab {
   --shell-bg: var(--c-night-850);
   border-color: rgba(211, 181, 124, .2);
+}
+
+.footer__slab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: radial-gradient(80% 120% at 6% 0%, rgba(211, 181, 124, .07), transparent 55%);
 }
 
 .footer__grid {
@@ -112,6 +120,15 @@ defineProps<{ locale: 'zh' | 'en'; t: Dictionary }>()
   :root[data-theme='dark'] .footer__slab {
   --shell-bg: var(--c-night-850);
   border-color: rgba(211, 181, 124, .2);
+}
+
+.footer__slab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: radial-gradient(80% 120% at 6% 0%, rgba(211, 181, 124, .07), transparent 55%);
 }
 
 .footer__grid { grid-template-columns: 1fr; gap: var(--s-4); }
