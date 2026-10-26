@@ -1,5 +1,7 @@
 # 第二轮视觉语言与交互精修 · 交付说明
 
+PR：[#40](https://github.com/Qiuizi/yijing-workbench-public/pull/40) · 分支 `design/visual-language-r2`
+
 范围：`website/`（GitHub Pages 官网）+ `frontend/`（Tauri 桌面端）。
 未改动算法、经典原文、学习审批门控与数据库语义；未触碰 v3.3.1 Release 资产、历史安装包、Manifest、SHA256SUMS；未合并 main、未触发发布工作流。
 
