@@ -22,12 +22,14 @@ const release = ref<ReleaseInfo>({
 let ctrl: AbortController | null = null
 
 const copied = ref(false)
+let copyTimer: ReturnType<typeof setTimeout> | null = null
 
 async function copySha() {
   try {
     await navigator.clipboard.writeText(release.value.sha256)
     copied.value = true
-    setTimeout(() => { copied.value = false }, 2000)
+    if (copyTimer) clearTimeout(copyTimer)
+    copyTimer = setTimeout(() => { copied.value = false }, 2000)
   } catch {
     // silent: clipboard unavailable
   }
@@ -92,7 +94,10 @@ async function load() {
 }
 
 onMounted(load)
-onBeforeUnmount(() => ctrl?.abort())
+onBeforeUnmount(() => {
+  ctrl?.abort()
+  if (copyTimer) clearTimeout(copyTimer)
+})
 
 const sizeMiB = computed(() => (release.value.exe.size / 1048576).toFixed(1) + ' MiB')
 const sizeBytes = computed(() => release.value.exe.size.toLocaleString('en-US') + ' bytes')
@@ -106,7 +111,7 @@ const shaGroups = computed(() => {
 </script>
 
 <template>
-  <section id="download" class="section shell grain-dark">
+  <section id="download" class="section section--blend download">
     <div class="container">
       <div class="section-head">
         <span class="overline">{{ t.download.overline }}</span>
@@ -114,54 +119,66 @@ const shaGroups = computed(() => {
         <p>{{ t.download.subheading }}</p>
       </div>
 
-      <div class="dl-card">
-        <div class="dl-card__head">
-          <div>
-            <span class="dl-card__label">{{ t.download.versionLabel }}</span>
-            <span class="dl-card__tag">{{ release.tag }}</span>
+      <div class="dl-slab">
+        <div class="dl-slab__head">
+          <div class="dl-pair">
+            <span class="dl-label">{{ t.download.versionLabel }}</span>
+            <span class="dl-value num">{{ release.tag }}</span>
           </div>
-          <div>
-            <span class="dl-card__label">{{ t.download.publishedLabel }}</span>
-            <span class="dl-card__tag">{{ release.date }}</span>
+          <div class="dl-pair">
+            <span class="dl-label">{{ t.download.publishedLabel }}</span>
+            <span class="dl-value num">{{ release.date }}</span>
           </div>
-          <p v-if="status === 'loading'" class="dl-card__status" role="status">{{ t.download.loading }}</p>
-          <p v-else-if="status === 'fallback'" class="dl-card__status" role="status">{{ t.download.fallbackNote }}</p>
+          <p v-if="status === 'loading'" class="dl-status" role="status">
+            <span class="dl-status__dot" aria-hidden="true"></span>{{ t.download.loading }}
+          </p>
+          <p v-else-if="status === 'fallback'" class="dl-status" role="status">
+            <span class="dl-status__dot" aria-hidden="true"></span>{{ t.download.fallbackNote }}
+          </p>
         </div>
 
-        <div class="dl-card__asset">
-          <div class="dl-card__asset-meta">
-            <span class="dl-card__label">{{ t.download.assetLabel }}</span>
-            <strong class="dl-card__asset-name">{{ release.exe.name }}</strong>
-            <span class="dl-card__asset-size">{{ sizeMiB }} · {{ sizeBytes }}</span>
+        <div class="dl-slab__asset">
+          <div class="dl-asset-meta">
+            <span class="dl-label">{{ t.download.assetLabel }}</span>
+            <strong class="dl-asset-name">{{ release.exe.name }}</strong>
+            <span class="dl-asset-size num">{{ sizeMiB }} · {{ sizeBytes }}</span>
           </div>
           <a class="btn btn--primary" :href="release.exe.url">{{ t.download.downloadBtn }}</a>
         </div>
 
-        <div class="dl-card__sha">
-          <span class="dl-card__label">{{ t.download.shaLabel }}</span>
-          <code class="dl-card__sha-value">{{ shaGroups }}</code>
-          <button class="dl-card__copy" type="button" @click="copySha">{{ copied ? t.download.copied : t.download.copy }}</button>
-          <a class="dl-card__link" :href="release.sumsUrl">{{ t.download.checksumsBtn }}</a>
+        <div class="dl-slab__sha">
+          <span class="dl-label">{{ t.download.shaLabel }}</span>
+          <code class="dl-sha">{{ shaGroups }}</code>
+          <button
+            class="dl-copy"
+            :class="{ 'is-copied': copied }"
+            type="button"
+            :aria-label="t.download.copy"
+            @click="copySha"
+          >
+            <svg v-if="!copied" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.4"/><path d="M10.5 5.5v-1a1.4 1.4 0 0 0-1.4-1.4H3.9a1.4 1.4 0 0 0-1.4 1.4v5.2a1.4 1.4 0 0 0 1.4 1.4h1"/></svg>
+            <svg v-else viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.4 8.4 3 3 6.2-6.6"/></svg>
+            <span>{{ copied ? t.download.copied : t.download.copy }}</span>
+          </button>
+          <a class="dl-link" :href="release.sumsUrl">{{ t.download.checksumsBtn }}</a>
         </div>
 
-        <div class="dl-card__links">
-          <a class="dl-card__link" :href="release.provenanceUrl">{{ t.download.provenanceBtn }}</a>
-          <span aria-hidden="true">·</span>
-          <a class="dl-card__link" :href="LINKS.releases">{{ t.download.historyLink }}</a>
-          <span aria-hidden="true">·</span>
-          <a class="dl-card__link" :href="release.htmlUrl">Release {{ release.tag }}</a>
+        <div class="dl-slab__links">
+          <a class="dl-link" :href="release.provenanceUrl">{{ t.download.provenanceBtn }}</a>
+          <a class="dl-link" :href="LINKS.releases">{{ t.download.historyLink }}</a>
+          <a class="dl-link" :href="release.htmlUrl">Release {{ release.tag }}</a>
         </div>
 
-        <div class="dl-card__notes">
-          <div class="note">
+        <div class="dl-slab__notes">
+          <div class="dl-note">
             <strong>{{ t.download.unsignedTitle }}</strong>
             <p>{{ t.download.unsignedNote }}</p>
           </div>
-          <div class="note">
+          <div class="dl-note">
             <strong>{{ t.download.webviewTitle }}</strong>
             <p>{{ t.download.webviewNote }}</p>
           </div>
-          <div class="note">
+          <div class="dl-note">
             <strong>{{ t.download.installNote }}</strong>
           </div>
         </div>
@@ -171,63 +188,216 @@ const shaGroups = computed(() => {
 </template>
 
 <style scoped>
-.dl-card {
-  max-width: 880px;
-  border: 1px solid rgba(214, 185, 121, .4);
-  border-radius: 4px;
-  background: linear-gradient(180deg, rgba(29, 43, 39, .6), rgba(20, 32, 29, .4));
-  overflow: hidden;
+.download {
+  --tone: var(--bg);
+  --tone-prev: var(--surface-2);
 }
-.dl-card__head { display: flex; flex-wrap: wrap; gap: 32px; align-items: baseline; padding: var(--s-5) var(--s-5) var(--s-4); border-bottom: 1px solid rgba(214, 185, 121, .18); }
-.dl-card__head > div { display: flex; gap: 10px; align-items: baseline; }
-.dl-card__label { font-family: var(--font-sans); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-300); }
-.dl-card__tag { font-family: var(--font-num); font-size: 18px; color: var(--shell-text); letter-spacing: .03em; }
-.dl-card__status { margin: 0; margin-left: auto; font-size: 12.5px; color: var(--gold-300); }
 
-.dl-card__asset { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: var(--s-5); border-bottom: 1px solid rgba(214, 185, 121, .18); flex-wrap: wrap; }
-.dl-card__asset-meta { display: grid; gap: 4px; }
-.dl-card__asset-name { font-size: 15px; color: var(--shell-text); word-break: break-all; }
-.dl-card__asset-size { font-family: var(--font-sans); font-size: 12.5px; color: var(--shell-text-soft); }
+/* 全站唯一的墨玉块：把语义色在局部重挂一遍，内部组件无需知道自己在暗底上 */
+.dl-slab {
+  --text-1: var(--shell-text);
+  --text-2: var(--shell-text-soft);
+  --text-3: #98a093;
+  --line: rgba(211, 181, 124, .18);
+  --line-strong: rgba(211, 181, 124, .3);
+  --accent: #c4785f;
+  --accent-strong: #d18d75;
+  --accent-soft: rgba(196, 120, 95, .14);
+  --accent-line: rgba(196, 120, 95, .36);
+  --bronze: var(--shell-bronze);
+  --text-inverse: var(--c-night-900);
 
-.dl-card__sha { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: var(--s-4) var(--s-5); border-bottom: 1px solid rgba(214, 185, 121, .18); }
-.dl-card__sha-value {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(20px, 2.6vw, 30px);
+  border-radius: var(--radius-lg);
+  /* 底色只走 background-color：装饰性渐变放 ::before，
+     这样「有效背景」可被审计工具精确计算，高对比模式下也不会塌。 */
+  background-color: var(--shell-bg);
+  border: 1px solid rgba(211, 181, 124, .16);
+  box-shadow:
+    inset 0 1px 0 rgba(233, 228, 214, .07),
+    0 34px 70px -48px rgba(15, 23, 19, .7);
+  color: var(--text-1);
+}
+/* 夜间把它抬到页面底色之上，避免变成一块更黑的洞 */
+:root[data-theme='dark'] .dl-slab {
+  --shell-bg: var(--c-night-850);
+  --shell-bg-2: var(--c-night-800);
+  border-color: rgba(211, 181, 124, .22);
+}
+
+/* 暖光与内高光都是装饰层：不参与文字背景计算 */
+.dl-slab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image:
+    radial-gradient(90% 120% at 8% 0%, rgba(211, 181, 124, .08), transparent 58%),
+    linear-gradient(180deg, rgba(28, 39, 33, .55), transparent 72%);
+  box-shadow: inset 0 0 0 1px rgba(233, 228, 214, .03);
+}
+
+.dl-slab__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 34px;
+  align-items: baseline;
+  padding-bottom: var(--s-4);
+}
+.dl-pair { display: flex; gap: 9px; align-items: baseline; }
+.dl-label {
+  font-family: var(--font-sans);
+  font-size: var(--t-micro);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--bronze);
+}
+.dl-value {
   font-family: var(--font-num);
-  font-size: 13px;
-  color: var(--shell-text);
-  letter-spacing: .03em;
+  font-size: 17px;
+  letter-spacing: .02em;
   font-variant-numeric: tabular-nums;
-  background: rgba(13, 22, 20, .7);
-  padding: 8px 12px;
-  border-radius: 3px;
-  border: 1px solid rgba(214, 185, 121, .22);
+  color: var(--text-1);
+}
+.dl-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 0 auto;
+  font-size: var(--t-micro);
+  color: var(--text-2);
+}
+.dl-status__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--bronze);
+  animation: breathe 2.4s var(--ease-soft) infinite;
+}
+@keyframes breathe {
+  0%, 100% { opacity: .35; }
+  50% { opacity: 1; }
+}
+
+.dl-slab__asset {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: var(--s-5) 0;
+  border-top: 1px solid var(--line);
+}
+.dl-asset-meta { display: grid; gap: 5px; min-width: 0; }
+.dl-asset-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-1);
+  word-break: break-all;
+  letter-spacing: .01em;
+}
+.dl-asset-size {
+  font-family: var(--font-sans);
+  font-size: var(--t-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.dl-slab__sha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: var(--s-4) 0;
+  border-top: 1px solid var(--line);
+}
+.dl-sha {
+  font-family: 'Consolas', 'SFMono-Regular', ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: .02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+  background: rgba(9, 15, 12, .5);
+  padding: 7px 11px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--line);
   user-select: all;
   word-break: break-all;
 }
-.dl-card__copy {
-  padding: 7px 12px;
-  border: 1px solid rgba(214, 185, 121, .4);
-  border-radius: 3px;
+.dl-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 78px;
+  padding: 7px 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
   background: transparent;
-  color: var(--gold-300);
+  color: var(--bronze);
   font-family: var(--font-sans);
-  font-size: 12px;
+  font-size: var(--t-micro);
   cursor: pointer;
-  transition: background-color .18s ease, border-color .18s ease;
+  transition: background-color var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
 }
-.dl-card__copy:hover { background: rgba(214, 185, 121, .1); border-color: var(--gold-300); }
+.dl-copy:hover { background: rgba(211, 181, 124, .1); border-color: var(--bronze); }
+.dl-copy.is-copied { color: var(--c-jade-400); border-color: rgba(127, 164, 139, .5); animation: seal-pop .34s var(--ease-out); }
 
-.dl-card__links { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: var(--s-4) var(--s-5); border-bottom: 1px solid rgba(214, 185, 121, .18); color: var(--shell-text-soft); }
-.dl-card__link { color: var(--gold-300); font-size: 13px; border-bottom: 1px solid rgba(201, 162, 39, .35); transition: border-color .18s ease, color .18s ease; }
-.dl-card__link:hover { color: var(--gold-400); border-bottom-color: var(--gold-400); }
+.dl-slab__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  padding: var(--s-4) 0;
+  border-top: 1px solid var(--line);
+  color: var(--text-2);
+}
+.dl-link {
+  color: var(--bronze);
+  font-size: var(--t-xs);
+  border-bottom: 1px solid rgba(211, 181, 124, .28);
+  transition: border-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+}
+.dl-link:hover { color: var(--shell-text); border-bottom-color: var(--shell-text); }
 
-.dl-card__notes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(214, 185, 121, .14); }
-.note { padding: var(--s-4) var(--s-5); background: var(--ink-900); }
-.note strong { display: block; font-size: 13px; color: var(--gold-300); letter-spacing: .04em; margin-bottom: 6px; }
-.note p { margin: 0; font-size: 12.5px; line-height: 1.7; color: var(--shell-text-soft); }
+/* 三栏说明：用 1px 的低对比竖线咬合，而不是把每块都框起来 */
+.dl-slab__notes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 1px;
+  margin-top: var(--s-2);
+  background: var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.dl-note {
+  padding: var(--s-4) var(--s-4) var(--s-4) 0;
+  padding-inline: 0 var(--s-4);
+  background: var(--shell-bg);
+}
+.dl-note:first-child { padding-left: var(--s-4); }
+.dl-note strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--bronze);
+}
+.dl-note p {
+  margin: 0;
+  font-size: var(--t-micro);
+  line-height: 1.75;
+  color: var(--text-2);
+}
 
 @media (max-width: 760px) {
-  .dl-card__notes { grid-template-columns: 1fr; }
-  .dl-card__head { gap: 16px; }
-  .dl-card__status { margin-left: 0; flex-basis: 100%; }
+  .dl-status { margin-left: 0; flex-basis: 100%; }
+  .dl-slab__sha { gap: 8px; }
+  .dl-note, .dl-note:first-child { padding-inline: 0; }
+  .dl-note { padding-block: var(--s-3); }
 }
 </style>

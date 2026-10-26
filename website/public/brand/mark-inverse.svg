@@ -1,11 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="易经起卦工作台标记（深底）">
-  <rect width="64" height="64" rx="14" fill="#14201d"/>
-  <rect x="5" y="5" width="54" height="54" rx="12" fill="none" stroke="#C9A227" stroke-width="2.5"/>
-  <g fill="#D6B979">
-    <rect x="10" y="15" width="20" height="8" rx="4"/>
-    <rect x="34" y="15" width="20" height="8" rx="4"/>
-    <rect x="10" y="28" width="44" height="8" rx="4"/>
-    <rect x="10" y="41" width="20" height="8" rx="4"/>
-    <rect x="34" y="41" width="20" height="8" rx="4"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 40 40" role="img" aria-label="易经起卦工作台标记（深底）">
+  <rect x="0.5" y="0.5" width="39" height="39" rx="9.5" fill="#131c17"/>
+  <rect x="0.5" y="0.5" width="39" height="39" rx="9.5" fill="none" stroke="#d3b57c" stroke-opacity="0.42"/>
+  <rect x="3.8" y="3.8" width="32.4" height="32.4" rx="7" fill="none" stroke="#d3b57c" stroke-opacity="0.16"/>
+  <g fill="#d3b57c">
+      <rect x="9" y="8.85" width="9.5" height="2.8" rx="1.4" />
+      <rect x="21.5" y="8.85" width="9.5" height="2.8" rx="1.4" />
+      <rect x="9" y="12.75" width="22" height="2.8" rx="1.4" />
+      <rect x="9" y="16.65" width="9.5" height="2.8" rx="1.4" />
+      <rect x="21.5" y="16.65" width="9.5" height="2.8" rx="1.4" />
+      <rect x="9" y="20.55" width="22" height="2.8" rx="1.4" />
+      <rect x="9" y="24.45" width="9.5" height="2.8" rx="1.4" />
+      <rect x="21.5" y="24.45" width="9.5" height="2.8" rx="1.4" />
+      <rect x="9" y="28.35" width="22" height="2.8" rx="1.4" />
   </g>
+  <rect x="9" y="12.75" width="22" height="2.8" rx="1.4" fill="#c4785f"/>
 </svg>

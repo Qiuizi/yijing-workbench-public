@@ -1,0 +1,93 @@
+
+=== site:home:light === 17 处低于阈值
+   4.45 <4.5  10px  div.atlas__layout>div.atlas__grid>button.cell.is-selected>span.cell__order.num
+        「01」 fg=rgb(98, 108, 99) bg=rgb(244,229,223)
+   1.79 <4.5  11.5px  div.dl-slab>div.dl-slab__head>div.dl-pair>span.dl-label
+        「版本」 fg=rgb(211, 181, 124) bg=rgb(248,244,234)
+   1.16 <4.5  17px  div.dl-slab>div.dl-slab__head>div.dl-pair>span.dl-value.num
+        「v3.3.1」 fg=rgb(233, 228, 214) bg=rgb(248,244,234)
+   1.79 <4.5  11.5px  div.dl-slab>div.dl-slab__head>div.dl-pair>span.dl-label
+        「发布日期」 fg=rgb(211, 181, 124) bg=rgb(248,244,234)
+   1.16 <4.5  17px  div.dl-slab>div.dl-slab__head>div.dl-pair>span.dl-value.num
+        「2026-10-24」 fg=rgb(233, 228, 214) bg=rgb(248,244,234)
+   1.79 <4.5  11.5px  div.dl-slab>div.dl-slab__asset>div.dl-asset-meta>span.dl-label
+        「安装包」 fg=rgb(211, 181, 124) bg=rgb(248,244,234)
+   1.16 <4.5  15px  div.dl-slab>div.dl-slab__asset>div.dl-asset-meta>strong.dl-asset-name
+        「yijing-workbench-3.3.1-x64-setup.exe」 fg=rgb(233, 228, 214) bg=rgb(248,244,234)
+   1.76 <4.5  11.5px  div.dl-slab>div.dl-slab__asset>div.dl-asset-meta>span.dl-asset-size.num
+        「15.4 MiB · 16,097,113 bytes」 fg=rgb(182, 189, 175) bg=rgb(248,244,234)
+   1.79 <4.5  11.5px  div.container>div.dl-slab>div.dl-slab__sha>span.dl-label
+        「SHA-256」 fg=rgb(211, 181, 124) bg=rgb(248,244,234)
+   3.07 <4.5  12px  div.container>div.dl-slab>div.dl-slab__sha>code.dl-sha
+        「3CAECBE2 CE768480 5BA5FBE2 D8F60767 101CCD」 fg=rgb(233, 228, 214) bg=rgb(129,130,123)
+   1.79 <4.5  11.5px  div.dl-slab>div.dl-slab__sha>button.dl-copy>span
+        「复制」 fg=rgb(211, 181, 124) bg=rgb(248,244,234)
+   1.79 <4.5  12.5px  div.container>div.dl-slab>div.dl-slab__sha>a.dl-link
+        「SHA256SUMS.txt」 fg=rgb(211, 181, 124) bg=rgb(248,244,234)
+   1.79 <4.5  12.5px  div.container>div.dl-slab>div.dl-slab__links>a.dl-link
+        「构建记录 PROVENANCE.md」 fg=rgb(211, 181, 124) bg=rgb(248,244,234)
+   1.76 <4.5  16px  div.container>div.dl-slab>div.dl-slab__links>span.dl-sep
+        「·」 fg=rgb(182, 189, 175) bg=rgb(248,244,234)
+  … 另有 3 处
+
+=== site:home:dark === 0 处低于阈值
+
+=== app:home:light === 0 处低于阈值
+
+=== app:home:dark === 2 处低于阈值
+   4.28 <4.5  13px  aside.app-sidebar>nav.side-nav>button.side-nav__item.side-nav__item--active>span
+        「起卦」 fg=rgb(196, 120, 95) bg=rgb(32,44,37)
+   3.39 <4.5  14px  form.el-form.el-form--default>div.el-radio-group.mode-switch>label.el-radio-button.is-active>span.el-radio-button__inner
+        「铜钱起卦」 fg=rgb(255, 255, 255) bg=rgb(196,120,95)
+
+=== app:history:dark === 3 处低于阈值
+   4.28 <4.5  13px  aside.app-sidebar>nav.side-nav>button.side-nav__item.side-nav__item--active>span
+        「历史记录」 fg=rgb(196, 120, 95) bg=rgb(32,44,37)
+    1.7 <4.5  13px  div.history-page__list>article.history-page__item>button.history-page__open>strong
+        「接下来三个月，是否应该把精力集中在当前这个项目上？」 fg=rgb(68, 69, 62) bg=rgb(23,33,28)
+    1.7 <4.5  13px  div.history-page__list>article.history-page__item>button.history-page__open>strong
+        「接下来三个月，是否应该把精力集中在当前这个项目上？」 fg=rgb(68, 69, 62) bg=rgb(23,33,28)
+
+=== app:history:light === 2 处低于阈值
+   3.16 <4.5  14px  section.page-panel.panel>nav.history-pagination>button.el-button.is-disabled>span
+        「上一页」 fg=rgb(138, 144, 135) bg=rgb(253,251,246)
+   3.16 <4.5  14px  section.page-panel.panel>nav.history-pagination>button.el-button.is-disabled>span
+        「下一页」 fg=rgb(138, 144, 135) bg=rgb(253,251,246)
+
+=== app:settings:dark === 6 处低于阈值
+   4.28 <4.5  13px  aside.app-sidebar>nav.side-nav>button.side-nav__item.side-nav__item--active>span
+        「设置」 fg=rgb(196, 120, 95) bg=rgb(32,44,37)
+   3.42 <4.5  10px  main.workbench>section.page-panel.panel>div.section-heading>span.settings-state
+        「AI 已关闭」 fg=rgb(137, 127, 105) bg=rgb(242,238,228)
+   3.39 <4.5  14px  div.settings-field__row>div.el-radio-group>label.el-radio-button.is-active>span.el-radio-button__inner
+        「夜间」 fg=rgb(255, 255, 255) bg=rgb(196,120,95)
+   2.23 <4.5  12px  section.page-panel.panel>details.settings-category>div.settings-field>label
+        「默认解读体系」 fg=rgb(85, 86, 79) bg=rgb(23,33,28)
+   3.42 <4.5  10px  details.settings-category>section.settings-group>div.settings-group__heading>span.settings-state
+        「未配置」 fg=rgb(137, 127, 105) bg=rgb(242,238,228)
+   3.58 <4.5  14px  div.el-select__wrapper.is-disabled>div.el-select__selection>div.el-select__selected-item.el-select__placeholder>span
+        「先配置 API Key 并读取模型」 fg=rgb(115, 123, 115) bg=rgb(27,38,32)
+
+=== app:settings:light === 8 处低于阈值
+   3.42 <4.5  10px  main.workbench>section.page-panel.panel>div.section-heading>span.settings-state
+        「AI 已关闭」 fg=rgb(137, 127, 105) bg=rgb(242,238,228)
+   2.89 <4.5  10px  section.page-panel.panel>details.settings-category>div.settings-field>small
+        「偏好保存在本机，AI 请求仍需主动触发。」 fg=rgb(153, 149, 138) bg=rgb(253,251,246)
+   3.42 <4.5  10px  details.settings-category>section.settings-group>div.settings-group__heading>span.settings-state
+        「未配置」 fg=rgb(137, 127, 105) bg=rgb(242,238,228)
+   2.82 <4.5  14px  div.el-select__wrapper.is-disabled>div.el-select__selection>div.el-select__selected-item.el-select__placeholder>span
+        「先配置 API Key 并读取模型」 fg=rgb(138, 144, 135) bg=rgb(242,238,228)
+   3.16 <4.5  14px  div.settings-field>div.settings-field__row>button.el-button.is-disabled>span
+        「刷新模型」 fg=rgb(138, 144, 135) bg=rgb(253,251,246)
+   3.16 <4.5  14px  div.settings-field>div.settings-field__row>button.el-button.is-disabled>span
+        「连接测试」 fg=rgb(138, 144, 135) bg=rgb(253,251,246)
+   3.16 <4.5  14px  div.settings-field>div.settings-field__row>button.el-button.is-disabled>span
+        「保存模型」 fg=rgb(138, 144, 135) bg=rgb(253,251,246)
+      1 <4.5  14px  section.settings-group>div.settings-field.settings-field--toggle>button.el-button.el-button--primary>span
+        「点击启用」 fg=rgb(253, 251, 246) bg=rgb(253,251,246)
+
+=== app:learning:dark === 0 处低于阈值
+
+=== app:learning:light === 0 处低于阈值
+
+总计 38 处

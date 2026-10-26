@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Coin, EditPen, Reading } from '@element-plus/icons-vue'
+import BrandMark from './BrandMark.vue'
 defineProps<{ busy: boolean }>()
 const emit = defineEmits<{ cast: []; learn: [] }>()
 const question = defineModel<string>('question', { required: true })
@@ -18,7 +19,7 @@ const manualRows = computed(() =>
 <template>
   <section class="casting-start">
     <header class="casting-start__heading">
-      <span class="casting-mark" aria-hidden="true">☰</span>
+      <span class="casting-mark" aria-hidden="true"><BrandMark :size="46" :tile="false" /></span>
       <h1>起一卦，整理当下的思路</h1>
       <p>原文与取辞来自本地典籍，结果保存在本机。</p>
     </header>

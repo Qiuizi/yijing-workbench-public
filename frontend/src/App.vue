@@ -6,8 +6,10 @@ import {
   Compass,
   Expand,
   Fold,
+  Moon,
   Reading,
   Setting,
+  Sunny,
 } from '@element-plus/icons-vue'
 import CastingForm from './components/CastingForm.vue'
 import ResultOverview from './components/ResultOverview.vue'
@@ -25,6 +27,8 @@ import type { Divination, HistorySummary, NajiaChart } from './types'
 import { divinationMarkdown, markdownFilename } from './markdownExport'
 import { saveMarkdown } from './saveMarkdown'
 import { useHistoryList } from './historyPresentation'
+import { useAppearance } from './appearance'
+import BrandMark from './components/BrandMark.vue'
 
 const question = ref('')
 const mode = ref<'coins' | 'manual'>('coins')
@@ -57,6 +61,7 @@ const pageTitle = computed(
   () => pageItems.find((item) => item.id === activePage.value)?.label ?? '起卦',
 )
 const navCollapsed = ref(false)
+const { resolved: appearance, setMode } = useAppearance()
 const exporting = ref(false)
 // 占问可以写满 500 字，结果页标题需要可折叠，否则卦象会被长文本挤出首屏。
 const questionExpanded = ref(false)
@@ -228,7 +233,7 @@ onMounted(async () => {
           @click.prevent="selectPage('divination')"
           aria-label="易经起卦工作台首页"
         >
-          <span class="brand__seal">易</span>
+          <BrandMark :size="34" />
           <span class="brand__wordmark"
             ><strong>易经</strong><small>起卦工作台</small></span
           >
@@ -266,8 +271,20 @@ onMounted(async () => {
     <div class="app-main">
       <LearningHeader v-if="activePage === 'learning'" @navigate="selectPage" />
       <header v-else class="topbar">
-        <span class="topbar__section">{{ pageTitle }}</span>
+        <div class="topbar__lead">
+          <BrandMark class="topbar__brand" :size="22" />
+          <span class="topbar__section">{{ pageTitle }}</span>
+        </div>
         <div class="topbar__right">
+          <button
+            class="appearance-toggle"
+            type="button"
+            :aria-label="appearance === 'dark' ? '切换到日间模式' : '切换到夜间模式'"
+            :title="appearance === 'dark' ? '切换到日间模式' : '切换到夜间模式'"
+            @click="setMode(appearance === 'dark' ? 'light' : 'dark')"
+          >
+            <el-icon><component :is="appearance === 'dark' ? Sunny : Moon" /></el-icon>
+          </button>
           <el-button
             v-if="result && activePage === 'divination'"
             plain

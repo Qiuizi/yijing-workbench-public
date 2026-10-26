@@ -1,0 +1,561 @@
+{
+  "pages": [
+    {
+      "name": "site:home:light",
+      "url": "http://localhost:5191/yijing-workbench-public/",
+      "theme": "light",
+      "scanned": 276,
+      "violations": [
+        {
+          "sel": "a.brand>span.brand__word>small>span.brand__dot",
+          "text": "·",
+          "fg": "rgb(173,176,167)",
+          "bg": "rgb(248,244,234)",
+          "ratio": 2,
+          "size": 9.5,
+          "large": false,
+          "opacity": 0.5,
+          "need": 4.5
+        },
+        {
+          "sel": "figure.gallery__main>figcaption.gallery__main-cap>span.gallery__main-cap-index.num>i",
+          "text": "/",
+          "fg": "rgb(211,171,161)",
+          "bg": "rgb(253,251,246)",
+          "ratio": 2,
+          "size": 12.5,
+          "large": false,
+          "opacity": 0.45,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "01",
+          "fg": "rgb(145,151,143)",
+          "bg": "rgb(253,251,246)",
+          "ratio": 2.9,
+          "size": 11.5,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "02",
+          "fg": "rgb(145,151,143)",
+          "bg": "rgb(253,251,246)",
+          "ratio": 2.9,
+          "size": 11.5,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "03",
+          "fg": "rgb(145,151,143)",
+          "bg": "rgb(253,251,246)",
+          "ratio": 2.9,
+          "size": 11.5,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "04",
+          "fg": "rgb(145,151,143)",
+          "bg": "rgb(253,251,246)",
+          "ratio": 2.9,
+          "size": 11.5,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "05",
+          "fg": "rgb(145,151,143)",
+          "bg": "rgb(253,251,246)",
+          "ratio": 2.9,
+          "size": 11.5,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "06",
+          "fg": "rgb(145,151,143)",
+          "bg": "rgb(253,251,246)",
+          "ratio": 2.9,
+          "size": 11.5,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "07",
+          "fg": "rgb(145,151,143)",
+          "bg": "rgb(253,251,246)",
+          "ratio": 2.9,
+          "size": 11.5,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        }
+      ],
+      "unaudited": [
+        {
+          "sel": "div.dl-slab>div.dl-slab__head>div.dl-pair>span.dl-label",
+          "text": "版本",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__head>div.dl-pair>span.dl-value.num",
+          "text": "v3.3.1",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__head>div.dl-pair>span.dl-label",
+          "text": "发布日期",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__head>div.dl-pair>span.dl-value.num",
+          "text": "2026-10-24",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__head>p.dl-status",
+          "text": "未能连接 GitHub API，以下为内置发布信息。",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__asset>div.dl-asset-meta>span.dl-label",
+          "text": "安装包",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__asset>div.dl-asset-meta>strong.dl-asset-name",
+          "text": "yijing-workbench-3.3.1-x64-setup.exe",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__asset>div.dl-asset-meta>span.dl-asset-size.num",
+          "text": "15.4 MiB · 16,097,113 bytes",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__sha>span.dl-label",
+          "text": "SHA-256",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__sha>code.dl-sha",
+          "text": "3CAECBE2 CE768480 5BA5FBE2 D8F60767 101CCD",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__sha>button.dl-copy>span",
+          "text": "复制",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__sha>a.dl-link",
+          "text": "SHA256SUMS.txt",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__links>a.dl-link",
+          "text": "构建记录 PROVENANCE.md",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__links>span.dl-sep",
+          "text": "·",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__links>a.dl-link",
+          "text": "历史版本",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__links>span.dl-sep",
+          "text": "·",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__links>a.dl-link",
+          "text": "Release v3.3.1",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__grid>div.footer__brand>div>strong",
+          "text": "易经起卦工作台",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__grid>div.footer__brand>div>p",
+          "text": "以古法起卦，以原文为归。",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>nav.footer__nav>a",
+          "text": "仓库",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>nav.footer__nav>a",
+          "text": "Release",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>nav.footer__nav>a",
+          "text": "许可",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>nav.footer__nav>a",
+          "text": "隐私",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>nav.footer__nav>a",
+          "text": "古籍来源",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>div.footer__meta>span.num",
+          "text": "v3.3.1",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>div.footer__meta>span",
+          "text": "Qiuizi",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>div.footer__meta>span.num",
+          "text": "© 2026 Qiuizi",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.footer__slab>div.footer__bottom>p",
+          "text": "卦爻辞转录自维基文库《周易》；本站不提供任何现代解释。",
+          "reason": "gradient-ancestor"
+        }
+      ],
+      "meta": {
+        "state": "complete",
+        "bodyChildren": 2,
+        "title": "易经起卦工作台 · Yijing Workbench",
+        "theme": "light",
+        "url": "http://localhost:5191/yijing-workbench-public/"
+      },
+      "error": null
+    },
+    {
+      "name": "site:home:dark",
+      "url": "http://localhost:5191/yijing-workbench-public/",
+      "theme": "dark",
+      "scanned": 276,
+      "violations": [
+        {
+          "sel": "figure.gallery__main>figcaption.gallery__main-cap>span.gallery__main-cap-index.num>i",
+          "text": "/",
+          "fg": "rgb(101,72,58)",
+          "bg": "rgb(23,33,28)",
+          "ratio": 2,
+          "size": 12,
+          "large": false,
+          "opacity": 0.45,
+          "need": 4.5
+        },
+        {
+          "sel": "a.brand>span.brand__word>small>span.brand__dot",
+          "text": "·",
+          "fg": "rgb(79,88,81)",
+          "bg": "rgb(19,28,23)",
+          "ratio": 2.36,
+          "size": 9.5,
+          "large": false,
+          "opacity": 0.5,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "01",
+          "fg": "rgb(104,114,105)",
+          "bg": "rgb(23,33,28)",
+          "ratio": 3.29,
+          "size": 11,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "02",
+          "fg": "rgb(104,114,105)",
+          "bg": "rgb(23,33,28)",
+          "ratio": 3.29,
+          "size": 11,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "03",
+          "fg": "rgb(104,114,105)",
+          "bg": "rgb(23,33,28)",
+          "ratio": 3.29,
+          "size": 11,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "04",
+          "fg": "rgb(104,114,105)",
+          "bg": "rgb(23,33,28)",
+          "ratio": 3.29,
+          "size": 11,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "05",
+          "fg": "rgb(104,114,105)",
+          "bg": "rgb(23,33,28)",
+          "ratio": 3.29,
+          "size": 11,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "06",
+          "fg": "rgb(104,114,105)",
+          "bg": "rgb(23,33,28)",
+          "ratio": 3.29,
+          "size": 11,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        },
+        {
+          "sel": "div.features__grid>article.feature.reveal>div.feature__top>span.feature__num.num",
+          "text": "07",
+          "fg": "rgb(104,114,105)",
+          "bg": "rgb(23,33,28)",
+          "ratio": 3.29,
+          "size": 11,
+          "large": false,
+          "opacity": 0.7,
+          "need": 4.5
+        }
+      ],
+      "unaudited": [
+        {
+          "sel": "div.dl-slab>div.dl-slab__head>div.dl-pair>span.dl-label",
+          "text": "版本",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__head>div.dl-pair>span.dl-value.num",
+          "text": "v3.3.1",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__head>div.dl-pair>span.dl-label",
+          "text": "发布日期",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__head>div.dl-pair>span.dl-value.num",
+          "text": "2026-10-24",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__head>p.dl-status",
+          "text": "未能连接 GitHub API，以下为内置发布信息。",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__asset>div.dl-asset-meta>span.dl-label",
+          "text": "安装包",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__asset>div.dl-asset-meta>strong.dl-asset-name",
+          "text": "yijing-workbench-3.3.1-x64-setup.exe",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__asset>div.dl-asset-meta>span.dl-asset-size.num",
+          "text": "15.4 MiB · 16,097,113 bytes",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__sha>span.dl-label",
+          "text": "SHA-256",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__sha>code.dl-sha",
+          "text": "3CAECBE2 CE768480 5BA5FBE2 D8F60767 101CCD",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.dl-slab>div.dl-slab__sha>button.dl-copy>span",
+          "text": "复制",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__sha>a.dl-link",
+          "text": "SHA256SUMS.txt",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__links>a.dl-link",
+          "text": "构建记录 PROVENANCE.md",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__links>span.dl-sep",
+          "text": "·",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__links>a.dl-link",
+          "text": "历史版本",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__links>span.dl-sep",
+          "text": "·",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.dl-slab>div.dl-slab__links>a.dl-link",
+          "text": "Release v3.3.1",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__grid>div.footer__brand>div>strong",
+          "text": "易经起卦工作台",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__grid>div.footer__brand>div>p",
+          "text": "以古法起卦，以原文为归。",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>nav.footer__nav>a",
+          "text": "仓库",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>nav.footer__nav>a",
+          "text": "Release",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>nav.footer__nav>a",
+          "text": "许可",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>nav.footer__nav>a",
+          "text": "隐私",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>nav.footer__nav>a",
+          "text": "古籍来源",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>div.footer__meta>span.num",
+          "text": "v3.3.1",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>div.footer__meta>span",
+          "text": "Qiuizi",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.footer__slab>div.footer__grid>div.footer__meta>span.num",
+          "text": "© 2026 Qiuizi",
+          "reason": "gradient-ancestor"
+        },
+        {
+          "sel": "div.container>div.footer__slab>div.footer__bottom>p",
+          "text": "卦爻辞转录自维基文库《周易》；本站不提供任何现代解释。",
+          "reason": "gradient-ancestor"
+        }
+      ],
+      "meta": {
+        "state": "complete",
+        "bodyChildren": 2,
+        "title": "易经起卦工作台 · Yijing Workbench",
+        "theme": "dark",
+        "url": "http://localhost:5191/yijing-workbench-public/"
+      },
+      "error": null
+    },
+    {
+      "name": "app:home:light",
+      "url": "http://127.0.0.1:5194/",
+      "theme": "light",
+      "scanned": 22,
+      "violations": [],
+      "unaudited": [],
+      "meta": {
+        "state": "complete",
+        "bodyChildren": 2,
+        "title": "易经 · 起卦工作台",
+        "theme": "light",
+        "url": "http://127.0.0.1:5194/"
+      },
+      "error": null
+    },
+    {
+      "name": "app:home:dark",
+      "url": "http://127.0.0.1:5194/",
+      "theme": "dark",
+      "scanned": 22,
+      "violations": [],
+      "unaudited": [],
+      "meta": {
+        "state": "complete",
+        "bodyChildren": 2,
+        "title": "易经 · 起卦工作台",
+        "theme": "dark",
+        "url": "http://127.0.0.1:5194/"
+      },
+      "error": null
+    },
+    {
+      "name": "app:history:dark",
+      "url": "http://127.0.0.1:5194/#/history",
+      "error": "20000ms 内未收到 load 事件（页面可能不可达）"
+    }
+  ],
+  "opts": {
+    "min": null,
+    "timeout": 20000
+  },
+  "generatedAt": "2026-10-26T12:46:14.074Z",
+  "error": "页面审计失败 [app:history:dark]: 20000ms 内未收到 load 事件（页面可能不可达）"
+}

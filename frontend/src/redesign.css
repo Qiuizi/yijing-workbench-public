@@ -1,12 +1,7 @@
-/* Consumer reading shell: shared tokens, then scoped page layouts. */
+/* Consumer reading shell: shared tokens live in theme.css; this file only
+   declares the reading-shell layout (content column, tabs, panels). */
 :root {
-  --bg: #f6f5f1;
-  --surface: #fffefb;
-  --radius-lg: 16px;
-  --text-base: 15px;
   --el-border-radius-base: 10px;
-  /* 主内容区左右留白；顶部栏与内容列共用，保证两处对齐同一条竖线。 */
-  --shell-pad: clamp(20px, 3.3vw, 52px);
 }
 .app-shell {
   grid-template-columns: 216px minmax(0, 1fr);
@@ -77,14 +72,9 @@ h3 {
 }
 .casting-mark {
   display: inline-grid;
-  width: 54px;
-  height: 54px;
   place-items: center;
-  margin-bottom: 16px;
-  border: 1px solid #d9bdb5;
-  border-radius: 16px;
-  color: var(--accent);
-  font-size: 30px;
+  margin-bottom: 14px;
+  color: var(--text-primary);
 }
 .casting-start h1 {
   margin: 0 0 12px;
@@ -369,8 +359,10 @@ h3 {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     padding: 7px 12px max(7px, env(safe-area-inset-bottom));
-    background: #fffefbf5;
+    /* 不透明底：避免下方内容透过导航条「重影」 */
+    background: var(--surface);
     border-top: 1px solid var(--border);
+    box-shadow: 0 -6px 18px -14px rgba(34, 42, 38, .28);
   }
   .bottom-nav button {
     display: grid;
@@ -571,4 +563,171 @@ h3 {
 .result-heading__toggle:hover {
   color: var(--accent-hover);
   text-decoration: underline;
+}
+
+/* ============================================================
+   v3.4 视觉精修：品牌区、顶栏、图标基线、等宽数字、微交互
+   ============================================================ */
+
+/* ---------- 左上角品牌区：图标与文字成为一个单元 ---------- */
+.sidebar-brand-row { padding-bottom: 18px; }
+.brand { gap: 9px; align-items: center; }
+.brand-mark { margin-top: -1px; }
+.brand__wordmark { gap: 1px; line-height: 1.1; }
+.brand__wordmark strong {
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: var(--text-primary);
+}
+.brand__wordmark small {
+  color: var(--text-muted);
+  font-size: 10.5px;
+  letter-spacing: .12em;
+}
+/* 早先用「易」字方块，已被 BrandMark 取代 */
+.brand__seal { display: none; }
+
+/* ---------- 顶栏 ---------- */
+.topbar { position: relative; }
+/* 顶栏分隔改为两端渐隐的发丝，避免整条硬线 */
+.topbar::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border) 8%, var(--border) 92%, transparent);
+  pointer-events: none;
+}
+.topbar { border-bottom-color: transparent; }
+.topbar__section {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  letter-spacing: .04em;
+}
+.topbar__right { display: flex; align-items: center; gap: 10px; }
+
+.appearance-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    color var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    background-color var(--dur-1) var(--ease-out);
+}
+.appearance-toggle:hover { color: var(--accent); border-color: var(--accent-line); background: var(--accent-soft); }
+.appearance-toggle:active { transform: translateY(.5px); }
+.appearance-toggle .el-icon { font-size: 16px; }
+
+/* ---------- 侧边导航：选中态用一道细朱线咬住左边 ---------- */
+.side-nav__item { position: relative; transition: background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out); }
+.side-nav__item--active::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 50%;
+  translate: 0 -50%;
+  width: 2px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.sidebar-footnote__dot { animation: local-breathe 2.6s var(--ease-soft) infinite; }
+@keyframes local-breathe {
+  0%, 100% { opacity: .45; }
+  50% { opacity: 1; }
+}
+
+/* ---------- 图标基线：flex 行内统一下沉，图文像一个整体 ---------- */
+.side-nav__item .el-icon,
+.bottom-nav .el-icon,
+.el-button .el-icon,
+.learning-top-nav .el-icon,
+.result-tabs .el-icon,
+.history-filter .el-icon { transform: translateY(1px); }
+.bottom-nav button .el-icon { transform: none; }
+
+/* ---------- 等宽数字：时间 / 编号 / 版本 / 统计 ---------- */
+.result-toolbar span,
+.result-date,
+.history-item__date,
+.history-pagination,
+.history-page__open,
+.settings-about__facts dd,
+.process-row__position,
+.coin-results__sum,
+.hexagram-card__ordinal,
+.hexagram-card__binary,
+.najia-table,
+.najia-meta span,
+.ai-message__usage,
+.learning-index__footer,
+.learning-matrix__number,
+.learning-preview__top { font-variant-numeric: tabular-nums; }
+
+/* ---------- 微交互：短、轻、收尾干脆 ---------- */
+.cast-button,
+.quiet-button,
+.side-nav__item,
+.result-tabs button,
+.history-filter button,
+.settings-category > summary { transition-duration: var(--dur-1); transition-timing-function: var(--ease-out); }
+.cast-button:active:not(.is-loading) { transform: translateY(1px); }
+.quiet-button:active { transform: translateY(.5px); }
+.result-tabs button { transition: background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out); }
+.result-tabs button:hover:not([aria-current]) { background: var(--surface-muted); color: var(--text-primary); }
+
+/* 成功提示的「Q 弹」：一次 240ms 的轻微回弹，不拖沓 */
+.el-message { border-radius: var(--radius-sm); }
+.el-message--success { animation: toast-pop var(--dur-2) var(--ease-out); }
+@keyframes toast-pop {
+  0% { transform: translateY(-6px) scale(.985); opacity: 0; }
+  60% { transform: translateY(1px) scale(1.004); opacity: 1; }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* ---------- 输入墨晕：只在起卦输入与 AI 输入这类关键场景 ---------- */
+.casting-start .el-textarea,
+.ai-composer .el-textarea { position: relative; }
+.casting-start .el-textarea::after,
+.ai-composer .el-textarea::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 14px;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(58% 80% at 22% 50%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%);
+  transition: opacity var(--dur-3) var(--ease-out);
+}
+.casting-start .el-textarea:focus-within::after,
+.ai-composer .el-textarea:focus-within::after { opacity: 1; }
+.casting-start .el-textarea__inner,
+.ai-composer .el-textarea__inner {
+  transition: box-shadow var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out);
+}
+.casting-start .el-textarea__inner:focus,
+.ai-composer .el-textarea__inner:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* 窄屏没有侧边栏时，顶栏补上品牌标记，避免整页无标识 */
+.topbar__lead { display: flex; align-items: center; gap: 10px; min-width: 0; }
+/* 组件 scoped 样式会给 .brand-mark 加 [data-v] 变成 (0,2,0)，
+   这里用三级类名压过它，避免窄屏标记在宽屏也显示。 */
+.topbar .topbar__lead .topbar__brand { display: none; }
+@media (max-width: 760px) {
+  .topbar .topbar__lead .topbar__brand { display: block; }
+  .topbar__section { font-size: var(--text-base); }
 }
