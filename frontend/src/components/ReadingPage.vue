@@ -17,7 +17,7 @@ const movingLines = computed(() => props.divination
   <section v-if="divination" class="reading-page">
     <div class="reading-page__header">
       <span class="section-index">02</span>
-      <div><p class="overline">TRADITIONAL READING</p><h2>本次取辞与原文</h2><p>先看本次为何选取这些内容，再对照本卦、动爻与之卦原文。</p></div>
+      <div><p class="page-kicker">传统取辞</p><h2>本次取辞与原文</h2><p>先看本次为何选取这些内容，再对照本卦、动爻与之卦原文。</p></div>
     </div>
     <TraditionalReading v-if="divination.traditional_reading" :reading="divination.traditional_reading" />
     <div class="reading-page__grid">

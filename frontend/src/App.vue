@@ -58,6 +58,11 @@ const pageTitle = computed(
 )
 const navCollapsed = ref(false)
 const exporting = ref(false)
+// 占问可以写满 500 字，结果页标题需要可折叠，否则卦象会被长文本挤出首屏。
+const questionExpanded = ref(false)
+const questionIsLong = computed(
+  () => (result.value?.question.trim().length ?? 0) > 60,
+)
 
 function updateSavedChart(recordId: number, chart: NajiaChart) {
   if (result.value?.id === recordId) result.value.najia_chart = chart
@@ -106,6 +111,7 @@ async function startDivination() {
         ? await api.cast(question.value.trim())
         : await api.castManual(question.value.trim(), [...manualLines.value])
     resultTab.value = 'overview'
+    questionExpanded.value = false
     ElMessage.success('起卦完成，已保存到历史记录。')
   } catch (error) {
     ElMessage.error(
@@ -145,6 +151,7 @@ async function openRecord(id: number) {
   try {
     result.value = await api.historyItem(id)
     resultTab.value = 'overview'
+    questionExpanded.value = false
     navigate('divination')
   } catch (error) {
     ElMessage.error(
@@ -300,7 +307,23 @@ onMounted(async () => {
             </div>
             <div class="result-heading">
               <span class="page-kicker">观象 · 读辞</span>
-              <h1>{{ result.question }}</h1>
+              <h1
+                :id="'result-question'"
+                :class="{ 'result-heading__question--clamped': questionIsLong && !questionExpanded }"
+                :title="result.question"
+              >
+                {{ result.question }}
+              </h1>
+              <button
+                v-if="questionIsLong"
+                type="button"
+                class="result-heading__toggle"
+                :aria-expanded="questionExpanded ? 'true' : 'false'"
+                aria-controls="result-question"
+                @click="questionExpanded = !questionExpanded"
+              >
+                {{ questionExpanded ? '收起占问' : '展开完整占问' }}
+              </button>
             </div>
             <nav class="result-tabs" aria-label="结果功能">
               <button

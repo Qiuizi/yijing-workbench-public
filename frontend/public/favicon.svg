@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="易经起卦工作台">
+  <rect width="64" height="64" rx="14" fill="#fffefb"/>
+  <rect x="6.5" y="6.5" width="51" height="51" rx="10" fill="none" stroke="#a94736" stroke-width="2.5"/>
+  <text x="32" y="45" text-anchor="middle" font-family="KaiTi, STKaiti, 'Songti SC', SimSun, serif" font-size="34" font-weight="600" fill="#a94736">易</text>
+</svg>
