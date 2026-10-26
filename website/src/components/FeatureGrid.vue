@@ -52,9 +52,19 @@ const icons: Record<string, string> = {
 <style scoped>
 .features { background: linear-gradient(180deg, var(--ink-950), var(--ink-900)); border-top: 1px solid rgba(201,162,39,.18); border-bottom: 1px solid rgba(201,162,39,.18); }
 .features__grid {
+  /* 12 栏栅格：7 张卡片按 4 + 3 排布，第二行三张各占 4 栏正好填满，
+     不再用 auto-fill 留下空轨道造成的空洞。 */
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 16px;
+}
+.feature {
+  grid-column: span 3;
+}
+.feature:nth-child(5),
+.feature:nth-child(6),
+.feature:nth-child(7) {
+  grid-column: span 4;
 }
 .feature {
   position: relative;
@@ -77,7 +87,23 @@ const icons: Record<string, string> = {
 .feature h3 { font-size: 17px; font-weight: 600; color: var(--shell-text); letter-spacing: .04em; }
 .feature p { margin: var(--s-2) 0 0; font-size: 13.5px; line-height: 1.75; color: var(--shell-text-soft); }
 
-@media (max-width: 560px) {
-  .features__grid { grid-template-columns: 1fr; }
+@media (max-width: 1023px) {
+  .feature,
+  .feature:nth-child(5),
+  .feature:nth-child(6) {
+    grid-column: span 6;
+  }
+  /* 第七张横跨整行，避免 2 栏布局下最后一个格子空缺。 */
+  .feature:nth-child(7) {
+    grid-column: span 12;
+  }
+}
+@media (max-width: 620px) {
+  .feature,
+  .feature:nth-child(5),
+  .feature:nth-child(6),
+  .feature:nth-child(7) {
+    grid-column: span 12;
+  }
 }
 </style>

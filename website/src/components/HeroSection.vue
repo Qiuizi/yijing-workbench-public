@@ -34,14 +34,14 @@ const shot = asset('shots/workbench-result.png')
           <div class="shot__frame">
             <img
               :src="shot"
-              :alt="t.hero.shotLabel + ' · ' + t.hero.badgeVersion"
+              :alt="t.hero.shotLabel"
               width="1600"
               height="1000"
               fetchpriority="high"
             />
           </div>
           <figcaption class="shot__cap">
-            <span class="shot__cap-label">{{ t.hero.shotLabel }} · {{ t.hero.badgeVersion }}</span>
+            <span class="shot__cap-label">{{ t.hero.shotLabel }}</span>
           </figcaption>
           <img class="shot__seal" :src="asset('brand/seal.svg')" alt="" width="48" height="48" aria-hidden="true" />
         </figure>
@@ -162,8 +162,10 @@ h1 {
 }
 
 @media (max-width: 900px) {
-  .hero__grid { grid-template-columns: 1fr; }
-  .hero__figure { order: -1; }
+  .hero__grid { grid-template-columns: 1fr; gap: clamp(24px, 5vw, 40px); }
+  /* 窄屏不再把截图提到最前：标题与主按钮必须留在首屏。 */
+  .hero__figure { order: 0; }
+  .hero { padding: var(--s-7) 0 var(--s-8); }
   .shot__seal { width: 40px; height: 40px; top: -10px; right: -10px; }
 }
 </style>

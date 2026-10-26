@@ -1,4 +1,5 @@
 import type { Dictionary } from './zh'
+import { APP_VERSION } from '../links'
 
 // English dictionary — key/value shape enforced by Dictionary.
 export const en: Dictionary = {
@@ -21,6 +22,8 @@ export const en: Dictionary = {
     openMenu: 'Open navigation',
     closeMenu: 'Close navigation',
     langLabel: 'Switch to Chinese',
+    primaryLabel: 'Primary',
+    mobileLabel: 'Mobile',
   },
   hero: {
     overline: 'Local-first · Source-verifiable · Windows desktop',
@@ -29,9 +32,9 @@ export const en: Dictionary = {
     slogan: 'Cast by the old method, read from the original text.',
     sub:
       'A local-first Windows desktop app. Coin casting, najia, and the full 64-hexagram source text all run on-device; judgments and line texts are transcribed from the Wikisource Yijing, word for word.',
-    ctaPrimary: 'Download v3.3.1',
+    ctaPrimary: `Download ${APP_VERSION}`,
     ctaSecondary: 'View on GitHub',
-    badgeVersion: 'v3.3.1',
+    badgeVersion: APP_VERSION,
     badgePlatform: 'Windows x64',
     badgeLocal: 'Fully local',
     shotLabel: 'Result overview',
@@ -39,8 +42,9 @@ export const en: Dictionary = {
   gallery: {
     overline: '01 — Screens · 界面',
     title: 'Nine real screens',
-    subheading: 'Nine real v3.3.0 screens. Click a thumbnail or use the arrow keys to switch.',
+    subheading: 'Nine real screens from the running app. Click a thumbnail or use the arrow keys to switch.',
     hint: 'Click a thumbnail, or press ← / → to switch',
+    tablistLabel: 'Screenshots',
     screens: [
       { id: 'workbench-result', title: 'Result overview', caption: 'The hexagram overview shown right after casting.' },
       { id: 'casting-form', title: 'Casting form', caption: 'Coin casting and manual entry.' },
@@ -125,7 +129,7 @@ export const en: Dictionary = {
   },
   footer: {
     tagline: 'Cast by the old method, read from the original text.',
-    version: 'v3.3.1',
+    version: APP_VERSION,
     author: 'Qiuizi',
     copyright: '© 2026 Qiuizi',
     links: { repo: 'Repository', release: 'Release', license: 'License', privacy: 'Privacy', source: 'Classical source' },

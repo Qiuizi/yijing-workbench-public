@@ -1,4 +1,7 @@
 // 简体中文词典（默认语言）。en.ts 通过 Dictionary 类型与之强约束对齐。
+// 版本号只允许来自 APP_VERSION，避免各处硬编码后与真实 Release 漂移。
+import { APP_VERSION } from '../links'
+
 export const zh = {
   meta: {
     title: '易经起卦工作台 · Yijing Workbench',
@@ -18,6 +21,8 @@ export const zh = {
     openMenu: '打开导航',
     closeMenu: '关闭导航',
     langLabel: '切换到英文',
+    primaryLabel: '主导航',
+    mobileLabel: '移动端导航',
   },
   hero: {
     overline: '本地优先 · 原文可溯 · Windows 桌面应用',
@@ -26,9 +31,9 @@ export const zh = {
     slogan: '以古法起卦，以原文为归。',
     sub:
       '一款本地优先的 Windows 桌面应用。铜钱起卦、六爻纳甲与六十四卦原文阅读皆在本机完成；卦爻辞转录自维基文库《周易》，逐字可溯。',
-    ctaPrimary: '下载 v3.3.1',
+    ctaPrimary: `下载 ${APP_VERSION}`,
     ctaSecondary: '查看 GitHub',
-    badgeVersion: 'v3.3.1',
+    badgeVersion: APP_VERSION,
     badgePlatform: 'Windows x64',
     badgeLocal: '完全本地',
     shotLabel: '结果概览',
@@ -36,8 +41,9 @@ export const zh = {
   gallery: {
     overline: '01 — 界面 · INTERFACE',
     title: '九张真实界面',
-    subheading: '九张 v3.3.0 真实界面截图，点击缩略图或使用方向键切换。',
+    subheading: '九张真实运行界面截图，点击缩略图或使用方向键切换。',
     hint: '点击缩略图，或按 ← / → 键切换',
+    tablistLabel: '界面截图',
     screens: [
       { id: 'workbench-result', title: '结果概览', caption: '起卦后第一时间呈现的卦象总览。' },
       { id: 'casting-form', title: '起卦表单', caption: '铜钱起卦与手动输入两种方式。' },
@@ -122,7 +128,7 @@ export const zh = {
   },
   footer: {
     tagline: '以古法起卦，以原文为归。',
-    version: 'v3.3.1',
+    version: APP_VERSION,
     author: 'Qiuizi',
     copyright: '© 2026 Qiuizi',
     links: { repo: '仓库', release: 'Release', license: '许可', privacy: '隐私', source: '古籍来源' },
