@@ -1,47 +1,84 @@
 /* ============================================================
-   墨玉金石 · design tokens
-   ink-jade & bronze-gold-stone — restrained, eastern, editorial
+   墨玉金石 · design tokens (v2)
+   ------------------------------------------------------------
+   一套角色，两套色板：
+   - light：米白纸面为主，墨字，铜金细线；只有「下载」是整块墨玉
+   - dark ：深墨绿纸面，暖白字，铜金弱化为微光
+
+   规则：
+   1. 组件只引用语义 token（--bg / --text-1 / --line ...），不写死色值。
+   2. 旧变量名（--paper / --ink-text / --gold-* / --shell-*）保留为别名，
+      避免一次性改动全部组件；新代码请用语义名。
+   3. 分界不做「一刀切」，用 --line 的渐隐 + 相邻 surface 的色阶差咬合。
    ============================================================ */
+
 :root {
-  /* skeleton — ink & bronze */
-  --ink-950: #0d1614;
-  --ink-900: #14201d;
-  --ink-850: #182420;
-  --bronze-800: #1d2b27;
-  --bronze-750: #22322c;
-  --bronze-700: #2a3a32;
-  --bronze-600: #3a4b41;
+  /* ---------- raw palette · rice paper ---------- */
+  --c-paper-50: #fdfbf6;
+  --c-paper-100: #f8f4ea;
+  --c-paper-200: #f2ecdd;
+  --c-paper-300: #eae3d1;
+  --c-paper-400: #ded5c1;
 
-  /* rice paper */
-  --paper: #f6f2e9;
-  --paper-bright: #fffdf8;
-  --paper-dim: #ece6d8;
+  /* ---------- raw palette · ink ---------- */
+  --c-ink-900: #222a26;
+  --c-ink-800: #2d3731;
+  --c-ink-700: #3d4841;
+  --c-ink-600: #4d564e;
+  --c-ink-500: #636c63;
 
-  /* bronze gold */
-  --gold-300: #d6b979;
-  --gold-400: #c9a227;
-  --gold-500: #b18d1e;
-  --gold-600: #967819;
+  /* ---------- raw palette · night ---------- */
+  --c-night-950: #0f1713;
+  --c-night-900: #131c17;
+  --c-night-850: #17211c;
+  --c-night-800: #1c2721;
+  --c-night-750: #212d27;
+  --c-night-700: #28352e;
 
-  /* cinnabar — the single tiny accent */
-  --cinnabar: #a94736;
-  --cinnabar-deep: #8a3728;
+  /* ---------- raw palette · bronze & clay ---------- */
+  --c-bronze-700: #7a6023;
+  --c-bronze-600: #81641f;
+  --c-bronze-500: #a8862f;
+  --c-bronze-400: #c09a4a;
+  --c-bronze-300: #d3b57c;
+  --c-bronze-200: #e6d3ab;
 
-  /* ink on paper */
-  --ink-text: #2b332e;
-  --ink-text-soft: #4a544d;
-  --ink-text-muted: #6f776f;
+  --c-clay-700: #83382a;
+  --c-clay-600: #a04a38;
+  --c-clay-500: #b15a45;
+  --c-clay-400: #c47a63;
+  --c-clay-100: #f4e5df;
 
-  /* gold on dark shell */
-  --shell-text: #e9e4d6;
-  --shell-text-soft: #b9c0b7;
+  /* ---------- raw palette · jade / amber ---------- */
+  --c-jade-600: #3f6449;
+  --c-jade-500: #567c5f;
+  --c-jade-400: #7fa48b;
+  --c-amber-600: #7f5c1d;
+  --c-amber-400: #b89355;
 
-  /* typography — system CJK serif / sans only, no external fonts */
+  /* ---------- typography ---------- */
   --font-serif: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', 'Times New Roman', serif;
   --font-sans: 'Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC', 'Segoe UI', sans-serif;
   --font-num: Georgia, 'Times New Roman', 'Noto Serif SC', serif;
 
-  /* 8pt baseline spacing */
+  /* 字号尺度：暗色整体降一档（见 [data-theme='dark']），避免夜间发肿 */
+  --t-display: clamp(34px, 4.6vw, 52px);
+  --t-h2: clamp(25px, 3vw, 33px);
+  --t-h3: 17px;
+  --t-lead: clamp(18px, 2vw, 22px);
+  --t-body: 16px;
+  --t-sm: 14px;
+  --t-xs: 12.5px;
+  --t-micro: 11.5px;
+
+  --lh-display: 1.18;
+  --lh-h2: 1.36;
+  --lh-body: 1.78;
+  --ls-display: .02em;
+  --ls-body: .01em;
+  --ls-overline: .16em;
+
+  /* ---------- spacing (8pt) ---------- */
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
@@ -54,10 +91,165 @@
   --s-10: 104px;
   --s-11: 128px;
 
+  /* ---------- shape & rhythm ---------- */
   --hairline: 1px;
   --radius-xs: 2px;
-  --radius-sm: 3px;
-  --maxw: 1200px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --maxw: 1160px;
+  --gutter: clamp(20px, 4vw, 56px);
+  --seam: clamp(56px, 7vw, 104px);
 
+  /* ---------- motion ---------- */
+  --ease-out: cubic-bezier(.22, .68, .28, 1);
+  --ease-soft: cubic-bezier(.4, .12, .2, 1);
+  --dur-1: 120ms;   /* hover / press */
+  --dur-2: 200ms;   /* 状态切换 */
+  --dur-3: 420ms;   /* 墨晕 / 进场 */
+
+  color-scheme: light;
+}
+
+/* ============================================================
+   light theme (default)
+   ============================================================ */
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: var(--c-paper-100);
+  --surface-1: var(--c-paper-50);
+  --surface-2: var(--c-paper-200);
+  --surface-3: var(--c-paper-300);
+
+  --line: #e5ddcb;
+  --line-strong: #d3c8b2;
+  --line-soft: rgba(160, 74, 56, .16);
+
+  --text-1: var(--c-ink-900);
+  --text-2: var(--c-ink-600);
+  --text-3: #626c63;
+  --text-inverse: var(--c-paper-50);
+
+  --accent: var(--c-clay-600);
+  --accent-strong: var(--c-clay-700);
+  --accent-soft: var(--c-clay-100);
+  --accent-line: rgba(160, 74, 56, .32);
+
+  --bronze: var(--c-bronze-600);
+  --bronze-strong: var(--c-bronze-700);
+  --bronze-bright: var(--c-bronze-500);
+  --bronze-soft: #f0e5cb;
+
+  --success: var(--c-jade-600);
+  --success-soft: #e8efe6;
+  --warning: var(--c-amber-600);
+  --warning-soft: #f6efdd;
+  --danger: var(--c-clay-700);
+  --danger-soft: #f7e9e5;
+
+  /* 唯一整块墨玉：下载区 / 页脚 */
+  --shell-bg: var(--c-night-850);
+  --shell-bg-2: var(--c-night-800);
+  --shell-line: rgba(211, 181, 124, .26);
+  --shell-text: #e9e4d6;
+  --shell-text-soft: #b6bdaf;
+  --shell-bronze: var(--c-bronze-300);
+
+  --shadow-1: 0 1px 2px rgba(34, 42, 38, .05), 0 8px 24px -16px rgba(34, 42, 38, .22);
+  --shadow-2: 0 2px 6px rgba(34, 42, 38, .06), 0 26px 60px -34px rgba(34, 42, 38, .34);
+  --sheen: inset 0 1px 0 rgba(255, 255, 255, .72);
+  --glow: radial-gradient(120% 100% at 18% 0%, rgba(160, 74, 56, .07), transparent 62%);
+}
+
+/* ============================================================
+   dark theme · 夜
+   ============================================================ */
+:root[data-theme='dark'] {
   color-scheme: dark;
+
+  --bg: var(--c-night-900);
+  --surface-1: var(--c-night-850);
+  --surface-2: var(--c-night-800);
+  --surface-3: var(--c-night-750);
+
+  --line: #2a362e;
+  --line-strong: #35423a;
+  --line-soft: rgba(196, 122, 99, .2);
+
+  --text-1: #e5e0d2;
+  --text-2: #b3bab0;
+  --text-3: #8b948a;
+  --text-inverse: var(--c-night-900);
+
+  --accent: #c4785f;
+  --accent-strong: #d18d75;
+  --accent-soft: #2b211d;
+  --accent-line: rgba(196, 120, 95, .34);
+
+  --bronze: var(--c-bronze-300);
+  --bronze-strong: var(--c-bronze-200);
+  --bronze-bright: var(--c-bronze-400);
+  --bronze-soft: #2c2a1f;
+
+  --success: var(--c-jade-400);
+  --success-soft: #1d2a22;
+  --warning: var(--c-amber-400);
+  --warning-soft: #2a2519;
+  --danger: #d08a7a;
+  --danger-soft: #2c2020;
+
+  --shell-bg: var(--c-night-950);
+  --shell-bg-2: var(--c-night-850);
+  --shell-line: rgba(211, 181, 124, .2);
+  --shell-text: #e9e4d6;
+  --shell-text-soft: #aab2a7;
+  --shell-bronze: var(--c-bronze-300);
+
+  /* 夜间不靠阴影撑层次，改用微亮边界与内高光 */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .32), 0 10px 26px -18px rgba(0, 0, 0, .6);
+  --shadow-2: 0 2px 8px rgba(0, 0, 0, .38), 0 30px 64px -36px rgba(0, 0, 0, .72);
+  --sheen: inset 0 1px 0 rgba(233, 228, 214, .06);
+  --glow: radial-gradient(120% 100% at 18% 0%, rgba(196, 120, 95, .10), transparent 60%);
+
+  /* 夜间字号整体降一档（约 1px），让版面更精致 */
+  --t-display: clamp(33px, 4.4vw, 50px);
+  --t-h2: clamp(24px, 2.9vw, 31px);
+  --t-h3: 16px;
+  --t-lead: clamp(17px, 1.9vw, 21px);
+  --t-body: 15px;
+  --t-sm: 13.5px;
+  --t-xs: 12px;
+  --t-micro: 11px;
+  --lh-body: 1.74;
+}
+
+/* ============================================================
+   legacy aliases — 旧组件仍按老名字取色
+   ============================================================ */
+:root {
+  --paper: var(--bg);
+  --paper-bright: var(--surface-1);
+  --paper-dim: var(--surface-2);
+
+  --ink-950: var(--shell-bg);
+  --ink-900: var(--shell-bg-2);
+  --ink-850: var(--c-night-850);
+  --bronze-800: var(--c-night-800);
+  --bronze-750: var(--c-night-750);
+  --bronze-700: var(--c-night-700);
+  --bronze-600: var(--text-2);
+
+  --gold-300: var(--shell-bronze);
+  --gold-400: var(--bronze-bright);
+  --gold-500: var(--bronze);
+  --gold-600: var(--bronze-strong);
+
+  --cinnabar: var(--accent);
+  --cinnabar-deep: var(--accent-strong);
+
+  --ink-text: var(--text-1);
+  --ink-text-soft: var(--text-2);
+  --ink-text-muted: var(--text-3);
 }

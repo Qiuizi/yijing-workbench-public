@@ -1,0 +1,244 @@
+/* ============================================================
+   夜间模式补丁
+   ------------------------------------------------------------
+   theme.css 已把主体界面换成 token；这里只处理两类遗留：
+   1. 早期样式表里写死的浅色值（纸卡片、爻线、表格底、标签）；
+   2. Element Plus 的浮层（弹窗 / 抽屉 / 消息）。
+   原则：不反色，改为「深墨绿 + 暖白字 + 微亮边界」。
+   ============================================================ */
+
+:root[data-theme='dark'] {
+  /* 爻线在暗底要反过来：深色笔画 → 暖白笔画 */
+  --ink-mark: #d8d3c2;
+}
+
+/* ---------- 外壳 ---------- */
+[data-theme='dark'] .topbar { border-color: var(--border); }
+[data-theme='dark'] .app-sidebar { box-shadow: inset -1px 0 0 var(--border-hairline); }
+[data-theme='dark'] .bottom-nav {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -8px 20px -16px rgba(0, 0, 0, .7);
+}
+
+/* ---------- 起卦表单 ---------- */
+[data-theme='dark'] .casting-mark { border-color: var(--border-strong); background: var(--surface); }
+[data-theme='dark'] .method-note { background: var(--surface-muted); border-color: var(--border); }
+[data-theme='dark'] .method-note__coin { border-color: var(--border-strong); color: var(--accent); }
+[data-theme='dark'] .manual-row { border-bottom-color: var(--border); }
+[data-theme='dark'] .manual-row .el-select__wrapper { box-shadow: var(--el-border-color) 0 0 0 1px inset; }
+[data-theme='dark'] .manual-row__glyph { color: var(--text-muted); }
+[data-theme='dark'] .privacy-line { color: var(--text-muted); }
+
+/* ---------- 卦象卡片与爻线 ---------- */
+[data-theme='dark'] .question-ribbon {
+  background: var(--surface-muted);
+  border-left-color: var(--accent-line);
+}
+[data-theme='dark'] .question-ribbon__label { color: var(--accent); }
+[data-theme='dark'] .question-ribbon p { color: var(--text-secondary); }
+[data-theme='dark'] .hexagram-card,
+[data-theme='dark'] .hexagram-card--changed {
+  background: var(--surface-muted);
+  border-color: var(--border);
+}
+[data-theme='dark'] .gua-line__segment { background: var(--ink-mark); }
+[data-theme='dark'] .legend-mark { background: var(--ink-mark); }
+[data-theme='dark'] .legend-mark--yin {
+  background: linear-gradient(90deg, var(--ink-mark) 0 40%, transparent 40% 60%, var(--ink-mark) 60%);
+}
+[data-theme='dark'] .legend-mark--moving { background: var(--accent); }
+[data-theme='dark'] .hexagram-card__legend,
+[data-theme='dark'] .hexagram-card__binary,
+[data-theme='dark'] .hexagram-card__eyebrow { color: var(--text-muted); }
+[data-theme='dark'] .change-connector i { background: var(--border-strong); }
+[data-theme='dark'] .change-connector i::after { border-color: var(--bronze); }
+[data-theme='dark'] .movement-chip { background: var(--accent-soft); color: var(--accent); }
+[data-theme='dark'] .movement-summary { border-top-color: var(--border); }
+[data-theme='dark'] .empty-diagram__seal {
+  border-color: var(--accent-line);
+  background: var(--surface);
+}
+[data-theme='dark'] .empty-diagram__lines i { background: var(--border-strong); }
+[data-theme='dark'] .empty-diagram__lines i:nth-child(2),
+[data-theme='dark'] .empty-diagram__lines i:nth-child(5) {
+  background: linear-gradient(90deg, var(--border-strong) 0 40%, transparent 40% 60%, var(--border-strong) 60%);
+}
+
+/* ---------- 起卦过程 ---------- */
+[data-theme='dark'] .process-panel > summary { color: var(--text-secondary); }
+[data-theme='dark'] .process-list,
+[data-theme='dark'] .process-row { border-color: var(--border); }
+[data-theme='dark'] .process-row--moving {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 10%, transparent) 0, transparent 62%);
+}
+[data-theme='dark'] .process-row__state small { background: var(--surface-sunken); color: var(--text-muted); }
+[data-theme='dark'] .coin-face { border-color: var(--border-strong); color: var(--text-secondary); }
+[data-theme='dark'] .coin-face--yang { border-color: color-mix(in srgb, var(--success) 45%, var(--border)); color: var(--success); }
+[data-theme='dark'] .calculation-note { color: var(--text-muted); }
+[data-theme='dark'] .calculation-note > span { border-color: var(--border-strong); color: var(--text-secondary); }
+
+/* ---------- 经典与取辞 ---------- */
+[data-theme='dark'] .text-card__seal { border-color: var(--accent-line); }
+[data-theme='dark'] .text-divider i { background: var(--border); }
+[data-theme='dark'] .special-line-text,
+[data-theme='dark'] .changed-text-card__note,
+[data-theme='dark'] .reading-card__note { border-top-color: var(--border); }
+[data-theme='dark'] .traditional-reading__badge { border: 0; }
+[data-theme='dark'] .reading-quote { background: var(--surface-muted); border-left-color: var(--bronze); }
+[data-theme='dark'] .reading-quote--line { background: var(--surface-muted); border-left-color: var(--accent); }
+[data-theme='dark'] .reading-quote--special { background: var(--accent-soft); }
+[data-theme='dark'] .hexagram-glyph--compact .gua-line__segment { background: var(--ink-mark); }
+[data-theme='dark'] .hexagram-glyph .gua-line__segment { background: var(--ink-mark); }
+
+/* ---------- 六爻排盘 ---------- */
+[data-theme='dark'] .najia-table thead th { background: var(--surface-muted); color: var(--text-secondary); }
+[data-theme='dark'] .najia-table th,
+[data-theme='dark'] .najia-table td { border-bottom-color: var(--border); }
+[data-theme='dark'] .najia-table__row--moving { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+[data-theme='dark'] .najia-table__spirit { color: var(--bronze) !important; }
+[data-theme='dark'] .najia-tag {
+  color: var(--text-secondary);
+  background: var(--surface-muted);
+  border-color: var(--border);
+}
+[data-theme='dark'] .najia-tag--role { color: var(--success); background: var(--success-soft); border-color: color-mix(in srgb, var(--success) 30%, transparent); }
+[data-theme='dark'] .najia-tag--moving { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-line); }
+[data-theme='dark'] .najia-tag--void { color: var(--info); background: var(--info-soft); border-color: color-mix(in srgb, var(--info) 30%, transparent); }
+[data-theme='dark'] .najia-tag--calendar { color: var(--warning); background: var(--warning-soft); border-color: color-mix(in srgb, var(--warning) 30%, transparent); }
+[data-theme='dark'] .najia-tag--break,
+[data-theme='dark'] .najia-tag--clash { color: var(--danger); background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 32%, transparent); }
+[data-theme='dark'] .najia-tag--relation { color: var(--text-secondary); background: var(--surface-muted); border-color: var(--border); }
+[data-theme='dark'] .najia-analysis-card__matches span { color: var(--text-secondary); background: var(--surface-sunken); }
+[data-theme='dark'] .najia-empty__mark { border-color: var(--border-strong); }
+
+/* ---------- AI ---------- */
+[data-theme='dark'] .ai-messages { background: var(--surface-sunken); border-color: var(--border); }
+[data-theme='dark'] .ai-message--user { background: var(--surface-raised); border-color: var(--border); }
+[data-theme='dark'] .ai-message--user .ai-message__role { color: var(--text-muted); }
+[data-theme='dark'] .ai-citations blockquote { background: var(--surface-muted); border-color: var(--border); border-left-color: var(--bronze); }
+[data-theme='dark'] .ai-evidence-explanations article { background: var(--surface-muted); border-color: var(--border); border-left-color: var(--bronze); }
+[data-theme='dark'] .ai-answer-section--modern { background: var(--surface-muted); }
+[data-theme='dark'] .ai-section-generated { color: var(--text-secondary); background: var(--surface-muted); }
+[data-theme='dark'] .ai-progress__steps li.is-active > span { border-color: var(--accent-line); }
+[data-theme='dark'] .ai-empty__mark { border-color: var(--border-strong); background: var(--surface); }
+[data-theme='dark'] .ai-retry-banner,
+[data-theme='dark'] .ai-notice { background: var(--warning-soft); border-left-color: var(--warning); }
+[data-theme='dark'] .ai-failure-banner { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 26%, transparent); }
+[data-theme='dark'] .ai-prompt,
+[data-theme='dark'] .ai-composer .el-textarea__inner { background: var(--surface); }
+
+/* ---------- 历史 / 设置 ---------- */
+[data-theme='dark'] .history-filter button[aria-pressed='true'] { background: var(--surface-raised); }
+[data-theme='dark'] .settings-group__index { background: var(--accent-soft); }
+[data-theme='dark'] .history-more > div { background: var(--surface-raised); border-color: var(--border); }
+[data-theme='dark'] .history-empty > span { border-color: var(--border-strong); }
+
+/* ---------- Element Plus 浮层 ---------- */
+[data-theme='dark'] .el-drawer { background: var(--surface); }
+[data-theme='dark'] .el-drawer__header { color: var(--text-primary); }
+[data-theme='dark'] .el-message { background: var(--surface-raised); border-color: var(--border); }
+[data-theme='dark'] .el-select-dropdown__item.is-hovering { background: var(--surface-muted); }
+[data-theme='dark'] .el-overlay { background-color: rgba(9, 15, 12, .62); }
+
+/* ============================================================
+   学习页：自己的调色板，同样不反色
+   ============================================================ */
+[data-theme='dark'] .app-shell.app-shell--learning {
+  --learning-paper: var(--c-night-900);
+  --learning-surface: var(--c-night-850);
+  --learning-ink: #e3ded0;
+  --learning-muted: #98a08f;
+  --learning-line: #2b3830;
+  --learning-red: var(--c-clay-400);
+}
+[data-theme='dark'] .learning-header { background: var(--c-night-850); }
+[data-theme='dark'] .learning-brand__mark { border-color: var(--accent-line); }
+[data-theme='dark'] .learning-index__tools .el-input__wrapper { background: var(--surface-muted); }
+[data-theme='dark'] .learning-matrix__entry:before { background: var(--surface-muted); }
+[data-theme='dark'] .learning-matrix__entry.is-selected { border-color: var(--accent-line); }
+[data-theme='dark'] .learning-matrix__entry .gua-line__segment { background: var(--ink-mark); }
+[data-theme='dark'] .learning-index__scroll { scrollbar-color: var(--border-strong) transparent; }
+[data-theme='dark'] .learning-index__scroll::-webkit-scrollbar-thumb { background: var(--border-strong); }
+[data-theme='dark'] .learning-index__filter button[aria-pressed='true'] { color: var(--accent); }
+
+/* 阅读面板：暗色下不做「黑上加黑」，抬一档表面色保留图文层次 */
+[data-theme='dark'] .learning-preview-frame {
+  background: var(--c-night-800);
+  color: var(--text-primary);
+  border-left: 1px solid var(--border);
+  scrollbar-color: var(--border-strong) transparent;
+}
+[data-theme='dark'] .learning-preview-frame::-webkit-scrollbar-thumb { background: var(--border-strong); }
+[data-theme='dark'] .learning-preview__top,
+[data-theme='dark'] .learning-preview__heading > p,
+[data-theme='dark'] .learning-preview__foot { color: var(--text-muted); }
+[data-theme='dark'] .learning-preview__top i { color: var(--text-muted); }
+[data-theme='dark'] .learning-preview .text-card,
+[data-theme='dark'] .learning-preview .panel { background: transparent; border-color: var(--border); }
+[data-theme='dark'] .learning-preview .reading-quote { background: var(--surface-muted); }
+[data-theme='dark'] .learning-preview blockquote,
+[data-theme='dark'] .learning-preview .preview-passage { background: var(--surface-raised); }
+
+/* 学习页里残留的浅色强调底 */
+[data-theme='dark'] .learning-preview .badge,
+[data-theme='dark'] .learning-source-note,
+[data-theme='dark'] .learning-tag { background: var(--surface-muted); color: var(--text-secondary); }
+
+/* ============================================================
+   夜间字号：整体降一档（约 1px）
+   ------------------------------------------------------------
+   主界面与学习页仍有大量写死的 px 字号，token 覆盖不到它们，
+   这里对**阅读面**逐个收 1px；微标签（9–11px）保持不变，
+   否则会小到影响辨识。官网走 token 覆盖，不需要这份清单。
+   ============================================================ */
+
+/* 起卦页 */
+[data-theme='dark'] .casting-start h1 { font-size: clamp(23px, 2.5vw, 30px); }
+[data-theme='dark'] .casting-start__heading p { font-size: 13.5px; }
+[data-theme='dark'] .casting-start .field-label { font-size: 15px; }
+[data-theme='dark'] .casting-start .el-textarea__inner { font-size: 14px; }
+[data-theme='dark'] .side-nav__item span { font-size: 13px; }
+[data-theme='dark'] .field-hint,
+[data-theme='dark'] .method-note p,
+[data-theme='dark'] .manual-entry__intro { font-size: 11.5px; }
+
+/* 结果页 */
+[data-theme='dark'] .result-heading h1 { font-size: clamp(22px, 2.4vw, 28px); }
+[data-theme='dark'] .result-overview .hexagram-card__title { font-size: 22px; }
+[data-theme='dark'] .result-overview .original-text { font-size: 17px; }
+[data-theme='dark'] .result-overview .line-text-item p,
+[data-theme='dark'] .result-overview .special-line-text p { font-size: 14px; }
+[data-theme='dark'] .text-card h3 { font-size: 19px; }
+[data-theme='dark'] .reading-card h3 { font-size: 21px; }
+[data-theme='dark'] .reading-quote p { font-size: 15px; }
+[data-theme='dark'] .traditional-reading__header h3 { font-size: 19px; }
+[data-theme='dark'] .traditional-reading__header p { font-size: 13.5px; }
+
+/* 排盘 */
+[data-theme='dark'] .najia-table { font-size: 12.5px; }
+[data-theme='dark'] .najia-table td strong { font-size: 13px; }
+[data-theme='dark'] .najia-panel__intro { font-size: 13.5px; }
+[data-theme='dark'] .najia-analysis-card h3 { font-size: 15px; }
+[data-theme='dark'] .najia-analysis-card p { font-size: 12.5px; }
+
+/* AI */
+[data-theme='dark'] .ai-message p { font-size: 13px; }
+[data-theme='dark'] .ai-message h3 { font-size: 15px; }
+[data-theme='dark'] .ai-citations blockquote p { font-size: 14px; }
+[data-theme='dark'] .ai-context > p { font-size: 13px; }
+
+/* 历史与设置 */
+[data-theme='dark'] .history-item__hexagrams { font-size: 13px; }
+[data-theme='dark'] .history-page__open strong { font-size: 13px; }
+[data-theme='dark'] .settings-group__heading h3 { font-size: 16px; }
+[data-theme='dark'] .settings-group .settings-field > label { font-size: 12.5px; }
+[data-theme='dark'] .settings-group .settings-field small { font-size: 11.5px; }
+
+/* 学习页 */
+[data-theme='dark'] .learning-index__heading h1 { font-size: 28px; }
+[data-theme='dark'] .learning-matrix__entry > strong { font-size: 15px; }
+[data-theme='dark'] .learning-preview__original blockquote { font-size: 19px; }
+[data-theme='dark'] .learning-preview__original > p { font-size: 13.5px; }
+[data-theme='dark'] .learning-preview__read { font-size: 13.5px; }
+[data-theme='dark'] .learning-preview__heading h2 { font-size: 42px; }

@@ -65,7 +65,7 @@ function pad(n: number): string {
 </script>
 
 <template>
-  <section id="hexagrams" class="section paper paper-noise">
+  <section id="hexagrams" class="section section--blend atlas">
     <div class="container">
       <div class="section-head">
         <span class="overline">{{ t.atlas.overline }}</span>
@@ -74,9 +74,9 @@ function pad(n: number): string {
       </div>
 
       <div class="atlas__controls">
-        <label class="atlas__search">
+        <label class="atlas__search ink-field">
           <span class="sr-only">{{ t.atlas.searchPlaceholder }}</span>
-          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg>
+          <svg class="atlas__search-icon" viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><line x1="10.6" y1="10.6" x2="14" y2="14"/></svg>
           <input v-model="query" type="search" :placeholder="t.atlas.searchPlaceholder" />
         </label>
 
@@ -101,7 +101,7 @@ function pad(n: number): string {
             :tabindex="h.order === selected.order ? 0 : -1"
             @click="select(h)"
           >
-            <span class="cell__order">{{ pad(h.order) }}</span>
+            <span class="cell__order num">{{ pad(h.order) }}</span>
             <span class="cell__lines"><HexagramLines :binary="h.binary" size="sm" /></span>
             <span class="cell__name">{{ h.name }}</span>
           </button>
@@ -110,7 +110,7 @@ function pad(n: number): string {
 
         <div class="atlas__detail" role="region" :aria-label="t.atlas.regionLabel" aria-live="polite">
           <div class="detail__head">
-            <span class="detail__num">{{ pad(selected.order) }}</span>
+            <span class="detail__num num">{{ pad(selected.order) }}</span>
             <h3>{{ selected.title }}</h3>
           </div>
           <div class="detail__lines"><HexagramLines :binary="selected.binary" size="lg" /></div>
@@ -145,116 +145,187 @@ function pad(n: number): string {
 </template>
 
 <style scoped>
-.atlas__controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; margin-bottom: var(--s-5); }
+.atlas {
+  --tone: var(--surface-2);
+  --tone-prev: var(--bg);
+}
+
+.atlas__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s-5);
+}
 
 .atlas__search {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  min-width: 260px;
-  border: 1px solid rgba(43, 51, 46, .3);
-  border-radius: var(--radius-sm);
-  background: var(--paper-bright);
-  color: var(--ink-text-muted);
-  flex: 1 1 280px;
-  max-width: 420px;
+  gap: 9px;
+  padding: 9px 13px;
+  min-width: 240px;
+  flex: 1 1 260px;
+  max-width: 380px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-1);
+  color: var(--text-3);
+  transition: border-color var(--dur-1) var(--ease-out), background-color var(--dur-1) var(--ease-out);
 }
+.atlas__search:focus-within { border-color: var(--accent-line); color: var(--accent); }
+.atlas__search-icon { flex: 0 0 auto; }
 .atlas__search input {
   flex: 1;
+  min-width: 0;
   border: 0;
   outline: none;
   background: transparent;
   font-family: var(--font-serif);
-  font-size: 14px;
-  color: var(--ink-text);
+  font-size: var(--t-sm);
+  color: var(--text-1);
 }
-.atlas__search:focus-within { border-color: var(--gold-500); }
 
-.atlas__groups { display: inline-flex; border: 1px solid rgba(43, 51, 46, .3); border-radius: var(--radius-sm); overflow: hidden; }
+/* 分段控件：轨道用二级表面，选中项用一级表面浮起，不画粗边 */
+.atlas__groups {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+}
 .atlas__groups button {
-  padding: 9px 16px;
+  padding: 7px 14px;
   border: 0;
-  border-right: 1px solid rgba(43, 51, 46, .25);
+  border-radius: 3px;
   background: transparent;
   font-family: var(--font-sans);
-  font-size: 13px;
-  color: var(--ink-text-soft);
+  font-size: var(--t-xs);
+  color: var(--text-2);
   cursor: pointer;
-  transition: background-color .18s ease, color .18s ease;
+  transition: background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out);
 }
-.atlas__groups button:last-child { border-right: 0; }
-.atlas__groups button:hover { background: rgba(43, 51, 46, .05); }
-.atlas__groups button[aria-pressed='true'] { background: var(--ink-text); color: var(--paper-bright); }
+.atlas__groups button:hover { color: var(--text-1); background: var(--surface-2); }
+.atlas__groups button[aria-pressed='true'] {
+  background: var(--surface-1);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--text-1) 8%, transparent), inset 0 0 0 1px var(--accent-line);
+}
 
-.atlas__layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--s-6); align-items: start; }
+.atlas__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 316px;
+  gap: clamp(18px, 2.4vw, 28px);
+  align-items: start;
+}
 
 .atlas__grid {
   display: grid;
-  /* 64 卦在桌面端按 8 栏排布，正好 8×8，不留孤行。 */
   grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 8px;
+  gap: 7px;
 }
 .cell {
   display: grid;
-  gap: 6px;
+  gap: 5px;
   justify-items: center;
-  padding: 12px 8px 10px;
-  background: var(--paper-bright);
-  border: 1px solid rgba(43, 51, 46, .2);
-  border-radius: 3px;
+  padding: 11px 6px 9px;
+  background: color-mix(in srgb, var(--surface-1) 62%, transparent);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  color: var(--ink-text);
-  transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
+  color: var(--text-1);
+  transition:
+    border-color var(--dur-1) var(--ease-out),
+    background-color var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-1) var(--ease-out);
 }
-.cell:hover { border-color: var(--gold-500); }
-.cell.is-selected { border-color: var(--cinnabar); background: #fbf6f0; box-shadow: inset 0 0 0 1px var(--cinnabar); }
-.cell__order { font-family: var(--font-num); font-size: 10px; letter-spacing: .14em; color: var(--ink-text-muted); }
-.cell__lines { width: 44%; color: var(--ink-text); }
-.cell.is-selected .cell__lines { color: var(--cinnabar); }
-.cell__name { font-size: 15px; font-weight: 600; letter-spacing: .04em; }
-.atlas__empty { grid-column: 1 / -1; padding: var(--s-7) 0; text-align: center; color: var(--ink-text-muted); }
+.cell:hover { background: var(--surface-1); border-color: var(--line-strong); }
+.cell.is-selected {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.cell__order {
+  font-family: var(--font-num);
+  font-size: 10px;
+  letter-spacing: .1em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+}
+.cell__lines { width: 42%; color: var(--text-1); }
+.cell.is-selected .cell__lines { color: var(--accent); }
+.cell__name { font-size: var(--t-sm); font-weight: 600; letter-spacing: .04em; color: var(--text-1); }
+.atlas__empty { grid-column: 1 / -1; padding: var(--s-7) 0; text-align: center; color: var(--text-3); }
 
 .atlas__detail {
   position: sticky;
-  top: 96px;
+  top: 88px;
   padding: var(--s-5);
-  background: var(--paper-bright);
-  border: 1px solid rgba(201, 162, 39, .5);
-  border-radius: 4px;
-  box-shadow: 0 20px 50px rgba(43, 51, 46, .06);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1), var(--sheen);
 }
-.detail__head { display: flex; align-items: baseline; gap: 12px; }
-.detail__num { font-family: var(--font-num); font-size: 30px; line-height: 1; color: var(--cinnabar); }
-.detail__head h3 { font-size: 21px; letter-spacing: .04em; color: var(--ink-text); }
-.detail__lines { width: 96px; margin: var(--s-5) auto var(--s-5); color: var(--ink-text); }
+.detail__head { display: flex; align-items: baseline; gap: 10px; }
+.detail__num {
+  font-family: var(--font-num);
+  font-size: 28px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+.detail__head h3 { font-size: 20px; letter-spacing: .04em; color: var(--text-1); }
+.detail__lines { width: 92px; margin: var(--s-5) auto; color: var(--text-1); }
 
-.detail__trigrams { margin: 0 0 var(--s-4); display: grid; gap: 8px; }
-.detail__trigrams div { display: flex; gap: 12px; font-size: 14px; }
-.detail__trigrams dt { flex: 0 0 auto; color: var(--ink-text-muted); }
-.detail__trigrams dd { margin: 0; color: var(--ink-text); }
+.detail__trigrams { margin: 0 0 var(--s-4); display: grid; gap: 7px; }
+.detail__trigrams div { display: flex; gap: 12px; font-size: var(--t-sm); }
+.detail__trigrams dt { flex: 0 0 auto; color: var(--text-3); }
+.detail__trigrams dd { margin: 0; color: var(--text-1); }
 
-.detail__judgment-label { font-size: 12px; font-family: var(--font-sans); font-weight: 600; letter-spacing: .12em; color: var(--gold-600); margin-bottom: var(--s-2); }
-.detail__judgment { margin: 0; font-size: 16px; line-height: 1.9; color: var(--ink-text); white-space: pre-wrap; }
+.detail__judgment-label {
+  font-size: var(--t-micro);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: var(--bronze);
+  margin-bottom: var(--s-2);
+}
+.detail__judgment {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--text-1);
+  white-space: pre-wrap;
+}
 
-.detail__source { margin: var(--s-4) 0 0; font-size: 12.5px; color: var(--ink-text-muted); }
-.detail__source a { color: var(--cinnabar); border-bottom: 1px solid rgba(169, 71, 54, .4); }
-.detail__source a:hover { border-bottom-color: var(--cinnabar); }
+.detail__source { margin: var(--s-4) 0 0; font-size: var(--t-micro); color: var(--text-3); }
+.detail__source a { color: var(--accent); border-bottom: 1px solid var(--accent-line); }
+.detail__source a:hover { border-bottom-color: var(--accent); }
 
-.detail__status { margin: var(--s-3) 0 0; padding: 10px 12px; font-size: 12px; line-height: 1.7; color: var(--ink-text-soft); background: rgba(201, 162, 39, .12); border-left: 2px solid var(--gold-500); }
-.detail__status span { font-weight: 600; }
-.detail__hint { margin: var(--s-4) 0 0; font-size: 11.5px; color: var(--ink-text-muted); }
+.detail__status {
+  margin: var(--s-3) 0 0;
+  padding: 9px 11px;
+  font-size: var(--t-micro);
+  line-height: 1.7;
+  color: var(--text-2);
+  background: var(--warning-soft);
+  border-left: 2px solid var(--warning);
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+}
+.detail__status span { font-weight: 600; color: var(--warning); }
+.detail__hint { margin: var(--s-4) 0 0; font-size: var(--t-micro); color: var(--text-3); }
 
-@media (max-width: 900px) {
-  .atlas__layout { grid-template-columns: 1fr; }
+@media (max-width: 980px) {
+  .atlas__layout { grid-template-columns: minmax(0, 1fr); }
   .atlas__detail { position: static; }
 }
 @media (max-width: 700px) {
   .atlas__grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
 }
 @media (max-width: 480px) {
-  .atlas__grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
-  .cell { padding: 10px 5px 8px; }
-  .cell__name { font-size: 14px; }
+  .atlas__grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
+  .cell { padding: 9px 4px 7px; }
+  .cell__name { font-size: 13px; }
 }
 </style>

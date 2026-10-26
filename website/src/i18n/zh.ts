@@ -23,6 +23,8 @@ export const zh = {
     langLabel: '切换到英文',
     primaryLabel: '主导航',
     mobileLabel: '移动端导航',
+    themeToDark: '切换到夜间模式',
+    themeToLight: '切换到日间模式',
   },
   hero: {
     overline: '本地优先 · 原文可溯 · Windows 桌面应用',

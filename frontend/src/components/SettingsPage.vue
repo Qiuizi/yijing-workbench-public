@@ -7,6 +7,7 @@ import { isTauri } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { DEEPSEEK_PLATFORM_TERMS_URL, DEEPSEEK_PRIVACY_URL, MICROSOFT_PRIVACY_URL, requireAIPrivacyAcknowledgement, WEBVIEW2_PRIVACY_URL } from '../aiPrivacyNotice'
 import { version as appVersion } from '../../src-tauri/tauri.conf.json'
+import { useAppearance, type Appearance } from '../appearance'
 import licenseText from '../../../LICENSE?raw'
 
 const settings = ref<AISettings | null>(null)
@@ -23,6 +24,13 @@ const aiDefaultMode = ref<'classical' | 'najia'>('classical')
 const isDesktop = isTauri()
 const migrationStatus = ref<{ can_import: boolean; history_count: number; ai_session_count: number; has_settings: boolean } | null>(null)
 const importing = ref(false)
+const { mode: appearanceMode, setMode: setAppearance } = useAppearance()
+
+function applyAppearance(value: string | number | boolean | undefined) {
+  if (value === 'auto' || value === 'light' || value === 'dark') {
+    setAppearance(value as Appearance)
+  }
+}
 
 async function refresh() {
   loading.value = true
@@ -232,6 +240,21 @@ onMounted(refresh)
       <small>当前唯一启用的传统取辞体系：{{ preferences?.ruleset_id ?? 'qiming-tongshi' }} · {{ preferences?.ruleset_version ?? '1.0.0' }}。</small>
     </section>
 
+    <section class="settings-group" aria-labelledby="settings-appearance-title">
+      <div class="settings-group__heading"><span class="settings-group__index">03</span><div><h3 id="settings-appearance-title">外观</h3><p>浅色与夜间共用同一套排版；夜间整体字号略收一档。</p></div></div>
+      <div class="settings-field">
+        <label>主题</label>
+        <div class="settings-field__row">
+          <el-radio-group :model-value="appearanceMode" @change="applyAppearance">
+            <el-radio-button value="auto">跟随系统</el-radio-button>
+            <el-radio-button value="light">浅色</el-radio-button>
+            <el-radio-button value="dark">夜间</el-radio-button>
+          </el-radio-group>
+        </div>
+        <small>仅保存在本机浏览器存储；不起卦、不联网。</small>
+      </div>
+    </section>
+
       <div class="settings-field">
         <label for="ai-default-mode">默认解读体系</label>
         <div class="settings-field__row">
@@ -245,7 +268,7 @@ onMounted(refresh)
     <div class="settings-preferences-save"><el-button type="primary" :loading="busy" @click="savePreferences">保存默认偏好</el-button></div></details>
     <details class="settings-category"><summary>AI 辅助 <span>启用、连接配置与模型</span></summary>
     <section class="settings-group" aria-labelledby="settings-ai-title">
-      <div class="settings-group__heading"><span class="settings-group__index">03</span><div><h3 id="settings-ai-title">AI 辅助</h3><p>模型清单从 DeepSeek 读取；密钥由后端保护，页面不会回显。</p></div><span class="settings-state" :class="{ 'settings-state--on': settings?.api_key_configured }">{{ settings?.api_key_configured ? '密钥已配置' : '未配置' }}</span></div>
+      <div class="settings-group__heading"><span class="settings-group__index">04</span><div><h3 id="settings-ai-title">AI 辅助</h3><p>模型清单从 DeepSeek 读取；密钥由后端保护，页面不会回显。</p></div><span class="settings-state" :class="{ 'settings-state--on': settings?.api_key_configured }">{{ settings?.api_key_configured ? '密钥已配置' : '未配置' }}</span></div>
       <div class="settings-field">
         <label for="deepseek-key">DeepSeek API Key</label>
         <div class="settings-field__row">
@@ -298,7 +321,7 @@ onMounted(refresh)
         </details>
       </div>
     <section v-if="isDesktop" class="settings-group" aria-labelledby="settings-data-title">
-      <div class="settings-group__heading"><span class="settings-group__index">04</span><div><h3 id="settings-data-title">本地数据</h3><p>导入会先备份，来源文件保持原位。</p></div></div>
+      <div class="settings-group__heading"><span class="settings-group__index">05</span><div><h3 id="settings-data-title">本地数据</h3><p>导入会先备份，来源文件保持原位。</p></div></div>
       <div class="settings-field">
         <label>导入 Web 版历史数据</label>
         <div class="settings-field__row">
@@ -312,7 +335,7 @@ onMounted(refresh)
     </details>
     <details class="settings-category"><summary>关于应用 <span>版本、许可证与典籍来源</span></summary>
     <section class="settings-group settings-about" aria-labelledby="settings-about-title">
-      <div class="settings-group__heading"><span class="settings-group__index">05</span><div><h3 id="settings-about-title">关于</h3><p>版本与内容来源</p></div></div>
+      <div class="settings-group__heading"><span class="settings-group__index">06</span><div><h3 id="settings-about-title">关于</h3><p>版本与内容来源</p></div></div>
       <dl class="settings-about__facts">
         <div><dt>当前界面版本</dt><dd>V{{ appVersion }}</dd></div>
         <div><dt>业务逻辑稳定核心</dt><dd>V3.1.4</dd></div>

@@ -1,80 +1,20 @@
+/* 颜色 / 字号 / 圆角 / 间距 / 动效 token 见 theme.css（单一来源）。
+   本文件只保留旧的别名与 Element Plus 的字体桥接。 */
 :root {
-  color-scheme: light;
-  font-family: 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif;
-  color: var(--text-primary);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  /* V3.2 design tokens: one warm, low-saturation system for every page. */
-  --bg: #f5f4ef;
-  --surface: #fffefa;
-  --surface-muted: #f7f6f1;
-  --surface-raised: #ffffff;
-  --text-primary: #292a25;
-  --text-secondary: #62645d;
-  --text-muted: #77796f;
-  --border: #e4e3da;
-  --border-strong: #d4d3c9;
-  --accent: #a94736;
-  --accent-hover: #873b2f;
-  --accent-soft: #f5e9e5;
-  --success: #466b52;
-  --success-soft: #eaf1e9;
-  --warning: #86672e;
-  --warning-soft: #f7f1e4;
-  --danger: #913e36;
-  --danger-soft: #f9eeeb;
-  --info: #5d6d79;
-  --info-soft: #eef2f4;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --shadow-panel: 0 2px 8px rgb(34 36 30 / 4%), 0 12px 30px rgb(34 36 30 / 2%);
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --text-xs: 12px;
-  --text-sm: 13px;
-  --text-base: 14px;
-  --text-lg: 16px;
-  --text-xl: 19px;
-  --text-2xl: 24px;
-  --text-display: 32px;
-  /* Compatibility aliases for the existing component stylesheet. */
-  --paper: var(--surface);
-  --paper-deep: var(--bg);
-  --ink: var(--text-primary);
-  --ink-soft: var(--text-secondary);
-  --rule: var(--border);
-  --vermilion: var(--accent);
-  --vermilion-soft: var(--accent-soft);
-  --jade: var(--success);
-  --font-classic: 'KaiTi', 'STKaiti', 'Songti SC', 'SimSun', serif;
-  --el-color-primary: var(--accent);
-  --el-color-primary-light-3: #c57768;
-  --el-color-primary-light-5: #d7a198;
-  --el-color-primary-light-7: #e8c9c3;
-  --el-color-primary-light-8: #f0dcd7;
-  --el-color-primary-light-9: #f7eeeb;
-  --el-color-primary-dark-2: var(--accent-hover);
+  --el-font-family: var(--font-ui);
   --el-border-radius-base: var(--radius-sm);
-  --el-font-family: 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif;
 }
 
 * { box-sizing: border-box; }
 html { min-width: 320px; background: var(--bg); }
 body { margin: 0; min-width: 320px; min-height: 100vh; color: var(--text-primary); background: var(--bg); font-size: var(--text-base); }
 button, textarea, input { font: inherit; }
-::selection { color: #fff; background: #a94736; }
-:focus-visible { outline: 3px solid rgb(169 71 54 / 48%); outline-offset: 2px; }
+::selection { color: var(--c-paper-50); background: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .app-shell { min-height: 100vh; padding: 0 clamp(20px, 4vw, 64px); }
-.topbar { height: 76px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #dedbd1; }
+.topbar { height: 76px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
 .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
-.brand__seal { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--vermilion); color: var(--vermilion); font: 600 20px var(--font-classic); }
 .brand__wordmark { display: grid; gap: 0; line-height: 1.18; }
 .brand__wordmark strong { font: 600 16px var(--font-classic); letter-spacing: .07em; }
 .brand__wordmark small { color: var(--ink-soft); font-size: 10px; letter-spacing: .12em; }
@@ -281,7 +221,7 @@ button, textarea, input { font: inherit; }
 .najia-analysis-card > a { width: fit-content; color: #999387; font-size: 9px; text-decoration: none; }
 .najia-empty { padding: 25px 15px; color: #99958a; text-align: center; font-size: 10px; }
 
-.app-footer { display: flex; align-items: center; justify-content: center; gap: 11px; max-width: 1600px; margin: 26px auto 0; padding: 15px 0 18px; color: #a29e92; border-top: 1px solid #dedbd1; font-size: 9px; letter-spacing: .04em; }
+.app-footer { display: flex; align-items: center; justify-content: center; gap: 11px; max-width: 1600px; margin: 26px auto 0; padding: 15px 0 18px; color: var(--text-muted); border-top: 1px solid var(--border); font-size: 9px; letter-spacing: .04em; }
 .app-footer i { width: 3px; height: 3px; border-radius: 50%; background: #c5bfb2; }
 .primary-nav { display: flex; flex-wrap: wrap; gap: 5px; max-width: 1600px; margin: 0 auto; padding: 12px 0 0; border-bottom: 1px solid #e3dfd5; }
 .primary-nav button { position: relative; padding: 9px 13px 11px; color: #77756c; background: transparent; border: 0; border-radius: 6px 6px 0 0; cursor: pointer; font-size: 12px; }
@@ -491,12 +431,11 @@ button, textarea, input { font: inherit; }
   min-height: 540px;
   flex-direction: column;
   padding: 22px 14px 16px;
-  background: #f1f0ea;
+  background: var(--surface-muted);
   border-right: 1px solid var(--border);
 }
 .sidebar-brand-row { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 6px; padding: 0 4px 22px; border-bottom: 1px solid var(--border); }
 .brand { min-width: 0; gap: 10px; }
-.brand__seal { flex: 0 0 36px; border-radius: 8px; }
 .brand__wordmark strong { font-size: 16px; letter-spacing: .03em; }
 .brand__wordmark small { font-size: 11px; letter-spacing: .04em; }
 .sidebar-collapse {
@@ -530,8 +469,8 @@ button, textarea, input { font: inherit; }
 }
 .side-nav__item .el-icon { flex: 0 0 18px; font-size: 18px; }
 .side-nav__item span { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
-.side-nav__item:hover { color: var(--text-primary); background: #e9e8e0; }
-.side-nav__item--active { color: var(--accent); background: #fffdfa; border-color: #e8d7d1; box-shadow: 0 1px 3px rgb(45 43 36 / 4%); font-weight: 600; }
+.side-nav__item:hover { color: var(--text-primary); background: var(--surface-sunken); }
+.side-nav__item--active { color: var(--accent); background: var(--surface-raised); border-color: var(--accent-line); box-shadow: var(--sheen); font-weight: 600; }
 .sidebar-footnote { display: flex; align-items: center; gap: 8px; margin-top: auto; padding: 12px 7px 2px; color: var(--text-muted); font-size: 12px; }
 .sidebar-footnote__dot { width: 7px; height: 7px; flex: 0 0 7px; background: var(--success); border-radius: 50%; }
 .app-shell--nav-collapsed .sidebar-brand-row { flex-direction: column; justify-content: center; gap: 10px; padding-right: 0; padding-left: 0; }

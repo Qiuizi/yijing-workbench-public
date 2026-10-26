@@ -1,0 +1,320 @@
+/* ============================================================
+   易经起卦工作台 · design tokens (v2)
+   ------------------------------------------------------------
+   与官网共享同一套设计语言：
+   - light：米白纸面、墨字、陶红点缀、铜金细线
+   - dark ：深墨绿纸面、暖白字、铜金微光（不用纯黑，不简单反色）
+
+   约定：
+   1. 组件只引用语义 token；不写死色值、字号、圆角。
+   2. Element Plus 变量在这里统一桥接到语义 token，组件层不再逐个覆盖色值。
+   3. 旧变量名（--surface-muted / --border / --accent ...）保持兼容。
+   ============================================================ */
+
+:root {
+  /* ---------- raw palette · rice paper ---------- */
+  --c-paper-50: #fdfbf6;
+  --c-paper-100: #f7f5ef;
+  --c-paper-200: #f2eee4;
+  --c-paper-300: #eae4d6;
+  --c-paper-400: #ded5c1;
+
+  /* ---------- raw palette · ink ---------- */
+  --c-ink-900: #222a26;
+  --c-ink-700: #3d4841;
+  --c-ink-600: #4f574f;
+  --c-ink-500: #646b63;
+
+  /* ---------- raw palette · night ---------- */
+  --c-night-950: #0f1713;
+  --c-night-900: #121a16;
+  --c-night-850: #17211c;
+  --c-night-800: #1b2620;
+  --c-night-750: #202c25;
+
+  /* ---------- raw palette · clay / bronze / jade ---------- */
+  --c-clay-700: #83382a;
+  --c-clay-600: #a04a38;
+  --c-clay-500: #b15a45;
+  --c-clay-400: #c4785f;
+  --c-clay-100: #f6e7e1;
+
+  --c-bronze-700: #7a6023;
+  --c-bronze-600: #80641f;
+  --c-bronze-300: #d3b57c;
+
+  --c-jade-600: #3f6449;
+  --c-jade-400: #7fa48b;
+  --c-amber-600: #7f5c1d;
+  --c-amber-400: #c3a05f;
+
+  /* ---------- shape ---------- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* ---------- space ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+
+  /* ---------- type ---------- */
+  --font-ui: 'Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  --font-classic: 'KaiTi', 'STKaiti', 'Songti SC', 'SimSun', serif;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 19px;
+  --text-2xl: 24px;
+  --text-display: 30px;
+  --lh-tight: 1.35;
+  --lh-base: 1.7;
+
+  /* ---------- motion ---------- */
+  --ease-out: cubic-bezier(.22, .68, .28, 1);
+  --ease-soft: cubic-bezier(.4, .12, .2, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 420ms;
+
+  /* 主内容区左右留白；顶栏与内容列共用同一条竖线。 */
+  --shell-pad: clamp(20px, 3.3vw, 52px);
+}
+
+/* ============================================================
+   light
+   ============================================================ */
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: var(--c-paper-100);
+  --surface: var(--c-paper-50);
+  --surface-muted: var(--c-paper-200);
+  --surface-raised: #fffefb;
+  --surface-sunken: var(--c-paper-300);
+
+  --text-primary: var(--c-ink-900);
+  --text-secondary: var(--c-ink-600);
+  --text-muted: var(--c-ink-500);
+  --text-faint: #8a9087;
+
+  --border: #e6dfd0;
+  --border-strong: #d5cbb8;
+  --border-hairline: rgba(34, 42, 38, .08);
+
+  --accent: var(--c-clay-600);
+  --accent-hover: var(--c-clay-700);
+  --accent-soft: var(--c-clay-100);
+  --accent-line: rgba(160, 74, 56, .3);
+  /* 落在强调色上的文字：浅色用米白，夜间反转为深墨（避免白字压浅赭） */
+  --text-inverse: var(--c-paper-50);
+
+  --bronze: var(--c-bronze-600);
+  --bronze-soft: #f1e7cd;
+
+  --success: var(--c-jade-600);
+  --success-soft: #e8efe6;
+  --warning: var(--c-amber-600);
+  --warning-soft: #f6efdd;
+  --danger: #8c3a31;
+  --danger-soft: #f8ebe7;
+  --info: #4d6577;
+  --info-soft: #eaf0f3;
+
+  --shadow-panel: 0 1px 2px rgba(34, 42, 38, .04), 0 12px 28px -20px rgba(34, 42, 38, .22);
+  --shadow-pop: 0 2px 6px rgba(34, 42, 38, .06), 0 24px 48px -28px rgba(34, 42, 38, .3);
+  --sheen: inset 0 1px 0 rgba(255, 255, 255, .7);
+
+  --ink-mark: #3f4a43;
+}
+
+/* ============================================================
+   dark · 夜（深墨绿，不反色）
+   ============================================================ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: var(--c-night-900);
+  --surface: var(--c-night-850);
+  --surface-muted: var(--c-night-800);
+  --surface-raised: var(--c-night-750);
+  --surface-sunken: var(--c-night-950);
+
+  --text-primary: #e5e0d2;
+  --text-secondary: #acb3a9;
+  --text-muted: #8a9289;
+  --text-faint: #737b73;
+
+  --border: #2a362e;
+  --border-strong: #3a473d;
+  --border-hairline: rgba(233, 228, 214, .07);
+
+  --accent: var(--c-clay-400);
+  --accent-hover: #d18d75;
+  --accent-soft: #2c211d;
+  --accent-line: rgba(196, 120, 95, .34);
+  --text-inverse: #131a16;
+
+  --bronze: var(--c-bronze-300);
+  --bronze-soft: #2a261c;
+
+  --success: var(--c-jade-400);
+  --success-soft: #1c2822;
+  --warning: var(--c-amber-400);
+  --warning-soft: #282217;
+  --danger: #d08a7a;
+  --danger-soft: #2b1f1e;
+  --info: #9db4bf;
+  --info-soft: #1d262b;
+
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, .3), 0 14px 30px -22px rgba(0, 0, 0, .6);
+  --shadow-pop: 0 2px 8px rgba(0, 0, 0, .36), 0 26px 52px -30px rgba(0, 0, 0, .72);
+  --sheen: inset 0 1px 0 rgba(233, 228, 214, .06);
+
+  --ink-mark: #cfcab9;
+
+  /* 夜间字号整体降一档，阅读更收，不显肿 */
+  --text-xs: 11.5px;
+  --text-sm: 12.5px;
+  --text-base: 13.5px;
+  --text-lg: 15px;
+  --text-xl: 18px;
+  --text-2xl: 22px;
+  --text-display: 28px;
+}
+
+/* ============================================================
+   Element Plus bridge
+   ============================================================ */
+:root,
+:root[data-theme='dark'] {
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: color-mix(in srgb, var(--accent) 70%, var(--surface));
+  --el-color-primary-light-5: color-mix(in srgb, var(--accent) 46%, var(--surface));
+  --el-color-primary-light-7: color-mix(in srgb, var(--accent) 26%, var(--surface));
+  --el-color-primary-light-8: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  --el-color-primary-light-9: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  --el-color-primary-dark-2: var(--accent-hover);
+
+  --el-color-success: var(--success);
+  --el-color-warning: var(--warning);
+  --el-color-danger: var(--danger);
+  --el-color-error: var(--danger);
+  --el-color-info: var(--info);
+
+  --el-bg-color: var(--surface);
+  --el-bg-color-page: var(--bg);
+  --el-bg-color-overlay: var(--surface-raised);
+  --el-fill-color: var(--surface-muted);
+  --el-fill-color-light: var(--surface-muted);
+  --el-fill-color-lighter: var(--surface);
+  --el-fill-color-blank: var(--surface);
+
+  --el-text-color-primary: var(--text-primary);
+  --el-text-color-regular: var(--text-secondary);
+  --el-text-color-secondary: var(--text-muted);
+  --el-text-color-placeholder: var(--text-faint);
+  --el-text-color-disabled: var(--text-faint);
+
+  --el-border-color: var(--border);
+  --el-border-color-light: var(--border);
+  --el-border-color-lighter: var(--border);
+  --el-border-color-extra-light: var(--border);
+  --el-border-color-dark: var(--border-strong);
+  --el-border-color-darker: var(--border-strong);
+
+  --el-border-radius-base: var(--radius-sm);
+  --el-font-family: var(--font-ui);
+  --el-box-shadow-light: var(--shadow-panel);
+  --el-box-shadow: var(--shadow-pop);
+  --el-mask-color: color-mix(in srgb, var(--c-night-950) 62%, transparent);
+  --el-disabled-bg-color: var(--surface-muted);
+
+  /* 旧别名，组件样式表仍在用 */
+  --paper: var(--surface);
+  --paper-deep: var(--bg);
+  --ink: var(--text-primary);
+  --ink-soft: var(--text-secondary);
+  --rule: var(--border);
+  --vermilion: var(--accent);
+  --vermilion-soft: var(--accent-soft);
+  --jade: var(--success);
+}
+
+/* ---------- 强调色填充：文字颜色跟主题走 ---------- */
+.el-button--primary {
+  --el-button-text-color: var(--text-inverse);
+  --el-button-hover-text-color: var(--text-inverse);
+  --el-button-active-text-color: var(--text-inverse);
+  --el-button-bg-color: var(--accent);
+  --el-button-border-color: var(--accent);
+  --el-button-hover-bg-color: var(--accent-hover);
+  --el-button-hover-border-color: var(--accent-hover);
+  --el-button-active-bg-color: var(--accent-hover);
+  --el-button-active-border-color: var(--accent-hover);
+  --el-button-disabled-bg-color: color-mix(in srgb, var(--accent) 42%, var(--surface));
+  --el-button-disabled-border-color: transparent;
+  --el-button-disabled-text-color: var(--text-inverse);
+}
+.el-radio-button__original-radio:checked + .el-radio-button__inner {
+  color: var(--text-inverse);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: -1px 0 0 0 var(--accent);
+}
+.el-radio-button__original-radio:checked + .el-radio-button__inner:hover { color: var(--text-inverse); }
+
+/* ============================================================
+   base atoms
+   ============================================================ */
+body {
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  line-height: var(--lh-base);
+  color: var(--text-primary);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: var(--c-paper-50); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 数字：时间 / 编号 / 版本 / 统计一律等宽，避免跳动 */
+:where(time, code, kbd, samp, .num, .tabular) {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* 图标与文字并排时整体下沉 1/8em，消除「浮在字上」的感觉 */
+:where(.el-icon) { vertical-align: -0.125em; }
+.i-baseline { transform: translateY(0.0625em); }
+
+/* 细而安静的滚动条，夜间不再出现刺眼的白色轨道 */
+* { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-faint); background-clip: content-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}

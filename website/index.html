@@ -7,6 +7,21 @@
     <meta name="description" content="本地优先的 Windows 桌面应用：铜钱起卦、手动起卦、传统取辞、六爻纳甲与六十四卦原文阅读皆在本机完成；卦爻辞转录自维基文库《周易》。" />
     <link rel="canonical" href="https://qiuizi.github.io/yijing-workbench-public/" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="theme-color" content="#f8f4ea" />
+    <script>
+      // 先定主题再绘制，避免夜间模式闪白。
+      (function () {
+        try {
+          var saved = localStorage.getItem('yijing-theme');
+          var dark = saved
+            ? saved === 'dark'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        } catch (e) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Yijing Workbench" />
     <meta property="og:title" content="易经起卦工作台 · Yijing Workbench" />

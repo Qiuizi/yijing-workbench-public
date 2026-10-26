@@ -73,23 +73,21 @@
 .learning-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   color: var(--learning-ink);
   text-decoration: none;
-  font-size: 20px;
-  letter-spacing: 0.05em;
-}
-.learning-brand__mark {
-  width: 28px;
-  height: 31px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #b86c57;
-  border-radius: 3px;
-  color: var(--learning-red);
   font-size: 19px;
-  line-height: 1;
-  letter-spacing: 0;
+  letter-spacing: 0.06em;
+}
+.learning-brand .brand-mark {
+  margin-right: 2px;
+}
+.learning-brand__sub {
+  color: var(--learning-muted);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  padding-left: 8px;
+  border-left: 1px solid var(--learning-line);
 }
 .learning-top-nav {
   display: flex;
@@ -257,7 +255,7 @@
   border-radius: 4px;
 }
 .learning-preview-frame::-webkit-scrollbar-thumb {
-  background: #66705e;
+  background: #424b40;
   border-radius: 4px;
 }
 .learning-matrix {
@@ -354,7 +352,7 @@
 .app-shell--learning .hexagram-glyph--compact .gua-line__segment {
   height: 100%;
   border-radius: 0.5px;
-  background: #687260;
+  background: var(--ink-mark);
 }
 .learning-matrix__entry .hexagram-glyph--compact {
   width: 42px;
@@ -378,13 +376,13 @@
   color: var(--learning-muted);
 }
 .learning-preview-frame {
-  background: #242d26;
-  color: #f7f7ef;
+  background: #17211c;
+  color: #e9e4d6;
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #66705e transparent;
+  scrollbar-color: #424b40 transparent;
   padding: 0;
 }
 .learning-preview {
@@ -399,14 +397,14 @@
   justify-content: space-between;
   align-items: center;
   gap: 15px;
-  color: #cfd7c8;
+  color: #c4bfb0;
   font-size: 12px;
   line-height: 20px;
 }
 .learning-preview__top i {
   font-size: 11px;
   font-style: normal;
-  color: #b9c5af;
+  color: #a6a294;
   margin-left: 3px;
 }
 .learning-preview__heading {
@@ -416,7 +414,7 @@
   margin: 0 0 8px;
   font-size: 12px;
   line-height: 20px;
-  color: #cfd7c8;
+  color: #c4bfb0;
 }
 .learning-preview__heading h2 {
   margin: 0;
@@ -442,12 +440,12 @@
   height: 8px;
 }
 .learning-preview .hexagram-glyph--compact .gua-line__segment {
-  background: #e6ecdd;
+  background: #ded9c9;
 }
 .learning-preview__figure > span {
   font-size: 12px;
   line-height: 20px;
-  color: #cfd7c8;
+  color: #c4bfb0;
 }
 .learning-preview__original {
   margin-top: 0;
@@ -455,7 +453,7 @@
 .learning-preview__original > span {
   font-size: 12px;
   line-height: 20px;
-  color: #cfd7c8;
+  color: #c4bfb0;
 }
 .learning-preview__original blockquote {
   margin: 10px 0 0;
@@ -467,7 +465,7 @@
   min-height: 58px;
   font-size: 14px;
   line-height: 1.8;
-  color: #d3dbca;
+  color: #bdb8a9;
   margin: 13px 0 0;
 }
 .learning-preview__error > button {
@@ -476,7 +474,7 @@
   border: 0;
   border-bottom: 1px solid currentColor;
   background: transparent;
-  color: #f0ecdf;
+  color: #ded8c8;
   font-size: 13px;
   line-height: 30px;
   cursor: pointer;
@@ -492,14 +490,14 @@
   margin-top: 22px;
   border: 0;
   border-radius: 3px;
-  background: #eef1e5;
-  color: #283022;
+  background: #e8e2d2;
+  color: #1b211c;
   font-size: 14px;
   line-height: 24px;
   cursor: pointer;
 }
 .learning-preview__read:hover {
-  background: #fffef9;
+  background: #f6f1e3;
 }
 .learning-preview__read > span {
   font-size: 19px;
@@ -510,7 +508,7 @@
   margin-top: 12px;
   font-size: 12px;
   line-height: 20px;
-  color: #cfd7c8;
+  color: #c4bfb0;
   text-decoration: none;
 }
 .learning-preview__source:hover {
@@ -519,7 +517,7 @@
 }
 .learning-preview-frame button:focus-visible,
 .learning-preview-frame a:focus-visible {
-  outline-color: #e6ecdd;
+  outline-color: #ded9c9;
 }
 .learning-preview-empty {
   padding: 48px 34px;
@@ -531,7 +529,7 @@
 .learning-preview-empty > span {
   font-size: 14px;
   line-height: 1.8;
-  color: #cfd7c8;
+  color: #c4bfb0;
 }
 .app-shell--learning .learning-state {
   display: flex;

@@ -24,6 +24,8 @@ export const en: Dictionary = {
     langLabel: 'Switch to Chinese',
     primaryLabel: 'Primary',
     mobileLabel: 'Mobile',
+    themeToDark: 'Switch to night mode',
+    themeToLight: 'Switch to day mode',
   },
   hero: {
     overline: 'Local-first · Source-verifiable · Windows desktop',

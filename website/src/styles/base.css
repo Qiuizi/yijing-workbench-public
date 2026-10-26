@@ -1,39 +1,53 @@
 /* ============================================================
-   base — reset, typography, texture, focus, shared atoms
+   base — reset, type, tone hand-off, texture, atoms
+   ------------------------------------------------------------
+   本文件只做三件事：
+   1. 让相邻区块通过「色阶溶解」咬合，而不是画一条硬线；
+   2. 给正文/标题一套平静的字号与行高节奏；
+   3. 提供按钮、图标基线、等宽数字、焦点、墨晕等共用原子。
    ============================================================ */
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  background: var(--bg);
+}
 
-/* sticky header height + breathing room, so #features/#hexagrams/#download
-   never land underneath the header. */
-section[id] { scroll-margin-top: 88px; }
+/* sticky header height + breathing room */
+section[id] { scroll-margin-top: 84px; }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  color: var(--shell-text);
-  background: var(--ink-950);
+  color: var(--text-1);
+  background: var(--bg);
   font-family: var(--font-serif);
-  font-size: 16px;
-  line-height: 1.7;
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  transition: background-color var(--dur-2) var(--ease-soft), color var(--dur-2) var(--ease-soft);
 }
 
 img, svg { display: block; max-width: 100%; }
 button { font: inherit; color: inherit; }
 a { color: inherit; text-decoration: none; }
 
-h1, h2, h3, h4 { margin: 0; font-weight: 600; }
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: .01em;
+  color: var(--text-1);
+}
 
-::selection { background: var(--cinnabar); color: #fffdf8; }
+::selection { background: var(--accent); color: var(--c-paper-50); }
 
 :focus-visible {
-  outline: 2px solid var(--gold-300);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
 }
 
 .sr-only {
@@ -51,52 +65,48 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; }
   top: 8px; left: 8px;
   z-index: 100;
   padding: 10px 16px;
-  background: var(--gold-400);
-  color: var(--ink-950);
+  background: var(--text-1);
+  color: var(--surface-1);
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: var(--t-sm);
   border-radius: var(--radius-sm);
   transform: translateY(-200%);
-  transition: transform .18s ease;
+  transition: transform var(--dur-2) var(--ease-out);
 }
 .skip-link:focus { transform: translateY(0); }
 
-/* ---------- texture: pure-CSS grain (no bitmap) ---------- */
-.grain-dark {
-  position: relative;
-}
-.grain-dark::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: .55;
-  background-image:
-    radial-gradient(rgba(214, 185, 121, .05) 0.6px, transparent 0.6px),
-    radial-gradient(rgba(246, 242, 233, .04) 0.5px, transparent 0.5px);
-  background-size: 6px 9px, 11px 5px;
-  background-position: 0 0, 4px 5px;
+/* ---------- 数字：一律等宽，时间/编号/版本/SHA 不跳动 ---------- */
+:where(code, kbd, samp, time, .num, .tnum) {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
 }
 
-.paper {
-  color-scheme: light;
-  background-color: var(--paper);
-  color: var(--ink-text);
-  position: relative;
+/* ---------- 图标基线：并排时整体下沉 1/8em，避免「浮在字上」 ---------- */
+:where(.icon, .with-icon > svg, .btn > svg, .nav-desktop a > svg) {
+  display: inline-block;
+  vertical-align: -0.125em;
 }
-.paper-noise::before {
+.inline-icon { transform: translateY(0.0625em); }
+
+/* ---------- tone hand-off：区块之间用色阶咬合 ---------- */
+.section {
+  position: relative;
+  padding-block: clamp(54px, 5.8vw, 88px);
+  background: var(--tone, var(--bg));
+  transition: background-color var(--dur-2) var(--ease-soft);
+}
+/* 顶部把上一块的色调溶解进来，收尾不留硬边 */
+.section--blend::before {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: 0 0 auto;
+  height: clamp(64px, 7vw, 92px);
+  background: linear-gradient(180deg, var(--tone-prev, transparent) 0%, transparent 100%);
   pointer-events: none;
-  opacity: .6;
-  background-image:
-    radial-gradient(rgba(43, 51, 46, .05) 0.6px, transparent 0.6px),
-    radial-gradient(rgba(169, 71, 54, .045) 0.5px, transparent 0.5px),
-    linear-gradient(90deg, rgba(255, 255, 255, .5), transparent 42%, rgba(43, 51, 46, .03) 68%);
-  background-size: 6px 8px, 10px 5px, 100% 100%;
-  background-position: 0 0, 3px 4px, 0 0;
 }
+
+/* ---------- 纹理与纸面类已随色阶咬合方案退场：
+   当前所有区块用 --tone 色阶 + section--blend 表达层次，不再叠颗粒。 ---------- */
 
 /* ---------- layout atoms ---------- */
 .shell { width: 100%; }
@@ -104,84 +114,91 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; }
   width: 100%;
   max-width: var(--maxw);
   margin: 0 auto;
-  padding-left: clamp(20px, 4vw, 56px);
-  padding-right: clamp(20px, 4vw, 56px);
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
 }
 
-.section { padding-top: var(--s-9); padding-bottom: var(--s-9); }
-
-.section-head { max-width: 760px; margin-bottom: var(--s-7); }
+/* ---------- section head：级差收敛，不再「一重一空」 ---------- */
+.section-head { max-width: 720px; margin-bottom: clamp(26px, 3.2vw, 42px); }
 .section-head .overline {
   display: block;
   margin: 0 0 var(--s-3);
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: var(--t-micro);
   font-weight: 600;
-  letter-spacing: .28em;
-  text-transform: uppercase;
-  color: var(--gold-500);
+  letter-spacing: var(--ls-overline);
+  color: var(--bronze);
 }
 .section-head h2 {
-  font-size: clamp(28px, 4vw, 40px);
-  line-height: 1.25;
-  letter-spacing: .02em;
+  font-size: var(--t-h2);
+  line-height: var(--lh-h2);
+  letter-spacing: .015em;
+  font-weight: 600;
 }
 .section-head p {
   margin: var(--s-4) 0 0;
-  max-width: 620px;
-  color: var(--ink-text-soft);
-  font-size: 16px;
+  max-width: 600px;
+  color: var(--text-2);
+  font-size: var(--t-sm);
+  line-height: 1.8;
 }
-.shell .section-head .overline { color: var(--gold-300); }
-.shell .section-head h2 { color: var(--shell-text); }
-.shell .section-head p { color: var(--shell-text-soft); }
 
-/* ---------- buttons ---------- */
+/* ---------- buttons：短促、克制，不做漂浮 ---------- */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 12px 22px;
+  gap: 8px;
+  padding: 11px 22px;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: var(--t-sm);
   font-weight: 600;
-  letter-spacing: .03em;
+  letter-spacing: .04em;
   cursor: pointer;
-  transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-1) var(--ease-out);
 }
-.btn:hover { transform: translateY(-1px); }
-.btn:active { transform: translateY(0); }
+.btn:active { transform: translateY(0.5px); }
 
 .btn--primary {
-  background: var(--gold-400);
-  color: var(--ink-950);
+  background: var(--accent);
+  color: var(--text-inverse);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .14) inset, 0 6px 18px -12px rgba(131, 56, 42, .5);
 }
-.btn--primary:hover { background: var(--gold-300); }
+.btn--primary:hover { background: var(--accent-strong); }
+.btn--primary:active { background: var(--accent-strong); }
 
 .btn--ghost {
-  background: transparent;
-  color: var(--shell-text);
-  border-color: rgba(214, 185, 121, .45);
+  background: color-mix(in srgb, var(--surface-1) 60%, transparent);
+  color: var(--text-1);
+  border-color: var(--line);
 }
-.btn--ghost:hover { border-color: var(--gold-300); background: rgba(214, 185, 121, .08); }
+.btn--ghost:hover { border-color: var(--accent-line); color: var(--accent); background: var(--surface-1); }
 
-.btn--paper-ghost {
-  background: transparent;
-  color: var(--ink-text);
-  border-color: rgba(43, 51, 46, .35);
+/* ---------- 墨晕：聚焦时极轻的边缘扩散，不做模糊滤镜 ---------- */
+.ink-field {
+  position: relative;
+  border-radius: var(--radius-md);
+  transition: box-shadow var(--dur-3) var(--ease-out);
 }
-.btn--paper-ghost:hover { border-color: var(--gold-500); color: var(--gold-600); }
-
-/* ---------- gold hairline ornament ---------- */
-.rule-gold {
-  height: 1px;
-  border: 0;
-  margin: 0;
-  background: linear-gradient(90deg, transparent, rgba(201, 162, 39, .55), transparent);
+.ink-field::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
+  background: radial-gradient(60% 80% at 24% 50%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 72%);
+  transition: opacity var(--dur-3) var(--ease-out);
+  pointer-events: none;
 }
+.ink-field:focus-within { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent); }
+.ink-field:focus-within::after { opacity: 1; }
 
 /* ---------- motion ---------- */
 @media (prefers-reduced-motion: reduce) {
@@ -196,9 +213,15 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; }
 
 .reveal {
   opacity: 0;
-  animation: rise-in .7s cubic-bezier(.2, .7, .2, 1) forwards;
+  animation: rise-in .52s var(--ease-out) forwards;
 }
 @keyframes rise-in {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes seal-pop {
+  0% { transform: scale(1); }
+  38% { transform: scale(1.06); }
+  100% { transform: scale(1); }
 }

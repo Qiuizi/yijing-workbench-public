@@ -13,6 +13,8 @@ async function renderSettings() {
   app.component('el-select', defineComponent({ setup: (_, { attrs, slots }) => () => h('div', attrs, slots.default?.()) }))
   app.component('el-option', defineComponent({ setup: (_, { attrs }) => () => h('span', attrs) }))
   app.component('el-button', defineComponent({ setup: (_, { attrs, slots }) => () => h('button', attrs, slots.default?.()) }))
+  app.component('el-radio-group', defineComponent({ setup: (_, { slots }) => () => h('div', { class: 'el-radio-group' }, slots.default?.()) }))
+  app.component('el-radio-button', defineComponent({ setup: (_, { attrs, slots }) => () => h('label', attrs, slots.default?.()) }))
   app.directive('loading', () => {})
   return renderToString(app)
 }
@@ -28,6 +30,9 @@ describe('SettingsPage grouping', () => {
     expect(html).toContain('关闭 AI 后')
     expect(html).toContain('https://privacy.microsoft.com/privacystatement')
     expect(html).toContain(`V${appVersion}`)
+    expect(html).toContain('外观')
+    expect(html).toContain('跟随系统')
+    expect(html).toContain('夜间')
     expect(html).toContain('关于')
     expect(html).toContain('当前界面版本')
     expect(html).toContain('应用代码许可证')

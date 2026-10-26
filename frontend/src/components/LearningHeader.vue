@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { Page } from '../navigation'
+import BrandMark from './BrandMark.vue'
+
 const emit = defineEmits<{ navigate: [page: Page] }>()
 const pages = [
   { id: 'divination', label: '起卦' },
@@ -15,9 +17,11 @@ const pages = [
       class="learning-brand"
       aria-label="易经学习首页"
       @click.prevent="emit('navigate', 'learning')"
-      ><span class="learning-brand__mark">易</span
-      ><span class="learning-brand__name">易经</span></a
     >
+      <BrandMark :size="26" />
+      <span class="learning-brand__name">易经</span>
+      <span class="learning-brand__sub">起卦工作台</span>
+    </a>
     <nav class="learning-top-nav" aria-label="主导航">
       <button
         v-for="page in pages"
