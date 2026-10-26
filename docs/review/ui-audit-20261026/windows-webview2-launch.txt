@@ -1,0 +1,20 @@
+# 真实 Tauri/WebView2 启动记录（隔离标识 cn.yijing.workbench.uiaudit，合成数据库）
+
+$ npx tauri build --no-bundle
+→ 构建成功，产物 frontend/src-tauri/target/release/yijing-workbench.exe
+
+窗口: 1333x916 physical, dpi=192 (scale=2.0), title=易经起卦工作台
+sidecar 日志:
+2026-10-26 15:30:57,174 INFO uvicorn.error Started server process [20576]
+2026-10-26 15:30:57,174 INFO uvicorn.error Waiting for application startup.
+2026-10-26 15:30:57,629 INFO uvicorn.error Application startup complete.
+2026-10-26 15:30:57,630 INFO uvicorn.error Uvicorn running on http://127.0.0.1:3117 (Press CTRL+C to quit)
+2026-10-26 15:32:40,554 INFO uvicorn.error Started server process [67232]
+2026-10-26 15:32:40,556 INFO uvicorn.error Waiting for application startup.
+2026-10-26 15:32:40,566 INFO uvicorn.error Application startup complete.
+2026-10-26 15:32:40,566 INFO uvicorn.error Uvicorn running on http://127.0.0.1:14174 (Press CTRL+C to quit)
+
+真实用户数据库核对（启动前后一致）:
+  路径 C:\Users\123\AppData\Local/cn.yijing.workbench/history.sqlite3
+  size 282624  mtime 2026-10-12 17:51:43
+  sha256 b0a8d304686848131fbcd3c61e30b1f7d359dee969cdbc3a0b79f17318943452

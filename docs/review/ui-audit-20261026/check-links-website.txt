@@ -1,0 +1,8 @@
+$ MSYS_NO_PATHCONV=1 node website/scripts/check-links.mjs --dir website/dist --base /yijing-workbench-public/
+链接检查 · dist: D:\Qiuizi\project\yijing\website\dist · base: /yijing-workbench-public/
+HTML 文件: 2 个；内部链接: 6（缺失 0）；外链: 2 个唯一 URL
+--- 外链清单（加 --external 检查状态码）---
+  https://qiuizi.github.io/yijing-workbench-public/
+  https://qiuizi.github.io/yijing-workbench-public/en/
+汇总: ✓ 通过
+exit=0
