@@ -213,9 +213,11 @@ const shaGroups = computed(() => {
   overflow: hidden;
   padding: clamp(20px, 2.6vw, 30px);
   border-radius: var(--radius-lg);
-  background:
+  /* 底色必须落在 background-color 上：纯渐变会让「有效背景」不可测（也影响高对比模式） */
+  background-color: var(--shell-bg);
+  background-image:
     radial-gradient(90% 120% at 8% 0%, rgba(211, 181, 124, .08), transparent 58%),
-    linear-gradient(180deg, var(--shell-bg-2), var(--shell-bg));
+    linear-gradient(180deg, color-mix(in srgb, var(--shell-bg-2) 92%, transparent), transparent 72%);
   border: 1px solid rgba(211, 181, 124, .16);
   box-shadow:
     inset 0 1px 0 rgba(233, 228, 214, .07),

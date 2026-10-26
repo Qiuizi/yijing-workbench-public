@@ -255,6 +255,7 @@ function pad(n: number): string {
 }
 .cell__lines { width: 42%; color: var(--text-1); }
 .cell.is-selected .cell__lines { color: var(--accent); }
+.cell.is-selected .cell__order { color: var(--accent); }
 .cell__name { font-size: var(--t-sm); font-weight: 600; letter-spacing: .04em; color: var(--text-1); }
 .atlas__empty { grid-column: 1 / -1; padding: var(--s-7) 0; text-align: center; color: var(--text-3); }
 

@@ -220,9 +220,12 @@ app : page title 32→30 (−2) · field label 16→15 (−1) · textarea 15→1
 | 桌面类型 | `npm --prefix frontend run typecheck` | 通过 | `checks/typecheck-frontend.txt` |
 | 桌面构建 | `npm --prefix frontend run build` | 通过（既有 chunk >500kB 警告未变） | `checks/build-frontend.txt` |
 | 桌面单测 | `npm --prefix frontend run test` | 24 文件 / 108 用例全通过（新增设置页外观分组断言） | `checks/test-frontend.txt` |
-| 对比度 | `python scripts/check_contrast.py` | 66 组全过 | `checks/contrast.txt` |
+| 对比度（token） | `python scripts/check_contrast.py` | 66 组全过 | `checks/contrast.txt` |
+| 对比度（DOM 实测） | `node scripts/audit-contrast.mjs` | 10 个页面/主题组合 **0 处**低于 AA（修复前 38 处） | `checks/dom-contrast.txt` |
 | 交互回归 | `node scripts/ui-regression.mjs` | 15/15 通过，控制台 0 错误 | `checks/interaction-regression.txt` |
 | 字号降档 | `node scripts/measure-type.mjs` | 两端 16 个元素均下降 | `checks/type-scale.txt` |
+
+> DOM 审计的做法：遍历所有文字节点，向上逐层合成有效背景（含半透明与 `background-color`），按字号/字重选 4.5 或 3.0 阈值。它抓到了 token 校验抓不到的三类问题：官网墨玉块用纯渐变当底色（有效背景不可测，已改 `background-color`）、夜间历史列表问句仍是 `#44453e`（1.7:1）、Element Plus 的 `--el-radio-button-*` 定义在组件自身导致白色文字压浅赭（3.39:1）。修复前后记录见 `checks/dom-contrast-before.txt` / `checks/dom-contrast.txt`。
 
 交互回归覆盖：主题按钮切换并持久化、`color-scheme` 同步、图鉴 64 格选中与搜索收敛、图库 9 张点击与方向键、SHA 复制反馈、英文页文案与导航、桌面端起卦链路（问句/4 标签/双卦卡）、排盘页与 6 爻表格生成、设置页外观分组与切回浅色、两端控制台无错误。
 
@@ -233,7 +236,7 @@ app : page title 32→30 (−2) · field label 16→15 (−1) · textarea 15→1
 ## 12. 未完成项与风险
 
 1. **真实 Tauri 窗口 / WebView2 未在真机截图验证**。本轮改用同内核 Chromium（CDP）逐视口取证；WebView2 的字体渲染与 DPI 缩放仍是 `NOT_TESTED`。
-2. **深色下 Element Plus 浮层只做变量桥接**（`--el-bg-color` 等），未逐组件截图核对 `el-dialog` / `el-message-box` / `el-select` 下拉。当前窗口内的抽屉、消息、选择器均已截图确认。
+2. **深色下 Element Plus 浮层只做变量桥接**（`--el-bg-color` 等），未逐组件截图核对 `el-dialog` / `el-message-box` / `el-select` 下拉；DOM 审计也只覆盖了当前渲染出的节点（抽屉与下拉未展开取样）。
 3. **桌面端仍有大量写死 px 字号**（`style.css` 273 条、`LearningPage.css` 88 条）。夜间降档只覆盖了阅读面 30 余条规则与全部 token 化文本；微标签（9–11px）有意不降。彻底方案是把组件字号全部迁到 `--text-*`，属于下一轮的结构性工作。
 4. **学习页仍有一批 9–12px 小字**（文王序、页码、脚注）。夜间未调整，仅调色；更细的可读性优化需要与 Qiuizi 确认是否允许放大版面。
 5. **官网 `og-cover.svg` 仍是旧标记**（5 线母题）。分享封面不在本轮 UI 面内，未改动；如需统一，是一张图的独立改动。

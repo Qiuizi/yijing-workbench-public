@@ -55,11 +55,18 @@ before 由 `git archive HEAD` 快照 + 复用依赖启动，同视口、同合�
 | 官网链接检查 | 6 内部链接 0 缺失 | `checks/check-links.txt` |
 | 桌面端 typecheck / build | 通过（既有 chunk 警告未变） | `checks/typecheck-frontend.txt`、`checks/build-frontend.txt` |
 | 桌面端单测 | 24 文件 / 108 用例全通过 | `checks/test-frontend.txt` |
-| 对比度 | 66 组全过 | `checks/contrast.txt` |
+| 对比度（token） | 66 组全过 | `checks/contrast.txt` |
+| 对比度（DOM 实测） | 10 个页面/主题组合 0 处低于 AA（修复前 38 处） | `checks/dom-contrast.txt` |
 | 交互回归 | 15/15，控制台 0 错误 | `checks/interaction-regression.txt` |
 | 夜间字号 | 18 个元素均下降 | `checks/type-scale.txt` |
 
 三个零依赖脚本（`scripts/shoot.mjs`、`ui-regression.mjs`、`measure-type.mjs`）用 Node 22 自带 WebSocket 直连 CDP，不新增 npm 依赖、不改锁文件。
+
+## 审计抓到的三个真问题（已修）
+
+1. 官网墨玉块用 `background: linear-gradient(...)` 当底色，`background-color` 是透明的 —— 视觉没问题，但有效背景不可测、高对比模式下会塌。已改 `background-color` + `background-image` 分层。
+2. 夜间历史列表问句仍是早期的 `#44453e`，对深底 **1.7:1**。已改 `var(--text-primary)`，分隔线一并 token 化。
+3. Element Plus 把 `--el-radio-button-*` 定义在 `.el-radio-button` 自身，`:root` 级改写无效，选中项白字压浅赭 **3.39:1**。已改为同层级改写，并统一禁用态文字（原本白字压浅底不可见）。
 
 ## 未完成与风险
 

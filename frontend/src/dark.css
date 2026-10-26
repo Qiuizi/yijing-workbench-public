@@ -242,3 +242,12 @@
 [data-theme='dark'] .learning-preview__original > p { font-size: 13.5px; }
 [data-theme='dark'] .learning-preview__read { font-size: 13.5px; }
 [data-theme='dark'] .learning-preview__heading h2 { font-size: 42px; }
+
+/* ---------- 对比度审计补漏（scripts/audit-contrast.mjs 报出的项） ---------- */
+[data-theme='dark'] .side-nav__item--active { color: var(--accent-hover); }
+[data-theme='dark'] .history-page__item { border-bottom-color: var(--border); }
+[data-theme='dark'] .najia-analysis-options { background: var(--surface-muted); }
+[data-theme='dark'] .najia-analysis-card pre { background: var(--surface); color: var(--text-secondary); }
+[data-theme='dark'] .reading-card--changed,
+[data-theme='dark'] .changed-text-card { background: var(--surface-muted); }
+[data-theme='dark'] .settings-category > summary > span { color: var(--text-muted); }

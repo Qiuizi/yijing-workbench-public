@@ -57,9 +57,8 @@ defineProps<{ locale: 'zh' | 'en'; t: Dictionary }>()
   padding: clamp(22px, 2.8vw, 34px);
   border-radius: var(--radius-lg);
   color: var(--shell-text);
-  background:
-    radial-gradient(80% 120% at 6% 0%, rgba(211, 181, 124, .07), transparent 55%),
-    var(--shell-bg);
+  background-color: var(--shell-bg);
+  background-image: radial-gradient(80% 120% at 6% 0%, rgba(211, 181, 124, .07), transparent 55%);
   border: 1px solid rgba(211, 181, 124, .14);
   box-shadow:
     inset 0 1px 0 rgba(233, 228, 214, .06),
