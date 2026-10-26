@@ -51,7 +51,7 @@ function closeDrawer() {
         </span>
       </a>
 
-      <nav class="nav-desktop" aria-label="Primary">
+      <nav class="nav-desktop" :aria-label="t.nav.primaryLabel">
         <a v-for="item in navItems" :key="item.href" :href="item.href">{{ item.label }}</a>
       </nav>
 
@@ -78,7 +78,7 @@ function closeDrawer() {
     </div>
 
     <div id="mobile-nav" class="mobile-drawer" :class="{ 'is-open': open }">
-      <nav aria-label="Mobile">
+      <nav :aria-label="t.nav.mobileLabel">
         <a v-for="item in navItems" :key="item.href" :href="item.href" @click="closeDrawer">{{ item.label }}</a>
       </nav>
       <div class="mobile-drawer__actions">
@@ -185,7 +185,12 @@ function closeDrawer() {
     opacity: 0;
     transition: max-height .28s ease, opacity .28s ease, padding .28s ease;
   }
-  .mobile-drawer.is-open { max-height: 420px; opacity: 1; }
+  /* 展开后按视口高度放开并允许内部滚动，避免内容被 max-height 截断。 */
+  .mobile-drawer.is-open {
+    max-height: calc(100dvh - 72px);
+    overflow-y: auto;
+    opacity: 1;
+  }
   .mobile-drawer nav { display: grid; gap: 4px; }
   .mobile-drawer nav a {
     padding: 12px 0;

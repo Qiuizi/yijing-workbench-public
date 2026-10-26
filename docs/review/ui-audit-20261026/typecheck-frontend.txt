@@ -1,0 +1,6 @@
+$ npm --prefix frontend run typecheck
+
+> yijing-workbench@3.3.1 typecheck
+> vue-tsc --noEmit
+
+exit=0

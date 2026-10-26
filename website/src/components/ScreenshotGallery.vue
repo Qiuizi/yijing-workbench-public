@@ -70,7 +70,7 @@ function onKeydown(e: KeyboardEvent) {
         ref="tablist"
         class="gallery__tabs"
         role="tablist"
-        aria-label="Screenshots"
+        :aria-label="t.gallery.tablistLabel"
         @keydown="onKeydown"
       >
         <button
@@ -112,10 +112,8 @@ function onKeydown(e: KeyboardEvent) {
   border: 1px solid rgba(43, 51, 46, .35);
 }
 .gallery__frame img {
-  width: calc(100% + 12px);
-  max-width: none;
+  width: 100%;
   height: auto;
-  margin-right: -12px;
 }
 .gallery__main-cap {
   display: flex;

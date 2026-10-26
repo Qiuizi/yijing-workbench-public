@@ -191,7 +191,8 @@ function pad(n: number): string {
 
 .atlas__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  /* 64 卦在桌面端按 8 栏排布，正好 8×8，不留孤行。 */
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 8px;
 }
 .cell {
@@ -248,7 +249,12 @@ function pad(n: number): string {
   .atlas__layout { grid-template-columns: 1fr; }
   .atlas__detail { position: static; }
 }
-@media (max-width: 560px) {
-  .atlas__grid { grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 6px; }
+@media (max-width: 700px) {
+  .atlas__grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+}
+@media (max-width: 480px) {
+  .atlas__grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+  .cell { padding: 10px 5px 8px; }
+  .cell__name { font-size: 14px; }
 }
 </style>

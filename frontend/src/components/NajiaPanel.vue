@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { api } from '../api'
 import type { Divination, NajiaChart, NajiaInput, NajiaLine, NajiaOptions, NajiaRuleModule } from '../types'
@@ -20,6 +20,23 @@ const manualUseGodCandidate = ref('')
 const chart = ref<NajiaChart | null>(null)
 const loading = ref(false)
 const saving = ref(false)
+// 窄窗口下排盘表会横向溢出，给一个确定的提示，不依赖系统的覆盖式滚动条。
+const tableScroll = ref<HTMLElement | null>(null)
+const tableOverflowing = ref(false)
+let tableObserver: ResizeObserver | null = null
+
+function measureTableOverflow() {
+  const el = tableScroll.value
+  tableOverflowing.value = el ? el.scrollWidth > el.clientWidth + 1 : false
+}
+
+function syncTableObserver() {
+  if (typeof ResizeObserver === 'undefined') return
+  if (!tableObserver) tableObserver = new ResizeObserver(measureTableOverflow)
+  tableObserver.disconnect()
+  if (tableScroll.value) tableObserver.observe(tableScroll.value)
+  measureTableOverflow()
+}
 
 const rows = computed(() => {
   if (!chart.value) return []
@@ -43,11 +60,18 @@ watch(() => props.divination?.id, () => {
       localDateTime.value = chart.value.calendar_context.local_datetime
       timezone.value = chart.value.calendar_context.timezone
     }
-  } else {
-    timestampSource.value = 'manual'
-    localDateTime.value = ''
-  }
+    } else {
+      timestampSource.value = 'manual'
+      localDateTime.value = ''
+    }
 }, { immediate: true })
+
+watch(chart, async () => {
+  await nextTick()
+  syncTableObserver()
+})
+
+onBeforeUnmount(() => tableObserver?.disconnect())
 
 onMounted(async () => {
   loading.value = true
@@ -193,7 +217,14 @@ function prettyResults(module: NajiaRuleModule) {
         <div><span>六爻排盘</span><small>上爻在上，初爻在下</small></div>
         <span>起卦数据 · {{ chart.timestamp_source === 'automatic' ? '自动历法' : '手动干支' }}</span>
       </div>
-      <div class="najia-table-scroll" role="region" aria-label="六爻排盘表，可横向滚动" tabindex="0">
+      <div
+        ref="tableScroll"
+        class="najia-table-scroll"
+        :class="{ 'najia-table-scroll--overflow': tableOverflowing }"
+        role="region"
+        aria-label="六爻排盘表，可横向滚动"
+        tabindex="0"
+      >
         <table class="najia-table">
           <thead>
             <tr>
@@ -217,6 +248,7 @@ function prettyResults(module: NajiaRuleModule) {
           </tbody>
         </table>
       </div>
+      <p v-if="tableOverflowing" class="najia-table-hint">表格可横向滚动，查看更多列</p>
       <p class="najia-source-note">{{ chart.rules_note }}</p>
       <div class="najia-sources">
         <a v-for="source in chart.sources" :key="source.revision_id" :href="source.url" target="_blank" rel="noreferrer">

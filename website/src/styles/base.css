@@ -5,6 +5,10 @@
 
 html { scroll-behavior: smooth; }
 
+/* sticky header height + breathing room, so #features/#hexagrams/#download
+   never land underneath the header. */
+section[id] { scroll-margin-top: 88px; }
+
 body {
   margin: 0;
   min-width: 320px;
