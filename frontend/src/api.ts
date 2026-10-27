@@ -39,6 +39,14 @@ function aiMessageFieldSummary(message: AISessionMessage): Pick<AIDiagnosticEven
 interface DesktopConnection { baseUrl: string; token: string }
 interface DesktopMigrationStatus { can_import: boolean; history_count: number; ai_session_count: number; has_settings: boolean }
 interface DesktopImportResult { imported: boolean; counts: Record<string, number>; backup_path: string; source_preserved: boolean }
+export interface UpdateBackupResult {
+  path: string
+  bytes: number
+  history_count: number
+  ai_session_count: number
+  settings_preserved: boolean
+  created_at: string
+}
 
 async function appFetch(path: string, init?: RequestInit): Promise<Response> {
   if (!isTauri()) return fetch(path, init)
@@ -78,6 +86,7 @@ export const api = {
   importDesktopDatabase: (sourcePath: string) => request<DesktopImportResult>('/api/desktop/migration/import', {
     method: 'POST', body: JSON.stringify({ source_path: sourcePath }),
   }),
+  updateBackup: () => request<UpdateBackupResult>('/api/desktop/update/backup', { method: 'POST' }),
   preferences: () => request<AppPreferences>('/api/preferences'),
   updatePreferences: (defaultMethod: 'coins' | 'manual', timezone: string, aiDefaultMode: 'classical' | 'najia') => request<AppPreferences>('/api/preferences', {
     method: 'PUT', body: JSON.stringify({ default_method: defaultMethod, timezone, ai_default_mode: aiDefaultMode }),

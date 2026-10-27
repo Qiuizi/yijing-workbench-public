@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "易经起卦工作台",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "identifier": "cn.yijing.workbench",
   "build": {
     "frontendDist": "../dist",
@@ -56,6 +56,18 @@
           "SimpChinese",
           "English"
         ]
+      }
+    },
+    "createUpdaterArtifacts": false
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/Qiuizi/yijing-workbench-public/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDJGNDA4QkNGQzkyRjA3N0IKUldSN0J5L0p6NHRBTC8wN3MweVVMbXV1YVNEY3pqZ2Y1Z2Q3enhlY2hyZElXNnZlTlBRM2xTT1oK",
+      "windows": {
+        "installMode": "currentUser"
       }
     }
   }

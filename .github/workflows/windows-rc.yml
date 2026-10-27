@@ -1,4 +1,4 @@
-name: Windows 3.3.1 unsigned release candidate
+name: Windows x64 candidate build
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - 'frontend/**'
       - 'backend/**'
+      - 'scripts/updater/**'
       - 'scripts/build_sidecar.ps1'
       - 'scripts/smoke_packaged_sidecar.ps1'
       - 'requirements-win.lock.txt'
@@ -15,6 +16,7 @@ on:
     paths:
       - 'frontend/**'
       - 'backend/**'
+      - 'scripts/updater/**'
       - 'scripts/build_sidecar.ps1'
       - 'scripts/smoke_packaged_sidecar.ps1'
       - 'requirements-win.lock.txt'
@@ -25,15 +27,15 @@ on:
 permissions:
   contents: read
 
+# 候选构建绝不使用正式签名私钥：要么用仓库级候选密钥，要么用本次运行生成的临时密钥。
 # A successful PR merge-test build is NOT the artifact of main's actual commit.
-# A push to main builds a separate, attributable release candidate.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   windows-rc:
-    name: Windows x64 tests and unsigned NSIS candidate
+    name: Windows x64 tests and NSIS candidate
     runs-on: windows-2022
     timeout-minutes: 80
     defaults:
@@ -56,6 +58,19 @@ jobs:
         with:
           toolchain: '1.98.1'
           targets: x86_64-pc-windows-msvc
+
+      - name: Read and validate application version
+        run: |
+          $conf = Get-Content 'frontend/src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
+          $version = $conf.version
+          if ($version -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$') { throw "Invalid version: $version" }
+          "YIJING_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Output "Building version $version"
+
+      - name: Verify all version sources agree
+        run: |
+          python -c "from scripts.updater.manifest import assert_versions_consistent; print('versions ok:', assert_versions_consistent('.'))"
+          if ($LASTEXITCODE -ne 0) { throw 'version consistency check failed' }
 
       - name: Install frozen Python release dependencies
         run: |
@@ -106,57 +121,97 @@ jobs:
           "YIJING_VC_REDIST_DIR=$redist" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Write-Output "Verified Microsoft CRT at $redist"
 
-      - name: Build PyInstaller sidecar and Tauri NSIS candidate
+      # 更新签名只在构建步骤内可见：优先用仓库级候选密钥；缺失时为本次运行生成临时密钥。
+      # 两条路径产出的 .sig 都能与构建时注入的公钥配对，且都不会触及正式私钥。
+      - name: Build PyInstaller sidecar and updater-signed NSIS candidate
         working-directory: frontend
-        run: npm run desktop:build
+        env:
+          YIJING_CANDIDATE_SIGNING_KEY: ${{ secrets.YIJING_CANDIDATE_SIGNING_KEY }}
+          YIJING_CANDIDATE_SIGNING_KEY_PASSWORD: ${{ secrets.YIJING_CANDIDATE_SIGNING_KEY_PASSWORD }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $override = Join-Path $env:RUNNER_TEMP 'updater-override.json'
+          $pubkey = (Get-Content 'src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json).plugins.updater.pubkey
+
+          if ([string]::IsNullOrWhiteSpace($env:YIJING_CANDIDATE_SIGNING_KEY)) {
+            $keyPath = Join-Path $env:RUNNER_TEMP 'candidate-ephemeral.key'
+            npx tauri signer generate --ci -p 'candidate-ephemeral' -w $keyPath | Out-Null
+            $env:TAURI_SIGNING_PRIVATE_KEY = (Get-Content -LiteralPath $keyPath -Raw)
+            $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = 'candidate-ephemeral'
+            $pubkey = (Get-Content -LiteralPath "$keyPath.pub" -Raw)
+            Write-Output 'signing: ephemeral candidate key (no repository secret configured)'
+          } else {
+            $env:TAURI_SIGNING_PRIVATE_KEY = $env:YIJING_CANDIDATE_SIGNING_KEY
+            $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = $env:YIJING_CANDIDATE_SIGNING_KEY_PASSWORD
+            Write-Output 'signing: repository candidate key'
+          }
+
+          @{
+            bundle = @{ createUpdaterArtifacts = $true }
+            plugins = @{ updater = @{ pubkey = $pubkey } }
+          } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $override -Encoding utf8
+
+          npm run build:sidecar
+          if ($LASTEXITCODE -ne 0) { throw 'sidecar build failed' }
+          npx tauri build --bundles nsis --config $override
+          if ($LASTEXITCODE -ne 0) { throw 'tauri build failed' }
+          Write-Output 'candidate build finished'
 
       - name: Smoke-test the bundled Python sidecar (synthetic profile only)
         run: |
+          $report = Join-Path $env:RUNNER_TEMP "yijing-rc-$($env:YIJING_VERSION)"
+          New-Item -ItemType Directory -Force -Path $report | Out-Null
           & ./scripts/smoke_packaged_sidecar.ps1 `
             -SidecarPath 'frontend/src-tauri/binaries/yijing-backend/yijing-backend.exe' `
-            -ReportPath (Join-Path $env:RUNNER_TEMP 'yijing-rc-3.3.1/sidecar-smoke.json')
+            -ReportPath (Join-Path $report 'sidecar-smoke.json')
 
-      - name: Check candidate binaries and produce SHA-256 manifest
+      - name: Assemble candidate release metadata and verify the updater contract
         env:
           YIJING_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
         run: |
-          $bundleDir = 'frontend\src-tauri\target\release\bundle\nsis'
-          $installers = @(Get-ChildItem -LiteralPath $bundleDir -File -Filter '*setup.exe')
-          if ($installers.Count -ne 1) { throw "Expected one NSIS setup, found $($installers.Count)" }
-          $setup = $installers[0]
-          if ($setup.Name -notmatch '3[._]3[._]1') { throw "Unexpected version in NSIS filename: $($setup.Name)" }
-          $sidecar = 'frontend\src-tauri\binaries\yijing-backend\yijing-backend.exe'
-          if (-not (Test-Path -LiteralPath $sidecar)) { throw 'Missing sidecar binary' }
-          $out = Join-Path $env:RUNNER_TEMP 'yijing-rc-3.3.1'
-          New-Item -ItemType Directory -Force -Path $out | Out-Null
-          Copy-Item -LiteralPath $setup.FullName -Destination $out
-          $setupHash = (Get-FileHash -LiteralPath $setup.FullName -Algorithm SHA256).Hash
-          $sidecarHash = (Get-FileHash -LiteralPath $sidecar -Algorithm SHA256).Hash
-          $manifest = [ordered]@{
-            version = '3.3.1'
+          $version = $env:YIJING_VERSION
+          $out = Join-Path $env:RUNNER_TEMP "yijing-rc-$version"
+          python scripts/updater/build_release_dir.py `
+            --bundle-dir 'frontend/src-tauri/target/release/bundle/nsis' `
+            --out $out `
+            --tag "v$version" `
+            --version $version `
+            --notes "候选构建（未发布），源码 $($env:GITHUB_SHA)。" `
+            --source-sha $env:GITHUB_SHA `
+            --source-ref $env:GITHUB_REF `
+            --source-trigger $env:GITHUB_EVENT_NAME `
+            --workflow-run "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID" `
+            --sidecar 'frontend/src-tauri/binaries/yijing-backend/yijing-backend.exe'
+          if ($LASTEXITCODE -ne 0) { throw 'build_release_dir failed' }
+
+          python scripts/updater/verify_release.py $out --tag "v$version" --expected-version $version
+          if ($LASTEXITCODE -ne 0) { throw 'release contract verification failed' }
+
+          $sidecar = 'frontend/src-tauri/binaries/yijing-backend/yijing-backend.exe'
+          $releaseManifest = Get-Content (Join-Path $out 'manifest.json') -Raw | ConvertFrom-Json
+          $rc = [ordered]@{
+            version = $version
             source_sha = $env:GITHUB_SHA
             source_trigger = $env:GITHUB_EVENT_NAME
             source_ref = $env:GITHUB_REF
             pr_head_sha = $env:YIJING_PR_HEAD_SHA
             install_mode = 'currentUser'
+            updater_signed = $true
+            updater_pubkey_is_qa = $releaseManifest.updater_pubkey_is_qa
             sidecar_smoke = 'PASS'
             gui_upgrade_tested = $false
-            status = 'unsigned-rc-not-manually-accepted'
-            installer = [ordered]@{
-              filename = $setup.Name
-              bytes = $setup.Length
-              sha256 = $setupHash
-            }
-            sidecar_sha256 = $sidecarHash
+            status = 'candidate-not-for-update-channel'
+            installer = $releaseManifest.installer
+            sidecar_sha256 = (Get-FileHash -LiteralPath $sidecar -Algorithm SHA256).Hash
             windows_runner = $env:ImageVersion
           }
-          ($manifest | ConvertTo-Json -Depth 6) | Set-Content -LiteralPath (Join-Path $out 'manifest-rc.json') -Encoding utf8
-          Write-Output "Candidate $($setup.Name) sha256=$setupHash"
+          ($rc | ConvertTo-Json -Depth 6) | Set-Content -LiteralPath (Join-Path $out 'manifest-rc.json') -Encoding utf8
+          Get-ChildItem -LiteralPath $out | Select-Object Name, Length
 
-      - name: Upload candidate binaries (not a public Release)
+      - name: Upload candidate artifacts (never a public Release, never the update channel)
         uses: actions/upload-artifact@v4
         with:
-          name: yijing-workbench-3.3.1-windows-x64-unsigned-rc
-          path: ${{ runner.temp }}/yijing-rc-3.3.1/*
+          name: yijing-workbench-${{ env.YIJING_VERSION }}-windows-x64-rc
+          path: ${{ runner.temp }}/yijing-rc-${{ env.YIJING_VERSION }}/*
           if-no-files-found: error
           retention-days: 14

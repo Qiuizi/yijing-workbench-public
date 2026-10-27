@@ -1,0 +1,244 @@
+# 正式发布流水线：只在人工授权 + 受保护环境 + 正式签名密钥下运行。
+#
+# 与候选流水线（windows-rc.yml）的区别：
+#   - 固定 main 的 commit SHA，先确认该 SHA 的 CI 全绿；
+#   - 使用 release 环境的正式签名私钥构建（候选构建永远拿不到它）；
+#   - 先以 draft 上传全部资产并回读校验，最后才 publish 成不可变正式 Release；
+#   - latest.json 随 Release 一起上传，只有发布成功后才会出现在 releases/latest 上。
+#
+# 任何一步失败都不会把半成品暴露到更新渠道：draft Release 不是 releases/latest。
+name: Publish stable release (updater-enabled)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '要发布的版本号（必须与仓库版本一致，例如 3.3.2）'
+        required: true
+      confirm:
+        description: '再次输入同一个版本号以确认发布'
+        required: true
+      notes_file:
+        description: 'Release 说明文件路径'
+        required: true
+        default: 'docs/release-notes-v3.3.2.md'
+      dry_run:
+        description: '只构建与校验，不创建 Release（默认开启）'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: yijing-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'Qiuizi/yijing-workbench-public'
+    runs-on: windows-2022
+    timeout-minutes: 120
+    # 需要 Environment 审批：未获独立授权时任务不会开始
+    environment: release
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      TAG: v${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Guard inputs and repository state
+        run: |
+          $version = '${{ inputs.version }}'
+          $confirm = '${{ inputs.confirm }}'
+          if ($version -ne $confirm) { throw "确认版本($confirm)与目标版本($version)不一致" }
+          if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "只允许稳定版本号，收到：$version" }
+          if ('${{ github.ref }}' -ne 'refs/heads/main') { throw "发布只能从 main 触发" }
+          $head = git rev-parse HEAD
+          Write-Output "SOURCE_SHA=$head"
+          "YIJING_SOURCE_SHA=$head" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.98.1'
+          targets: x86_64-pc-windows-msvc
+
+      - name: Require version consistency and a production public key
+        run: |
+          python scripts/updater/release_gate.py --expect-version '${{ inputs.version }}'
+          if ($LASTEXITCODE -ne 0) { throw 'version/public key gate failed' }
+
+      - name: Require green CI for this exact commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $sha = $env:YIJING_SOURCE_SHA
+          $repo = $env:GITHUB_REPOSITORY
+          $runs = gh api "repos/$repo/commits/$sha/check-runs?per_page=100" | ConvertFrom-Json
+          $required = @(
+            'Windows x64 tests and NSIS candidate',
+            'Frontend tests and build',
+            'Backend regression tests',
+            'website-validation'
+          )
+          $bad = @()
+          foreach ($name in $required) {
+            $matches = @($runs.check_runs | Where-Object { $_.name -eq $name })
+            if ($matches.Count -eq 0) { $bad += "$name (missing)"; continue }
+            $latest = $matches | Sort-Object started_at -Descending | Select-Object -First 1
+            if ($latest.status -ne 'completed' -or $latest.conclusion -ne 'success') {
+              $bad += "$name ($($latest.status)/$($latest.conclusion))"
+            }
+          }
+          if ($bad.Count -gt 0) { throw "CI 未全绿：$($bad -join ', ')" }
+          Write-Output "CI green for $sha"
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install -r requirements-win.lock.txt
+          .\.venv\Scripts\python.exe -m pip install -r requirements-build.txt
+          Push-Location frontend
+          npm ci
+          Pop-Location
+
+      - name: Regression tests before the release build
+        run: |
+          .\.venv\Scripts\python.exe -X utf8 -m pytest
+          Push-Location frontend
+          npm test
+          npm run typecheck
+          Pop-Location
+
+      - name: Build sidecar and NSIS installer with the production signing key
+        working-directory: frontend
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:TAURI_SIGNING_PRIVATE_KEY)) {
+            throw '缺少正式签名私钥：请在 release 环境配置 TAURI_SIGNING_PRIVATE_KEY'
+          }
+          npm run build:sidecar
+          if ($LASTEXITCODE -ne 0) { throw 'sidecar build failed' }
+          # createUpdaterArtifacts 在基础配置里是关闭的，只在正式构建时打开
+          npx tauri build --bundles nsis --config '{"bundle":{"createUpdaterArtifacts":true}}'
+          if ($LASTEXITCODE -ne 0) { throw 'tauri build failed' }
+
+      - name: Assemble release directory and verify the contract (production gate)
+        run: |
+          $version = '${{ inputs.version }}'
+          python scripts/updater/build_release_dir.py `
+            --bundle-dir 'frontend/src-tauri/target/release/bundle/nsis' `
+            --out 'release' `
+            --tag $env:TAG `
+            --version $version `
+            --notes-file '${{ inputs.notes_file }}' `
+            --source-sha $env:YIJING_SOURCE_SHA `
+            --source-ref '${{ github.ref }}' `
+            --source-trigger '${{ github.event_name }}' `
+            --workflow-run "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID" `
+            --sidecar 'frontend/src-tauri/binaries/yijing-backend/yijing-backend.exe'
+          if ($LASTEXITCODE -ne 0) { throw 'build_release_dir failed' }
+
+          python scripts/updater/verify_release.py release --tag $env:TAG --expected-version $version --production
+          if ($LASTEXITCODE -ne 0) { throw 'production release verification failed' }
+
+      - name: Upload release bundle as workflow artifact (audit trail)
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ env.TAG }}
+          path: release/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Stop here on dry run
+        if: ${{ inputs.dry_run }}
+        run: Write-Output "dry_run=true：已构建并校验，但未创建 Release、未更新官网。"
+
+      - name: Create draft release and upload assets
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create $env:TAG --draft --title "易经起卦工作台 $env:TAG" --notes-file '${{ inputs.notes_file }}'
+          if ($LASTEXITCODE -ne 0) { throw 'draft release creation failed' }
+          gh release upload $env:TAG (Get-ChildItem release -File | ForEach-Object { $_.FullName })
+          if ($LASTEXITCODE -ne 0) { throw 'asset upload failed' }
+
+      - name: Re-read published assets from the API and verify
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = '${{ inputs.version }}'
+          $release = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$env:TAG" | ConvertFrom-Json
+          $names = @($release.assets | ForEach-Object { $_.name })
+          foreach ($required in @("yijing-workbench-$version-x64-setup.exe", "yijing-workbench-$version-x64-setup.exe.sig", 'latest.json', 'SHA256SUMS.txt', 'manifest.json', 'PROVENANCE.md')) {
+            if ($names -notcontains $required) { throw "Release 资产缺失：$required" }
+          }
+          $installer = $release.assets | Where-Object { $_.name -eq "yijing-workbench-$version-x64-setup.exe" }
+          $assets = Get-ChildItem release -File
+          $local = $assets | Where-Object { $_.Name -eq $installer.name }
+          if ($installer.size -ne $local.Length) { throw '上传后的安装包字节数与本地不一致' }
+          if ($installer.digest -and ($installer.digest -ne "sha256:$($local | ForEach-Object { (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower() })")) {
+            throw '上传后的安装包摘要与本地不一致'
+          }
+          Write-Output "assets verified: $($names -join ', ')"
+
+      - name: Publish（不可逆：之后 latest.json 才会进入更新渠道）
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release edit $env:TAG --draft=false --latest
+          if ($LASTEXITCODE -ne 0) { throw 'publish failed' }
+
+      - name: Verify the public latest.json served by releases/latest
+        if: ${{ !inputs.dry_run }}
+        run: |
+          $url = "https://github.com/$env:GITHUB_REPOSITORY/releases/latest/download/latest.json"
+          $local = Get-Content 'release/latest.json' -Raw
+          $ok = $false
+          for ($i = 0; $i -lt 10; $i++) {
+            try {
+              $remote = (Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 20).Content
+              if ($remote.Trim() -eq $local.Trim()) { $ok = $true; break }
+            } catch { }
+            Start-Sleep -Seconds 15
+          }
+          if (-not $ok) { throw '公开 latest.json 与本地不一致（CDN 未收敛或上传错误）' }
+          Write-Output 'public latest.json matches'
+
+      - name: Update the website release facts and deploy Pages
+        if: ${{ !inputs.dry_run }}
+        run: |
+          python scripts/updater/update_site_release.py --release-dir release --tag $env:TAG
+          if ($LASTEXITCODE -ne 0) { throw 'site facts update failed' }
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add website/src/links.ts
+          git diff --cached --quiet; if ($LASTEXITCODE -eq 0) { Write-Output 'site already up to date'; return }
+          git commit -m "release(site): point download to $env:TAG"
+          git push origin HEAD:main
+
+      - name: Summary
+        run: |
+          Write-Output "tag=$env:TAG source=$env:YIJING_SOURCE_SHA dry_run=${{ inputs.dry_run }}"
+          Get-ChildItem release -File | Select-Object Name, Length | Format-Table -AutoSize

@@ -168,6 +168,61 @@ fn ensure_backend(app: &tauri::AppHandle, state: &BackendState) -> Result<Backen
     Err(format!("本地 Python 后端连续 3 次启动失败（{last_failure}）。请检查本机日志：{}", log_path.display()))
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct UpdatePreparation {
+    stopped: bool,
+    app_version: String,
+    data_dir: String,
+    database_path: String,
+}
+
+/// 安装更新前调用：停掉 Python sidecar 并等待进程真正退出。
+///
+/// NSIS 覆盖安装需要替换 `binaries/yijing-backend/yijing-backend.exe`；
+/// 只要 sidecar 还活着，Windows 就会拒绝覆盖该文件，安装会在中途失败。
+/// 数据库一致性备份由前端先调用 `/api/desktop/update/backup` 完成，
+/// 这里只负责"停服务 + 报告路径"，不做任何文件复制。
+#[tauri::command]
+async fn prepare_for_update(app: tauri::AppHandle, state: State<'_, BackendState>) -> Result<UpdatePreparation, String> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut stopped = false;
+        if let Ok(mut runtime) = state.runtime.lock() {
+            if let Some(mut child) = runtime.child.take() {
+                let _ = child.kill();
+                let started = Instant::now();
+                while started.elapsed() < Duration::from_secs(5) {
+                    match child.try_wait() {
+                        Ok(Some(_)) => {
+                            stopped = true;
+                            break;
+                        }
+                        Ok(None) => thread::sleep(Duration::from_millis(80)),
+                        Err(_) => break,
+                    }
+                }
+            } else {
+                // 没有 sidecar 在跑，等价于已停止
+                stopped = true;
+            }
+            runtime.port = None;
+            runtime.token = None;
+        }
+
+        let data_dir = app.path().app_local_data_dir()
+            .map_err(|_| "无法定位 Windows 用户数据目录".to_string())?;
+        Ok(UpdatePreparation {
+            stopped,
+            app_version: app.package_info().version.to_string(),
+            data_dir: data_dir.display().to_string(),
+            database_path: data_dir.join("history.sqlite3").display().to_string(),
+        })
+    })
+    .await
+    .map_err(|_| "停止本地服务任务失败".to_string())?
+}
+
 #[tauri::command]
 async fn backend_connection(app: tauri::AppHandle, state: State<'_, BackendState>) -> Result<BackendConnection, String> {
     let state = state.inner().clone();
@@ -220,9 +275,12 @@ pub fn run() {
             }
         }))
     .plugin(tauri_plugin_dialog::init())
+        // Updater 只在这里注册；权限在 capabilities/default.json 里按窗口最小化授予。
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_log::Builder::new().level(log::LevelFilter::Warn).build())
         .manage(BackendState::default())
-        .invoke_handler(tauri::generate_handler![backend_connection, export_markdown]);
+        .invoke_handler(tauri::generate_handler![backend_connection, export_markdown, prepare_for_update]);
 
     builder
         .build(tauri::generate_context!())

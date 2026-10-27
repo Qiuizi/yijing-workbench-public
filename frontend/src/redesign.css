@@ -731,3 +731,108 @@ h3 {
   .topbar .topbar__lead .topbar__brand { display: block; }
   .topbar__section { font-size: var(--text-base); }
 }
+
+/* ============================================================
+   应用更新面板（设置 → 关于应用）
+   状态：idle / checking / available / deferred / downloading /
+        installing / completed / up_to_date / offline / error
+   ============================================================ */
+.settings-state--ok { color: var(--success); background: var(--success-soft); border-color: color-mix(in srgb, var(--success) 24%, transparent); }
+.settings-state--warn { color: var(--warning); background: var(--warning-soft); border-color: color-mix(in srgb, var(--warning) 24%, transparent); }
+.settings-state--danger { color: var(--danger); background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 26%, transparent); }
+.settings-state--muted { color: var(--text-muted); background: var(--surface-muted); border-color: var(--border); }
+
+.update-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px 16px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.update-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+.update-card__version { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+.update-card__label { font-size: 12px; color: var(--text-muted); }
+.update-card__version strong {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.update-card__meta { font-size: 11.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.update-card__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.update-auto {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.update-auto:has(.el-switch.is-disabled) { cursor: not-allowed; color: var(--text-muted); }
+
+.update-card__body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.update-release__title { display: flex; align-items: baseline; gap: 10px; margin: 0; }
+.update-release__title strong { font-size: 16px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.update-release__date { font-size: 12px; color: var(--text-muted); }
+.update-release__notes {
+  margin: 6px 0 0;
+  max-width: 560px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+.update-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.update-progress { display: grid; gap: 8px; }
+.update-bar {
+  height: 8px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  overflow: hidden;
+}
+.update-bar__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width var(--dur-2) var(--ease-out);
+}
+.update-progress__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.update-note { margin: 0; font-size: 12.5px; line-height: 1.7; color: var(--text-secondary); }
+.update-error {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--danger) 26%, transparent);
+  background: var(--danger-soft);
+}
+.update-error p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--danger); }
+.update-privacy { margin: 0; font-size: 11.5px; line-height: 1.7; color: var(--text-muted); }
