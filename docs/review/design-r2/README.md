@@ -18,6 +18,7 @@ PR：[#40](https://github.com/Qiuizi/yijing-workbench-public/pull/40) · 分支 
 | 对比度 | token 66 组 + DOM 实测 1118 个文字节点，全部达 WCAG AA（严格 4.5 亦全过） |
 | 浮层 | Element Plus 五类浮层在深浅两套主题下实开验收 64/64 |
 | 实机 | 真实 Tauri/WebView2（Edg/155，dpr=2）通过 9+2 项检查 |
+| 线上 | PR #40 合并（`0bcfabe`）+ Pages 部署成功，线上 13/13 |
 | 回归 | typecheck / build / 单测 108 项 / 链接检查 / 交互回归 15 项 全部通过；控制台 0 错误 |
 | 改动规模 | 90 个文件，+4242 / −697 行（含 37 张截图与校验记录） |
 
@@ -328,6 +329,31 @@ PASS  页面无内容 → 2          exit=2（不得报 0 违规）
 | 交互回归 | 15/15 | `checks/interaction-regression.txt` |
 | 实机 WebView2 | 9/9 + 2/2 | `checks/webview2.txt` |
 
+### 12.6 合并与线上部署验证
+
+| 项目 | 结果 |
+| --- | --- |
+| PR #40 | 已合并（squash），merge commit `0bcfabe`，2026-10-26T13:30:31Z |
+| 合并前 CI（e3adf51） | Backend / Frontend / website-validation / Windows x64 + NSIS 四项全 pass |
+| Pages 部署 | `Deploy website to Pages` run 40331182930，commit `0bcfabe`，**success** |
+| 线上验收 | `node scripts/pages-live-check.mjs` → **13/13**，连续两次运行结果一致（`checks/pages-live.txt`） |
+
+线上逐项：中文首页标题/语言正确；新版品牌标记与主题按钮在线；5 个色阶咬合区块；图鉴 64 格、图库 9 张；首屏浅色 → 点按钮转夜间 → 刷新仍为夜间；移动端 390px 抽屉可展开且 4 个入口、无横向溢出；英文页正常；控制台 0 错误。
+
+**下载区与真实 Release 的逐项核对**（`checks/release-crosscheck.txt`）：
+
+| 项 | GitHub Release v3.3.1 | 线上页面 |
+| --- | --- | --- |
+| tag | `v3.3.1` | `v3.3.1` |
+| 文件名 | `yijing-workbench-3.3.1-x64-setup.exe` | 同 |
+| 字节数 | 16,097,113 | `15.4 MiB · 16,097,113 bytes` |
+| SHA-256 | `3CAECBE2…B086B74`（与 SHA256SUMS.txt 逐字一致） | `3CAECBE2…B086B74` |
+| 发布日期 | 2026-10-24 | `2026-10-24` |
+
+线上截图：`after/pages-home-light.png`、`pages-home-dark.png`、`pages-mobile-drawer.png`、`pages-en.png`。
+
+> 测试隔离：`pages-live-check.mjs` 在每次运行前用 CDP `Storage.clearDataForOrigin` 清掉线上 origin 的 localStorage —— 否则上一次运行的 `yijing-theme=dark` 会让「首屏浅色」断言误报（首次复跑就是这样失败的，已修）。
+
 ## 13. 未完成项与风险
 
 1. ~~真实 Tauri 窗口 / WebView2 未在真机截图验证~~ —— 已在 12.4 补齐（Edg/155，dpr=2，9+2 项通过）。仍未覆盖：多显示器拖拽、系统缩放中途切换、WebView2 缺失时的 Bootstrapper 路径。
@@ -335,7 +361,7 @@ PASS  页面无内容 → 2          exit=2（不得报 0 违规）
 3. **桌面端仍有大量写死 px 字号**（`style.css` 273 条、`LearningPage.css` 88 条）。夜间降档只覆盖了阅读面 30 余条规则与全部 token 化文本；微标签（9–11px）有意不降。彻底方案是把组件字号全部迁到 `--text-*`，属于下一轮的结构性工作。
 4. **学习页仍有一批 9–12px 小字**（文王序、页码、脚注）。夜间未调整，仅调色；更细的可读性优化需要与 Qiuizi 确认是否允许放大版面。
 5. **官网 `og-cover.svg` 仍是旧标记**（5 线母题）。分享封面不在本轮 UI 面内，未改动；如需统一，是一张图的独立改动。
-6. **GitHub Pages 线上未验证**：只验证了 `/yijing-workbench-public/` 基径下的生产产物，线上是否更新需合并后由 `pages.yml` 确认。
+6. ~~GitHub Pages 线上未验证~~ —— 已在 12.6 完成（run 40331182930，13/13）。仍未覆盖：GitHub Pages 的 CDN 缓存刷新时间窗、部署回滚演练、自定义域名/HTTPS 证书。
 7. **`prefers-reduced-motion` 覆盖**：两端均已把动画降到 0.01ms，但没有做「关闭墨晕」的独立开关——墨晕本身是纯渐变透明度，降级后即静态。
 8. **未做 A/B 或可用性测试**：字号、间距的取舍来自对比度与版式规则，不是用户实测数据。
 
