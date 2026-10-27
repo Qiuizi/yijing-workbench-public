@@ -1,0 +1,18 @@
+# Release v3.3.1 与线上下载区的逐项比对
+
+## GitHub Release 资产（gh release view）
+tag: v3.3.1
+published: 2026-10-24
+manifest-rc.json  640 bytes  sha256:50a7a83f318fddd4bc380cb9d217c06bfc6129372a637a0c4bf8c9f98cfd54f5
+PROVENANCE.md  935 bytes  sha256:ca9e5865f473a939179d73e67360b5a1ac3501d4df3639306dd5ec2d56e58735
+SHA256SUMS.txt  103 bytes  sha256:ccb3eb76c0b7d56e4722003bb7ad15823ae529f1ac84f9a9d4c93127668bfca5
+sidecar-smoke.json  354 bytes  sha256:4573383306045334598586f669e4947fca4859cdcb1b33c52de2ecf06a061cc9
+yijing-workbench-3.3.1-x64-setup.exe  16097113 bytes  sha256:3caecbe2ce7684805ba5fbe2d8f60767101ccd71565a4ec37bacb2181b086b74
+
+## 官方校验和文件 SHA256SUMS.txt
+3CAECBE2CE7684805BA5FBE2D8F60767101CCD71565A4EC37BACB2181B086B74  yijing-workbench-3.3.1-x64-setup.exe
+
+## 线上页面显示（pages-live-check.mjs 取值）
+PASS  下载区版本与文件名成对出现  — {"tag":"v3.3.1","name":"yijing-workbench-3.3.1-x64-setup.exe"}
+PASS  下载链接指向同版本 Release  — https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.1/yijing-workbench-3.3.1-x64-setup.exe
+  SHA=3CAECBE2CE7684805BA5FBE2D8F60767101CCD71565A4EC37BACB2181B086B74  size=15.4 MiB · 16,097,113 bytes  date=2026-10-24
