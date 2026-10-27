@@ -101,6 +101,7 @@
   sidecar 冒烟 → `build_release_dir.py` 生成 latest.json/SHA256SUMS/manifest/PROVENANCE →
   `verify_release.py`（非生产模式）→ 上传 Artifact。
 - 边界：不创建 Release、不写更新渠道、不接触正式私钥；产物 14 天过期。
+- 实跑记录：run 40466608307（commit `ff87bbe`）——签名构建、sidecar 冒烟、契约校验、Artifact 上传全部通过。
 
 ### B. 正式发布（`.github/workflows/release.yml`）
 
