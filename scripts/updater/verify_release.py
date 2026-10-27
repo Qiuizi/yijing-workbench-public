@@ -39,7 +39,15 @@ def sha256_of(path: Path) -> str:
             digest.update(chunk)
     return digest.hexdigest().upper()
 
-def verify(release_dir: Path, *, tag: str, repo: str, production: bool, expected_version: str | None) -> list[str]:
+def verify(
+    release_dir: Path,
+    *,
+    tag: str,
+    repo: str,
+    production: bool,
+    expected_version: str | None,
+    allow_prerelease: bool = False,
+) -> list[str]:
     problems: list[str] = []
     if not release_dir.is_dir():
         return [f"目录不存在：{release_dir}"]
@@ -50,10 +58,20 @@ def verify(release_dir: Path, *, tag: str, repo: str, production: bool, expected
     if problems:
         return problems
 
-    try:
-        version = manifest.assert_versions_consistent(REPO_ROOT, expected=expected_version)
-    except manifest.UpdaterManifestError as error:
-        return [str(error)]
+    build_manifest = json.loads((release_dir / "manifest.json").read_text(encoding="utf-8"))
+
+    if allow_prerelease:
+        # QA/候选构建用 --config 覆盖版本，仓库版本仍是发布版本，不能拿来做一致性对比
+        version = str(build_manifest.get("version") or expected_version or "")
+        if not manifest.SEMVER_RE.match(version):
+            return [f"manifest.json 的 version 无效：{version!r}"]
+        if expected_version and version != expected_version:
+            return [f"构建版本 {version} 与期望的 {expected_version} 不一致"]
+    else:
+        try:
+            version = manifest.assert_versions_consistent(REPO_ROOT, expected=expected_version)
+        except manifest.UpdaterManifestError as error:
+            return [str(error)]
 
     try:
         asset = manifest.collect_bundle(release_dir, version)
@@ -67,7 +85,6 @@ def verify(release_dir: Path, *, tag: str, repo: str, production: bool, expected
     if recorded.get(asset.filename) != digest:
         problems.append("SHA256SUMS.txt 与安装包实际哈希不一致")
 
-    build_manifest = json.loads((release_dir / "manifest.json").read_text(encoding="utf-8"))
     installer = build_manifest.get("installer", {})
     if installer.get("filename") != asset.filename:
         problems.append("manifest.json 的安装包文件名不一致")
@@ -81,7 +98,9 @@ def verify(release_dir: Path, *, tag: str, repo: str, production: bool, expected
         problems.append(f"manifest.json tag {build_manifest.get('tag')} 与 {tag} 不一致")
 
     latest = json.loads((release_dir / "latest.json").read_text(encoding="utf-8"))
-    errors = manifest.validate_latest_json(latest, expected_version=version, repo=repo, tag=tag)
+    errors = manifest.validate_latest_json(
+        latest, expected_version=version, repo=repo, tag=tag, allow_prerelease=allow_prerelease
+    )
     problems.extend(errors)
     entry = latest.get("platforms", {}).get(manifest.WINDOWS_TARGET, {})
     if isinstance(entry, dict):
@@ -110,6 +129,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo", default="Qiuizi/yijing-workbench-public")
     parser.add_argument("--expected-version", default=None)
     parser.add_argument("--production", action="store_true", help="正式渠道校验：拒绝 QA 公钥")
+    parser.add_argument("--allow-prerelease", action="store_true", help="QA/候选构建允许 3.3.2-qa.N")
     args = parser.parse_args(argv)
 
     problems = verify(
@@ -118,6 +138,7 @@ def main(argv: list[str] | None = None) -> int:
         repo=args.repo,
         production=args.production,
         expected_version=args.expected_version,
+        allow_prerelease=args.allow_prerelease,
     )
     if problems:
         print("发布校验失败：", file=sys.stderr)

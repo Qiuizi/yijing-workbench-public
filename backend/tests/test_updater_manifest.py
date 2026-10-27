@@ -1,5 +1,7 @@
 """更新清单与发布契约的单元测试（不涉及真实签名私钥）。"""
 
+import base64
+import base64
 import json
 import re
 from pathlib import Path
@@ -11,7 +13,14 @@ from scripts.updater.keys import QA_PUBLIC_KEY, app_public_key, describe_public_
 from scripts.updater.update_site_release import apply_to_source
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SIGNATURE = "untrusted comment: signature from tauri secret key\ntest-signature-line-1\ntest-signature-line-2\n"
+# Tauri 的 .sig 是「整份 minisign 文件」的 base64，不是明文多行文本
+_MINISIGN_TEXT = (
+    "untrusted comment: signature from tauri secret key\n"
+    "dGVzdC1zaWduYXR1cmUtYnl0ZXMtZm9yLXVuaXQtdGVzdC0wMTIzNDU2Nzg5YWJjZGVm\n"
+    "trusted comment: timestamp:1793081026\tfile:test-setup.exe\n"
+    "dGVzdC1nbG9iYWwtc2lnbmF0dXJlLWJ5dGVzLWZvci11bml0LXRlc3QtYWJjZGVmZ2hp\n"
+)
+SIGNATURE = base64.b64encode(_MINISIGN_TEXT.encode("utf-8")).decode("ascii")
 
 
 def _fake_bundle(tmp_path: Path, version: str = "3.3.2", *, with_signature: bool = True) -> Path:
@@ -92,6 +101,36 @@ def test_latest_json_without_signature_is_rejected():
     assert "缺少更新包签名" in str(error.value)
 
 
+def test_plain_multiline_signature_is_rejected():
+    """回归：把 minisign 明文直接塞进 signature 字段（而不是 base64）必须被拒绝。"""
+    data = {
+        "version": "3.3.2",
+        "notes": "x",
+        "pub_date": "2026-10-27T00:00:00Z",
+        "platforms": {"windows-x86_64": {
+            "signature": _MINISIGN_TEXT,
+            "url": "https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.2/yijing-workbench-3.3.2-x64-setup.exe",
+        }},
+    }
+    errors = manifest.validate_latest_json(data)
+    assert any("不是有效的签名内容" in item for item in errors)
+
+
+def test_plain_multiline_signature_is_rejected():
+    """回归：把 minisign 明文直接塞进 signature 字段（而不是 base64）必须被拒绝。"""
+    data = {
+        "version": "3.3.2",
+        "notes": "x",
+        "pub_date": "2026-10-27T00:00:00Z",
+        "platforms": {"windows-x86_64": {
+            "signature": _MINISIGN_TEXT,
+            "url": "https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.2/yijing-workbench-3.3.2-x64-setup.exe",
+        }},
+    }
+    errors = manifest.validate_latest_json(data)
+    assert any("不是有效的签名内容" in item for item in errors)
+
+
 def test_signature_url_is_not_accepted_as_signature():
     data = {
         "version": "3.3.2",
@@ -144,7 +183,8 @@ def test_signature_mismatch_between_sig_and_latest_json_is_rejected(tmp_path):
 
     release = _build_release(tmp_path)
     data = json.loads((release / "latest.json").read_text(encoding="utf-8"))
-    data["platforms"]["windows-x86_64"]["signature"] = SIGNATURE.replace("line-2", "other-line")
+    tampered = _MINISIGN_TEXT.replace("file:test-setup.exe", "file:other-setup.exe")
+    data["platforms"]["windows-x86_64"]["signature"] = base64.b64encode(tampered.encode("utf-8")).decode("ascii")
     (release / "latest.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
     problems = verify(release, tag="v3.3.2", repo="Qiuizi/yijing-workbench-public", production=False, expected_version="3.3.2")

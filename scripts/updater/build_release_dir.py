@@ -58,6 +58,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--workflow-run", default="")
     parser.add_argument("--sidecar", type=Path, default=None)
     parser.add_argument("--pub-date", default=None)
+    parser.add_argument("--allow-prerelease", action="store_true", help="QA/候选构建允许 3.3.2-qa.N")
     args = parser.parse_args(argv)
 
     version = args.version or manifest.assert_versions_consistent(REPO_ROOT)
@@ -87,8 +88,14 @@ def main(argv: list[str] | None = None) -> int:
         tag=args.tag,
         pub_date=args.pub_date,
     )
-    manifest.assert_latest_json(latest, expected_version=version, repo=args.repo, tag=args.tag)
-    manifest.write_latest_json(args.out / "latest.json", latest)
+    manifest.assert_latest_json(
+        latest,
+        expected_version=version,
+        repo=args.repo,
+        tag=args.tag,
+        allow_prerelease=args.allow_prerelease,
+    )
+    manifest.write_latest_json(args.out / "latest.json", latest, allow_prerelease=args.allow_prerelease)
 
     pubkey = app_public_key(REPO_ROOT)
     info = describe_public_key(pubkey)

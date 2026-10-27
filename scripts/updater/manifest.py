@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import base64
 import json
 import re
 from dataclasses import dataclass
@@ -110,14 +111,37 @@ def assert_versions_consistent(repo_root: Path | str, expected: str | None = Non
     return version
 
 
+def decode_signature(signature: str) -> list[str] | None:
+    """Tauri 的 .sig 是「整份 minisign 文件的 base64」，不是明文多行文本。
+
+    解出来至少要有 3 行，且首行是 untrusted comment、含 trusted comment。
+    返回解码后的行列表；不符合格式返回 None。
+    """
+    compact = "".join(signature.split())
+    if not compact:
+        return None
+    try:
+        decoded = base64.b64decode(compact, validate=True).decode("utf-8")
+    except (ValueError, UnicodeDecodeError):
+        return None
+    lines = [line for line in decoded.splitlines() if line.strip()]
+    if len(lines) < SIGNATURE_MIN_LINES:
+        return None
+    if not lines[0].startswith("untrusted comment:"):
+        return None
+    if not any(line.startswith("trusted comment:") for line in lines):
+        return None
+    return lines
+
+
 def read_signature(path: Path) -> str:
     if not path.exists():
         raise UpdaterManifestError(f"缺少签名文件：{path.name}")
     signature = path.read_text(encoding="utf-8").strip()
     if not signature:
         raise UpdaterManifestError(f"签名文件为空：{path.name}")
-    if len(signature.splitlines()) < SIGNATURE_MIN_LINES:
-        raise UpdaterManifestError(f"签名文件不是 minisign 格式：{path.name}")
+    if decode_signature(signature) is None:
+        raise UpdaterManifestError(f"签名文件不是 Tauri/minisign 格式：{path.name}")
     return signature
 
 
@@ -197,6 +221,7 @@ def validate_latest_json(
     expected_version: str | None = None,
     repo: str | None = None,
     tag: str | None = None,
+    allow_prerelease: bool = False,
 ) -> list[str]:
     """返回错误列表；空列表表示可以进入正式更新渠道。"""
     errors: list[str] = []
@@ -208,7 +233,7 @@ def validate_latest_json(
         errors.append(f"version 不是合法 SemVer：{version!r}")
     elif expected_version and version != expected_version:
         errors.append(f"version={version} 与期望 {expected_version} 不一致")
-    if expected_version and isinstance(version, str) and "-" in version:
+    if not allow_prerelease and isinstance(version, str) and "-" in version:
         errors.append(f"正式更新渠道不允许预发布版本：{version}")
 
     if not isinstance(data.get("notes"), str):
@@ -237,8 +262,8 @@ def validate_latest_json(
         errors.append(f"platforms.{WINDOWS_TARGET}.signature 缺失（必须是 .sig 文本本身）")
     elif signature.strip().lower().startswith("http"):
         errors.append("signature 不能是签名文件链接，必须是签名文本")
-    elif len(signature.strip().splitlines()) < SIGNATURE_MIN_LINES:
-        errors.append(f"platforms.{WINDOWS_TARGET}.signature 不是有效的签名内容（必须是 .sig 文本本身）")
+    elif decode_signature(signature) is None:
+        errors.append(f"platforms.{WINDOWS_TARGET}.signature 不是有效的签名内容（必须是 .sig 文件内容本身）")
 
     url = entry.get("url")
     if not isinstance(url, str) or not url.startswith("https://"):
@@ -259,6 +284,6 @@ def assert_latest_json(data: Any, **kwargs: Any) -> None:
         raise UpdaterManifestError("latest.json 校验失败：" + "；".join(errors))
 
 
-def write_latest_json(path: Path, data: dict[str, Any]) -> None:
-    assert_latest_json(data)
+def write_latest_json(path: Path, data: dict[str, Any], *, allow_prerelease: bool = False) -> None:
+    assert_latest_json(data, allow_prerelease=allow_prerelease)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

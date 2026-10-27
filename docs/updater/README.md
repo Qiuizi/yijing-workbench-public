@@ -77,7 +77,7 @@
   "pub_date": "2026-10-27T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "<.sig 文件的文本内容，不是链接>",
+      "signature": "<.sig 文件内容：base64 编码的 minisign 文本，不是链接>",
       "url": "https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.2/yijing-workbench-3.3.2-x64-setup.exe"
     }
   }
@@ -88,7 +88,7 @@
 
 - `version` 是合法 SemVer，且与仓库所有版本来源一致；
 - 正式渠道拒绝预发布版本（含 `-`）；
-- `signature` 是签名文本本身，不能是 URL；与 `.sig` 文件逐字相同；
+- `signature` 是 `.sig` 文件的内容本身（Tauri 写成单行 base64，解码后是 minisign 文本），不能是 URL；与 `.sig` 逐字相同；
 - `url` 必须 HTTPS、指向本仓库、与 tag 和文件名一致；
 - 所有字段来自同一次构建（`SHA256SUMS.txt` / `manifest.json` / `PROVENANCE.md` 交叉核对）。
 
