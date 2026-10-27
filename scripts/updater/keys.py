@@ -25,8 +25,9 @@ REQUIRED_COMMENT_PREFIX = "untrusted comment:"
 PUBLIC_KEY_BYTES = 42  # "Ed" + 8 字节 key id + 32 字节 ed25519 公钥
 
 
-def app_public_key(repo_root: Path) -> str:
+def app_public_key(repo_root: Path | str) -> str:
     """读取应用实际内置的更新公钥。"""
+    repo_root = Path(repo_root)
     config = json.loads((repo_root / "frontend/src-tauri/tauri.conf.json").read_text(encoding="utf-8"))
     return str(config.get("plugins", {}).get("updater", {}).get("pubkey", "")).strip()
 

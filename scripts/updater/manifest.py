@@ -61,8 +61,9 @@ def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def collect_versions(repo_root: Path) -> dict[str, str]:
+def collect_versions(repo_root: Path | str) -> dict[str, str]:
     """收集所有构建版本号来源，返回 {来源描述: 版本}。"""
+    repo_root = Path(repo_root)
     versions: dict[str, str] = {}
     for relative, path in VERSION_SOURCES:
         data = read_json(repo_root / relative)
@@ -85,12 +86,14 @@ def collect_versions(repo_root: Path) -> dict[str, str]:
     return versions
 
 
-def app_version(repo_root: Path) -> str:
+def app_version(repo_root: Path | str) -> str:
+    repo_root = Path(repo_root)
     return str(read_json(repo_root / "frontend/src-tauri/tauri.conf.json")["version"])
 
 
-def assert_versions_consistent(repo_root: Path, expected: str | None = None) -> str:
+def assert_versions_consistent(repo_root: Path | str, expected: str | None = None) -> str:
     """全部来源必须同版本、且是合法 SemVer；返回该版本。"""
+    repo_root = Path(repo_root)
     versions = collect_versions(repo_root)
     empty = [name for name, value in versions.items() if not value]
     if empty:

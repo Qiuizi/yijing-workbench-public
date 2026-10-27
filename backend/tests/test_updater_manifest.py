@@ -204,6 +204,18 @@ def test_versions_consistent_after_bump():
     assert manifest.assert_versions_consistent(REPO_ROOT) == "3.3.2"
 
 
+def test_path_helpers_accept_str_root():
+    # CLI 里常见 assert_versions_consistent('.')，必须能吃字符串路径
+    assert manifest.assert_versions_consistent(str(REPO_ROOT)) == "3.3.2"
+    assert app_public_key(str(REPO_ROOT)) == app_public_key(REPO_ROOT)
+
+
+def test_path_helpers_accept_str_root():
+    # CLI 里常见 assert_versions_consistent('.')，必须能吃字符串路径
+    assert manifest.assert_versions_consistent(str(REPO_ROOT)) == "3.3.2"
+    assert app_public_key(str(REPO_ROOT)) == app_public_key(REPO_ROOT)
+
+
 def test_site_links_update_is_idempotent():
     source = (REPO_ROOT / "website/src/links.ts").read_text(encoding="utf-8")
     facts = {
