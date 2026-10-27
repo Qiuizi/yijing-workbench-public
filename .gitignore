@@ -26,3 +26,4 @@ backend/data/history.sqlite3*
 *.p12
 *.pfx
 frontend/src-tauri/gen/
+frontend/src-tauri/.updater-qa/

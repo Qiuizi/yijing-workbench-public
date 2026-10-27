@@ -155,7 +155,7 @@ npm run build   # 产出 dist/，由 .github/workflows/pages.yml 部署
 
 ## 隐私与数据处理 (Privacy)
 
-本地优先：起卦、原文、排盘与历史完全本地处理，不启用 AI 时不联网；AI Key 由当前 Windows 用户 DPAPI 保护，不回显给前端。DeepSeek 仅在用户主动调用时以 HTTPS Bearer 发送请求。详细范围见 [PRIVACY.md](PRIVACY.md)。
+本地优先：起卦、原文、排盘与历史完全本地处理。应用有两类联网行为——你主动调用 AI 时的 DeepSeek 请求，以及 v3.3.2 起最多每 24 小时一次的 GitHub 更新检查（可在设置中关闭）。AI Key 由当前 Windows 用户 DPAPI 保护，不回显给前端。更新检查只发送版本请求，不上传卦象、历史、设置或密钥；安装前会先做 SQLite 一致性备份。详细范围见 [PRIVACY.md](PRIVACY.md)，更新机制见 [docs/updater/README.md](docs/updater/README.md)。
 
 ## 许可与数据来源 (License & Data Sources)
 
@@ -165,6 +165,13 @@ npm run build   # 产出 dist/，由 .github/workflows/pages.yml 部署
 - 第三方组件许可见 [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt)。
 
 ## 更新记录 (Changelog)
+
+v3.3.2（未发布，分支开发中）：
+
+- 新增应用内更新：启动后自动检查（24 小时节流）、手动检查、下载进度、签名校验、安装后重启。
+- 安装前自动创建 SQLite 一致性备份并停止本地 Python 服务，备份失败即取消安装。
+- 版本号与发布流水线改为可复用：候选构建与正式发布分离，正式发布需人工审批与正式签名密钥。
+- v3.3.1 没有更新器，升级到 v3.3.2 仍需手动安装一次；此后可从 v3.3.2 自动升级。
 
 v3.3.1（2026-10-24）：
 

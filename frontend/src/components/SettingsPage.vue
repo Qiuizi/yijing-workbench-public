@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { api } from '../api'
 import type { AIModel, AISettings, AppPreferences } from '../types'
@@ -8,6 +8,7 @@ import { open } from '@tauri-apps/plugin-dialog'
 import { DEEPSEEK_PLATFORM_TERMS_URL, DEEPSEEK_PRIVACY_URL, MICROSOFT_PRIVACY_URL, requireAIPrivacyAcknowledgement, WEBVIEW2_PRIVACY_URL } from '../aiPrivacyNotice'
 import { version as appVersion } from '../../src-tauri/tauri.conf.json'
 import { useAppearance, type Appearance } from '../appearance'
+import { formatBytes, formatDuration, formatSpeed, useUpdater, type UpdatePhase } from '../updater'
 import licenseText from '../../../LICENSE?raw'
 
 const settings = ref<AISettings | null>(null)
@@ -30,6 +31,92 @@ function applyAppearance(value: string | number | boolean | undefined) {
   if (value === 'auto' || value === 'light' || value === 'dark') {
     setAppearance(value as Appearance)
   }
+}
+
+const updater = useUpdater()
+const updateState = updater.state
+
+const UPDATE_PHASE_LABEL: Record<UpdatePhase, string> = {
+  unsupported: '仅桌面版可用',
+  idle: '未检查',
+  checking: '正在检查',
+  up_to_date: '已是最新',
+  available: '发现新版本',
+  deferred: '已推迟',
+  downloading: '正在下载',
+  installing: '正在安装',
+  completed: '安装完成',
+  offline: '离线',
+  error: '更新失败',
+}
+
+const updatePhaseLabel = computed(() => UPDATE_PHASE_LABEL[updateState.phase] ?? '未检查')
+const updateBusy = computed(() => updater.isBusy.value)
+const updateTone = computed<'ok' | 'warn' | 'danger' | 'muted'>(() => {
+  switch (updateState.phase) {
+    case 'up_to_date':
+    case 'completed':
+      return 'ok'
+    case 'checking':
+    case 'available':
+    case 'deferred':
+    case 'downloading':
+    case 'installing':
+      return 'warn'
+    case 'offline':
+    case 'error':
+      return 'danger'
+    default:
+      return 'muted'
+  }
+})
+
+const updateLastCheckedText = computed(() => {
+  if (!updateState.lastCheckedAt) return '尚未检查'
+  const date = new Date(updateState.lastCheckedAt)
+  const pad = (value: number) => String(value).padStart(2, '0')
+  return `上次检查 ${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+})
+
+const latestDateText = computed(() => {
+  const raw = updateState.latest?.date
+  if (!raw) return ''
+  const date = new Date(raw)
+  if (Number.isNaN(date.getTime())) return ''
+  const pad = (value: number) => String(value).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+})
+
+const downloadedText = computed(() => {
+  const { received, total } = updateState.progress
+  return total > 0 ? `${formatBytes(received)} / ${formatBytes(total)}` : formatBytes(received)
+})
+const speedText = computed(() => formatSpeed(updateState.progress.bytesPerSecond))
+const etaText = computed(() => {
+  const { total, received, bytesPerSecond } = updateState.progress
+  if (!total || !bytesPerSecond) return '—'
+  return `剩余 ${formatDuration(((total - received) / bytesPerSecond) * 1000)}`
+})
+
+async function checkForUpdates() {
+  await updater.check({ manual: true })
+}
+
+async function installUpdate() {
+  await updater.downloadAndInstall()
+}
+
+async function retryUpdate() {
+  if (updateState.latest) await updater.downloadAndInstall()
+  else await updater.check({ manual: true })
+}
+
+function deferUpdate() {
+  updater.defer()
+}
+
+function onAutoCheckChange(value: string | number | boolean) {
+  updater.setAutoCheck(Boolean(value))
 }
 
 async function refresh() {
@@ -305,10 +392,12 @@ onMounted(refresh)
     <details class="settings-category"><summary>数据与隐私 <span>本地存储、旧库导入与联网说明</span></summary>
       <div class="settings-limit privacy-notice">
         <strong>本地与联网隐私说明</strong>
-        <p>起卦记录、偏好设置和 AI 会话保存在本机 SQLite；这不等于应用绝不联网。关闭 AI 后，铜钱起卦、手动起卦、排盘和本地历史仍可使用。</p>
+        <p>起卦记录、偏好设置和 AI 会话保存在本机 SQLite；这不等于应用绝不联网。应用有两类联网行为：① 你主动调用 AI 时的 DeepSeek 请求；② 检查更新时访问 GitHub。关闭 AI 与自动更新检查后，铜钱起卦、手动起卦、排盘、阅读和本地历史仍可完全离线使用。</p>
         <details class="settings-calendar-details">
-          <summary>查看 AI、密钥和 WebView2 的数据处理说明</summary>
+          <summary>查看 AI、更新检查、密钥和 WebView2 的数据处理说明</summary>
           <div class="settings-calendar-rules__grid">
+            <span><strong>检查更新</strong>启动后最多每 24 小时请求一次 <code>github.com/…/releases/latest/download/latest.json</code>，下载新版本时访问 <code>objects.githubusercontent.com</code>。请求只包含版本号与平台标识，不发送卦象、历史记录、设置或 API Key；可在设置中关闭自动检查，关闭后仍可手动检查。</span>
+            <span><strong>安装更新</strong>安装前会先在本地创建 SQLite 一致性备份、停止本地 Python 服务，再由 Tauri updater 校验签名并运行安装包；备份与数据库只留在本机，不上传。</span>
             <span><strong>模型清单、连接测试和模型校验</strong>应用向 DeepSeek API 发送 API Key（HTTPS Bearer 身份验证）；这些操作不发送卦象问题或聊天内容。</span>
             <span><strong>AI 对话请求</strong>发送本条消息、起卦问题、起卦方法、卦象/爻值/动爻、所选分析模式及该模式需要的经文取辞或纳甲排盘与规则证据，并附带当前会话的此前消息；不会自动发送其他历史会话或 SQLite 文件。</span>
             <span><strong>目的与结果</strong>上述内容用于向 DeepSeek 请求模型回答。回答和会话历史保存在本机 SQLite；DeepSeek 对 API 请求数据的处理和留存由其适用条款决定，本应用不承诺服务方不会保存。</span>
@@ -333,9 +422,79 @@ onMounted(refresh)
     </section>
 
     </details>
-    <details class="settings-category"><summary>关于应用 <span>版本、许可证与典籍来源</span></summary>
+    <details class="settings-category"><summary>关于应用 <span>版本、更新、许可证与典籍来源</span></summary>
+    <section class="settings-group" aria-labelledby="settings-update-title">
+      <div class="settings-group__heading"><span class="settings-group__index">06</span><div><h3 id="settings-update-title">应用更新</h3><p>安装前会自动备份历史数据库；备份失败则取消安装。</p></div><span class="settings-state" :class="`settings-state--${updateTone}`">{{ updatePhaseLabel }}</span></div>
+
+      <div class="update-card">
+        <div class="update-card__head">
+          <div class="update-card__version">
+            <span class="update-card__label">当前版本</span>
+            <strong class="num">V{{ updateState.currentVersion || appVersion }}</strong>
+            <span class="update-card__meta num">{{ updateLastCheckedText }}</span>
+          </div>
+          <div class="update-card__controls">
+            <label class="update-auto">
+              <el-switch
+                :model-value="updateState.autoCheck"
+                :disabled="!isDesktop || updateBusy"
+                aria-label="自动检查更新"
+                @change="onAutoCheckChange"
+              />
+              <span>自动检查（每 24 小时）</span>
+            </label>
+            <el-button
+              :loading="updateState.phase === 'checking'"
+              :disabled="!isDesktop || updateBusy"
+              @click="checkForUpdates"
+            >
+              检查更新
+            </el-button>
+          </div>
+        </div>
+
+        <div v-if="updateState.latest" class="update-card__body">
+          <div class="update-release">
+            <p class="update-release__title">
+              <strong class="num">v{{ updateState.latest.version }}</strong>
+              <span v-if="latestDateText" class="update-release__date num">{{ latestDateText }}</span>
+            </p>
+            <p class="update-release__notes">{{ updateState.latest.body || '该版本未提供更新说明。' }}</p>
+          </div>
+          <div class="update-actions">
+            <el-button type="primary" :loading="updateBusy" :disabled="updateState.phase === 'installing'" @click="installUpdate">下载并安装</el-button>
+            <el-button :disabled="updateBusy" @click="deferUpdate">稍后</el-button>
+          </div>
+        </div>
+
+        <div v-if="updateState.phase === 'downloading' || updateState.phase === 'installing'" class="update-progress">
+          <div class="update-bar" role="progressbar" :aria-valuenow="updateState.progress.percent" aria-valuemin="0" aria-valuemax="100" :aria-label="updatePhaseLabel">
+            <span class="update-bar__fill" :style="{ width: `${updateState.progress.percent}%` }"></span>
+          </div>
+          <div class="update-progress__meta num">
+            <span>{{ updateState.progress.percent }}%</span>
+            <span>{{ downloadedText }}</span>
+            <span>{{ speedText }}</span>
+            <span>{{ etaText }}</span>
+          </div>
+          <p class="update-note">下载完成后会先做数据库一致性备份、停止本地服务，再安装并重启。</p>
+        </div>
+
+        <p v-if="updateState.phase === 'completed'" class="update-note">已安装 v{{ updateState.latest?.version || '' }}，应用正在重启。若未自动重启，请手动关闭后重新打开。</p>
+        <p v-if="updateState.phase === 'up_to_date'" class="update-note">当前已是最新版本，无需更新。</p>
+        <p v-if="!isDesktop" class="update-note">应用内更新仅在 Windows 桌面版可用。</p>
+
+        <div v-if="updateState.phase === 'error' || updateState.phase === 'offline'" class="update-error" role="alert">
+          <p>{{ updateState.error }}</p>
+          <el-button size="small" :loading="updateBusy" @click="retryUpdate">重试</el-button>
+        </div>
+
+        <p class="update-privacy">检查更新会访问 github.com 与下载资产所在的 objects.githubusercontent.com，只发送版本请求；不发送卦象、历史记录、设置或 API Key。关闭自动检查后仍可手动检查；离线时本地起卦、阅读、排盘与历史记录不受影响。</p>
+      </div>
+    </section>
+
     <section class="settings-group settings-about" aria-labelledby="settings-about-title">
-      <div class="settings-group__heading"><span class="settings-group__index">06</span><div><h3 id="settings-about-title">关于</h3><p>版本与内容来源</p></div></div>
+      <div class="settings-group__heading"><span class="settings-group__index">07</span><div><h3 id="settings-about-title">关于</h3><p>版本与内容来源</p></div></div>
       <dl class="settings-about__facts">
         <div><dt>当前界面版本</dt><dd>V{{ appVersion }}</dd></div>
         <div><dt>业务逻辑稳定核心</dt><dd>V3.1.4</dd></div>

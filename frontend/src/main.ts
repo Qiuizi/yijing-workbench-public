@@ -11,6 +11,7 @@ import {
   ElRadioButton,
   ElRadioGroup,
   ElSelect,
+  ElSwitch,
 } from 'element-plus'
 import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
@@ -37,6 +38,7 @@ for (const component of [
   ElRadioButton,
   ElRadioGroup,
   ElSelect,
+  ElSwitch,
 ]) {
   app.component(component.name!, component)
 }

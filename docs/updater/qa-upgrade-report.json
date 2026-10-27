@@ -1,0 +1,163 @@
+{
+  "ranAt": "2026-10-27T06:45:04.706Z",
+  "oldSetup": "C:\\Users\\123\\AppData\\Local\\Temp\\updater-e2e\\v1\\YijingWorkbenchQA_3.3.2-qa.1_x64-setup.exe",
+  "updateDir": "C:\\Users\\123\\AppData\\Local\\Temp\\updater-e2e\\update",
+  "identifier": "cn.yijing.workbench.updaterqa",
+  "installDir": "C:\\Users\\123\\AppData\\Local\\YijingWorkbenchQA",
+  "dataDir": "C:\\Users\\123\\AppData\\Local\\cn.yijing.workbench.updaterqa",
+  "dataBefore": {
+    "historyCount": 3,
+    "question": "隔离升级实验：更新后这条记录必须还在。",
+    "preferences": "{\"default_method\": \"coins\", \"timezone\": \"Asia/Shanghai\", \"ai_default_mode\": \"classical\"}",
+    "hasProtectedKey": true,
+    "backups": []
+  },
+  "dataAfter": {
+    "historyCount": 3,
+    "question": "隔离升级实验：更新后这条记录必须还在。",
+    "preferences": "{\"default_method\": \"coins\", \"timezone\": \"Asia/Shanghai\", \"ai_default_mode\": \"classical\"}",
+    "hasProtectedKey": true,
+    "backups": [
+      "history.pre-update-20261027T064435Z.sqlite3"
+    ]
+  },
+  "checks": [
+    {
+      "name": "旧版 NSIS 静默安装返回 0",
+      "ok": true,
+      "detail": "exit=0",
+      "at": "2026-10-27T06:44:03.398Z"
+    },
+    {
+      "name": "安装目录存在",
+      "ok": true,
+      "detail": "C:\\Users\\123\\AppData\\Local\\YijingWorkbenchQA\\yijing-workbench.exe",
+      "at": "2026-10-27T06:44:03.402Z"
+    },
+    {
+      "name": "旧版起卦成功并渲染结果",
+      "ok": true,
+      "detail": "隔离升级实验：更新后这条记录必须还在。",
+      "at": "2026-10-27T06:44:10.387Z"
+    },
+    {
+      "name": "设置页可写入 API Key 输入框",
+      "ok": true,
+      "detail": "",
+      "at": "2026-10-27T06:44:10.388Z"
+    },
+    {
+      "name": "旧版数据：新增 1 条记录",
+      "ok": true,
+      "detail": "2 → 3",
+      "at": "2026-10-27T06:44:12.143Z"
+    },
+    {
+      "name": "旧版数据：DPAPI 密钥已保存",
+      "ok": true,
+      "detail": "",
+      "at": "2026-10-27T06:44:12.143Z"
+    },
+    {
+      "name": "旧版数据：偏好已写入",
+      "ok": true,
+      "detail": "{\"default_method\": \"coins\", \"timezone\": \"Asia/Shanghai\", \"ai",
+      "at": "2026-10-27T06:44:12.143Z"
+    },
+    {
+      "name": "检查更新得到「发现新版本」",
+      "ok": true,
+      "detail": "发现新版本 / v3.3.2-qa.22026-10-27",
+      "at": "2026-10-27T06:44:34.786Z"
+    },
+    {
+      "name": "显示可用版本号",
+      "ok": true,
+      "detail": "v3.3.2-qa.22026-10-27",
+      "at": "2026-10-27T06:44:34.786Z"
+    },
+    {
+      "name": "下载并安装按钮可点击",
+      "ok": true,
+      "detail": "",
+      "at": "2026-10-27T06:44:34.792Z"
+    },
+    {
+      "name": "应用在安装前退出",
+      "ok": true,
+      "detail": "lastState=正在下载 error=-",
+      "at": "2026-10-27T06:44:36.817Z"
+    },
+    {
+      "name": "界面读取到运行时版本 3.3.2-qa.2",
+      "ok": true,
+      "detail": "{\"aboutVersion\":\"V3.3.2\",\"runtimeVersion\":\"V3.3.2-qa.2\",\"state\":\"未检查\"}",
+      "at": "2026-10-27T06:44:48.114Z"
+    },
+    {
+      "name": "升级后历史记录条数未变",
+      "ok": true,
+      "detail": "3 → 3",
+      "at": "2026-10-27T06:44:48.719Z"
+    },
+    {
+      "name": "升级后问句内容未变",
+      "ok": true,
+      "detail": "隔离升级实验：更新后这条记录必须还在。",
+      "at": "2026-10-27T06:44:48.719Z"
+    },
+    {
+      "name": "升级后偏好保留",
+      "ok": true,
+      "detail": "{\"default_method\": \"coins\", \"timezone\": \"Asia/Shanghai\", \"ai",
+      "at": "2026-10-27T06:44:48.719Z"
+    },
+    {
+      "name": "升级后 DPAPI 密钥仍存在",
+      "ok": true,
+      "detail": "",
+      "at": "2026-10-27T06:44:48.719Z"
+    },
+    {
+      "name": "升级后至少一份升级前备份",
+      "ok": true,
+      "detail": "history.pre-update-20261027T064435Z.sqlite3",
+      "at": "2026-10-27T06:44:48.719Z"
+    },
+    {
+      "name": "DPAPI 密钥可被当前用户解密",
+      "ok": true,
+      "detail": "decrypted",
+      "at": "2026-10-27T06:44:50.616Z"
+    },
+    {
+      "name": "篡改场景先被识别为新版本（qa.3）",
+      "ok": true,
+      "detail": "发现新版本",
+      "at": "2026-10-27T06:44:57.432Z"
+    },
+    {
+      "name": "篡改包被拒绝（状态为更新失败）",
+      "ok": true,
+      "detail": "更新失败 / The signature verification failed",
+      "at": "2026-10-27T06:45:03.443Z"
+    },
+    {
+      "name": "错误提示说明校验失败",
+      "ok": true,
+      "detail": "The signature verification failed",
+      "at": "2026-10-27T06:45:03.443Z"
+    },
+    {
+      "name": "应用仍可继续使用且版本未变",
+      "ok": true,
+      "detail": "{\"version\":\"V3.3.2-qa.2\",\"rows\":4}",
+      "at": "2026-10-27T06:45:03.448Z"
+    }
+  ],
+  "summary": {
+    "total": 22,
+    "passed": 22,
+    "failed": 0
+  }
+}

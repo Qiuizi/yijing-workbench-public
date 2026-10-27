@@ -46,6 +46,7 @@ from backend.services.ai_provider import AIProvider, AIProviderError, AIStreamCh
 from backend.services.ai_cost import estimate_cost
 from backend.services.ai_runtime import AIOutputValidationError, build_ai_context, build_chat_messages, validate_ai_output
 from backend.services.desktop_migration import DesktopMigrationError, import_legacy_database, migration_status
+from backend.services.desktop_backup import DesktopBackupError, create_update_backup
 
 
 ai_logger = logging.getLogger("backend.ai")
@@ -125,7 +126,7 @@ def create_app(
 
     app = FastAPI(
         title="易经起卦工作台",
-        version="3.3.1",
+        version="3.3.2",
         description="本地起卦、卦象资料与历史记录 API",
         lifespan=lifespan,
     )
@@ -218,6 +219,19 @@ def create_app(
                 request.app.state.secret_store,
             )
         except DesktopMigrationError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/api/desktop/update/backup")
+    async def desktop_update_backup(request: Request) -> dict[str, Any]:
+        """安装更新前的一致性快照；失败必须明确报错，前端据此取消安装。"""
+        if not request.app.state.desktop_mode:
+            raise HTTPException(status_code=404, detail="未启用桌面运行模式")
+        try:
+            return create_update_backup(
+                request.app.state.db_path,
+                request.app.state.desktop_backup_dir,
+            )
+        except DesktopBackupError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.get("/api/preferences")

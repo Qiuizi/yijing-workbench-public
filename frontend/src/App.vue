@@ -28,6 +28,7 @@ import { divinationMarkdown, markdownFilename } from './markdownExport'
 import { saveMarkdown } from './saveMarkdown'
 import { useHistoryList } from './historyPresentation'
 import { useAppearance } from './appearance'
+import { useUpdater } from './updater'
 import BrandMark from './components/BrandMark.vue'
 
 const question = ref('')
@@ -209,6 +210,8 @@ onMounted(async () => {
           : '桌面后端启动失败，请查看 yijing-backend.log。',
       )
     }
+    // 更新检查是后台任务：不 await，失败也不影响起卦、阅读与历史。
+    void useUpdater().init()
   }
 })
 </script>
