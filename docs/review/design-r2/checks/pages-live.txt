@@ -32,3 +32,20 @@ PASS  线上控制台无错误
 
 13/13 通过
 EXIT=0
+PASS  线上中文首页可加载  — 易经起卦工作台 · Yijing Workbench / zh-CN
+PASS  新版品牌标记与主题按钮已上线  — brand=true toggle=true
+PASS  色阶咬合区块已上线  — sections=5
+PASS  图鉴 64 格 / 图库 9 张  — atlas=64 thumbs=9
+PASS  首屏为浅色（无存储偏好）  — light
+PASS  线上切换到夜间  — {"theme":"dark","stored":"dark","bodyBg":"rgb(19, 28, 23)","size":"13.5px"}
+PASS  刷新后仍为夜间（持久化）  — dark
+PASS  下载区版本与文件名成对出现  — {"tag":"v3.3.1","name":"yijing-workbench-3.3.1-x64-setup.exe"}
+PASS  下载链接指向同版本 Release  — https://github.com/Qiuizi/yijing-workbench-public/releases/download/v3.3.1/yijing-workbench-3.3.1-x64-setup.exe
+  SHA=3CAECBE2CE7684805BA5FBE2D8F60767101CCD71565A4EC37BACB2181B086B74  size=15.4 MiB · 16,097,113 bytes  date=2026-10-24
+PASS  移动端抽屉可展开且有 4 个入口  — {"toggle":true,"open":true,"links":4,"overflow":true}
+PASS  移动端无横向溢出
+PASS  英文首页可加载且带新版品牌区  — {"lang":"en","h1":"Yijing Workbench","brand":true,"nav":4}
+PASS  线上控制台无错误
+
+13/13 通过
+EXIT=0
