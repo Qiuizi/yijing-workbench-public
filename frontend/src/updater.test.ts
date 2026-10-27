@@ -160,16 +160,15 @@ describe('updater state machine', () => {
   })
 
   it('重复点击不会产生并发检查', async () => {
-    let resolveCheck: ((value: RemoteUpdate | null) => void) | null = null
-    const checkUpdate = vi.fn(
-      () => new Promise<RemoteUpdate | null>((resolve) => {
-        resolveCheck = resolve
-      }),
-    )
+    let release: (value: RemoteUpdate | null) => void = () => {}
+    const pending = new Promise<RemoteUpdate | null>((resolve) => {
+      release = resolve
+    })
+    const checkUpdate = vi.fn(() => pending)
     const store = createUpdater(deps({ checkUpdate }))
     const first = store.check({ manual: true })
     const second = store.check({ manual: true })
-    resolveCheck?.(null)
+    release(null)
     await Promise.all([first, second])
     expect(checkUpdate).toHaveBeenCalledTimes(1)
   })

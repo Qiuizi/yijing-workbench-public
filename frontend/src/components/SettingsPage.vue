@@ -392,10 +392,12 @@ onMounted(refresh)
     <details class="settings-category"><summary>数据与隐私 <span>本地存储、旧库导入与联网说明</span></summary>
       <div class="settings-limit privacy-notice">
         <strong>本地与联网隐私说明</strong>
-        <p>起卦记录、偏好设置和 AI 会话保存在本机 SQLite；这不等于应用绝不联网。关闭 AI 后，铜钱起卦、手动起卦、排盘和本地历史仍可使用。</p>
+        <p>起卦记录、偏好设置和 AI 会话保存在本机 SQLite；这不等于应用绝不联网。应用有两类联网行为：① 你主动调用 AI 时的 DeepSeek 请求；② 检查更新时访问 GitHub。关闭 AI 与自动更新检查后，铜钱起卦、手动起卦、排盘、阅读和本地历史仍可完全离线使用。</p>
         <details class="settings-calendar-details">
-          <summary>查看 AI、密钥和 WebView2 的数据处理说明</summary>
+          <summary>查看 AI、更新检查、密钥和 WebView2 的数据处理说明</summary>
           <div class="settings-calendar-rules__grid">
+            <span><strong>检查更新</strong>启动后最多每 24 小时请求一次 <code>github.com/…/releases/latest/download/latest.json</code>，下载新版本时访问 <code>objects.githubusercontent.com</code>。请求只包含版本号与平台标识，不发送卦象、历史记录、设置或 API Key；可在设置中关闭自动检查，关闭后仍可手动检查。</span>
+            <span><strong>安装更新</strong>安装前会先在本地创建 SQLite 一致性备份、停止本地 Python 服务，再由 Tauri updater 校验签名并运行安装包；备份与数据库只留在本机，不上传。</span>
             <span><strong>模型清单、连接测试和模型校验</strong>应用向 DeepSeek API 发送 API Key（HTTPS Bearer 身份验证）；这些操作不发送卦象问题或聊天内容。</span>
             <span><strong>AI 对话请求</strong>发送本条消息、起卦问题、起卦方法、卦象/爻值/动爻、所选分析模式及该模式需要的经文取辞或纳甲排盘与规则证据，并附带当前会话的此前消息；不会自动发送其他历史会话或 SQLite 文件。</span>
             <span><strong>目的与结果</strong>上述内容用于向 DeepSeek 请求模型回答。回答和会话历史保存在本机 SQLite；DeepSeek 对 API 请求数据的处理和留存由其适用条款决定，本应用不承诺服务方不会保存。</span>
@@ -428,7 +430,7 @@ onMounted(refresh)
         <div class="update-card__head">
           <div class="update-card__version">
             <span class="update-card__label">当前版本</span>
-            <strong class="num">V{{ appVersion }}</strong>
+            <strong class="num">V{{ updateState.currentVersion || appVersion }}</strong>
             <span class="update-card__meta num">{{ updateLastCheckedText }}</span>
           </div>
           <div class="update-card__controls">

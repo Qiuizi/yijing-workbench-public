@@ -6,6 +6,17 @@
 
 Windows 后端作为 sidecar 在本机回环地址运行。设置中的 API Key 通过本地接口交给后端，并由当前 Windows 用户 DPAPI 保护后保存在 SQLite；密钥不回显给前端。
 
+## 自动更新（v3.3.2 起）
+
+应用在启动后最多每 24 小时检查一次更新，也可在「设置 → 关于应用 → 应用更新」手动检查或关闭自动检查。
+
+- 检查更新访问 `https://github.com/Qiuizi/yijing-workbench-public/releases/latest/download/latest.json`；下载新版本时访问 GitHub 的资产域名 `objects.githubusercontent.com`。两者都是 HTTPS。
+- 请求只包含版本信息与平台标识（`windows-x86_64`），**不发送**卦象问题、历史记录、AI 会话、设置或 API Key。
+- 新版本必须通过 Tauri updater 的数字签名校验才会安装；签名不匹配或被篡改的包会被拒绝。
+- 安装前应用会在本机创建 SQLite 一致性备份并停止本地 Python 服务；备份与数据库不上传。
+- 关闭自动检查后仍可手动检查；完全离线时本地起卦、阅读、排盘与历史记录不受影响。
+- v3.3.1 及更早版本没有更新器，需要手动安装到 v3.3.2 一次。
+
 ## DeepSeek 联网功能
 
 AI 为可选功能。读取模型列表、测试连接或校验模型时，应用会将 API Key 作为 HTTPS Bearer 身份验证信息发送至 DeepSeek，这些操作不发送卦象问题或聊天内容。
@@ -25,4 +36,4 @@ AI 对话请求会发送本条消息、当前起卦问题和所选模式的卦�
 - [Microsoft WebView2 数据与隐私](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/data-privacy)
 - [Microsoft 隐私声明](https://privacy.microsoft.com/privacystatement)
 
-本文件说明 3.2.2 源码中的数据处理行为。安装路径、安装覆盖和首次启动必须由最终安装包在隔离 Windows 环境中验证；本地准备阶段未打开或修改 Stable 用户数据库。
+本文件说明 3.3.2 源码中的数据处理行为。安装路径、安装覆盖和首次启动必须由最终安装包在隔离 Windows 环境中验证；本地准备阶段未打开或修改 Stable 用户数据库。
