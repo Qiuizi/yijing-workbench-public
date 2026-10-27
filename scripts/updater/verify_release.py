@@ -131,6 +131,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--production", action="store_true", help="正式渠道校验：拒绝 QA 公钥")
     parser.add_argument("--allow-prerelease", action="store_true", help="QA/候选构建允许 3.3.2-qa.N")
     args = parser.parse_args(argv)
+    manifest.enable_utf8_console()
 
     problems = verify(
         args.release_dir,
@@ -145,7 +146,7 @@ def main(argv: list[str] | None = None) -> int:
         for item in problems:
             print(f"  - {item}", file=sys.stderr)
         return 1
-    print(f"OK  {args.release_dir}（tag={args.tag}，production={args.production}）")
+    print(f"OK  {args.release_dir} (tag={args.tag}, production={args.production})")
     return 0
 
 if __name__ == "__main__":

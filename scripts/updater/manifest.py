@@ -14,6 +14,7 @@ from __future__ import annotations
 import base64
 import json
 import re
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -34,6 +35,15 @@ VERSION_SOURCES = (
 
 class UpdaterManifestError(ValueError):
     """清单或版本信息不符合发布契约。"""
+
+
+def enable_utf8_console() -> None:
+    """Windows runner 的控制台默认不是 UTF-8，中文提示会抛 UnicodeEncodeError。"""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
+        except (AttributeError, ValueError):
+            pass
 
 
 # 公开发布时的规范资产名（与 v3.3.1 既有约定一致；只是重命名，字节不变）

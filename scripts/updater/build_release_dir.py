@@ -60,6 +60,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--pub-date", default=None)
     parser.add_argument("--allow-prerelease", action="store_true", help="QA/候选构建允许 3.3.2-qa.N")
     args = parser.parse_args(argv)
+    manifest.enable_utf8_console()
 
     version = args.version or manifest.assert_versions_consistent(REPO_ROOT)
     notes = args.notes
