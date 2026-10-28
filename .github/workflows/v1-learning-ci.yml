@@ -1,6 +1,11 @@
 name: V1 learning content and regression checks
 
 on:
+  # main 上不加路径过滤：正式发布门禁要求「最终 main SHA 上存在这四条检查」，
+  # 任何一次合并（哪怕只改文档）都必须能在该 SHA 上拿到 Frontend/Backend 结果。
+  # 发布前若缺结果，可在 Actions 里对 main 手动 workflow_dispatch 补跑。
+  push:
+    branches: [main]
   pull_request:
     paths:
       - 'frontend/**'

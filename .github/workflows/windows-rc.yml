@@ -1,17 +1,10 @@
 name: Windows x64 candidate build
 
 on:
+  # main 上不加路径过滤：正式发布门禁要求「最终 main SHA 上存在 Windows 候选构建结果」。
+  # PR 侧仍按路径过滤以控制成本。
   push:
     branches: [main]
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
-      - 'scripts/updater/**'
-      - 'scripts/build_sidecar.ps1'
-      - 'scripts/smoke_packaged_sidecar.ps1'
-      - 'requirements-win.lock.txt'
-      - 'requirements-build.txt'
-      - '.github/workflows/windows-rc.yml'
   pull_request:
     paths:
       - 'frontend/**'
@@ -150,6 +143,8 @@ jobs:
             bundle = @{ createUpdaterArtifacts = $true }
             plugins = @{ updater = @{ pubkey = $pubkey } }
           } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $override -Encoding utf8
+          # 公钥是公开信息；后续步骤用它核对「签名 key id 与内置公钥一致」
+          "YIJING_BUILD_PUBKEY=$pubkey" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
           npm run build:sidecar
           if ($LASTEXITCODE -ne 0) { throw 'sidecar build failed' }
@@ -181,7 +176,8 @@ jobs:
             --source-ref $env:GITHUB_REF `
             --source-trigger $env:GITHUB_EVENT_NAME `
             --workflow-run "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID" `
-            --sidecar 'frontend/src-tauri/binaries/yijing-backend/yijing-backend.exe'
+            --sidecar 'frontend/src-tauri/binaries/yijing-backend/yijing-backend.exe' `
+            --updater-pubkey $env:YIJING_BUILD_PUBKEY
           if ($LASTEXITCODE -ne 0) { throw 'build_release_dir failed' }
 
           python scripts/updater/verify_release.py $out --tag "v$version" --expected-version $version
@@ -198,6 +194,9 @@ jobs:
             install_mode = 'currentUser'
             updater_signed = $true
             updater_pubkey_is_qa = $releaseManifest.updater_pubkey_is_qa
+            updater_pubkey_source = $releaseManifest.updater_pubkey_source
+            updater_pubkey_key_id = $releaseManifest.updater_pubkey_key_id
+            signature_key_id = $releaseManifest.signature_key_id
             sidecar_smoke = 'PASS'
             gui_upgrade_tested = $false
             status = 'candidate-not-for-update-channel'

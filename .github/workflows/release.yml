@@ -1,12 +1,11 @@
-# 正式发布流水线：只在人工授权 + 受保护环境 + 正式签名密钥下运行。
+# 正式发布流水线：人工触发 + 受保护环境 + 正式签名密钥，且必须先过四道门禁。
 #
-# 与候选流水线（windows-rc.yml）的区别：
-#   - 固定 main 的 commit SHA，先确认该 SHA 的 CI 全绿；
-#   - 使用 release 环境的正式签名私钥构建（候选构建永远拿不到它）；
-#   - 先以 draft 上传全部资产并回读校验，最后才 publish 成不可变正式 Release；
-#   - latest.json 随 Release 一起上传，只有发布成功后才会出现在 releases/latest 上。
-#
-# 任何一步失败都不会把半成品暴露到更新渠道：draft Release 不是 releases/latest。
+# 设计要点（与 docs/updater/README.md §6、docs/updater/release-gate-review.md 对应）：
+#   - 源码只认 dispatch 时的 SHA（github.sha），构建前后都核对，不用浮动的 main；
+#   - 门禁按**工作流文件**核对该 SHA 的运行结果，并交叉核对 check run 的名字/来源；
+#   - 正式公钥从 release 环境 Secret 注入构建，绝不使用仓库里的 QA 公钥；
+#   - 构建与发布分两个 job：构建只有 contents:read，发布 job 拿不到签名私钥；
+#   - 先 draft 上传并回读校验，最后才 publish；dry_run 只构建校验、零副作用。
 name: Publish stable release (updater-enabled)
 
 on:
@@ -19,7 +18,7 @@ on:
         description: '再次输入同一个版本号以确认发布'
         required: true
       notes_file:
-        description: 'Release 说明文件路径'
+        description: 'Release 说明文件（只允许 docs/release-notes-v<版本>.md）'
         required: true
         default: 'docs/release-notes-v3.3.2.md'
       dry_run:
@@ -27,8 +26,9 @@ on:
         type: boolean
         default: true
 
+# 默认最小权限；需要写 GitHub 的 publish job 单独声明
 permissions:
-  contents: write
+  contents: read
   actions: read
 
 concurrency:
@@ -36,33 +36,37 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
+  build:
     if: github.repository == 'Qiuizi/yijing-workbench-public'
     runs-on: windows-2022
     timeout-minutes: 120
-    # 需要 Environment 审批：未获独立授权时任务不会开始
+    # 需要 release 环境的人工审批：未获批时任务不会开始
     environment: release
     defaults:
       run:
         shell: pwsh
     env:
-      TAG: v${{ inputs.version }}
+      YIJING_VERSION_INPUT: ${{ inputs.version }}
+      YIJING_CONFIRM_INPUT: ${{ inputs.confirm }}
+      YIJING_NOTES_FILE: ${{ inputs.notes_file }}
+      YIJING_PINNED_SHA: ${{ github.sha }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout the exact dispatched commit
+        uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
-      - name: Guard inputs and repository state
+      - name: Preflight inputs, ref, SHA and tag availability
         run: |
-          $version = '${{ inputs.version }}'
-          $confirm = '${{ inputs.confirm }}'
-          if ($version -ne $confirm) { throw "确认版本($confirm)与目标版本($version)不一致" }
-          if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "只允许稳定版本号，收到：$version" }
-          if ('${{ github.ref }}' -ne 'refs/heads/main') { throw "发布只能从 main 触发" }
-          $head = git rev-parse HEAD
-          Write-Output "SOURCE_SHA=$head"
-          "YIJING_SOURCE_SHA=$head" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          python scripts/updater/release_preflight.py `
+            --version $env:YIJING_VERSION_INPUT `
+            --confirm $env:YIJING_CONFIRM_INPUT `
+            --notes-file $env:YIJING_NOTES_FILE `
+            --pinned-sha $env:YIJING_PINNED_SHA `
+            --ref $env:GITHUB_REF `
+            --repo $env:GITHUB_REPOSITORY
+          if ($LASTEXITCODE -ne 0) { throw 'preflight failed' }
 
       - uses: actions/setup-python@v5
         with:
@@ -79,35 +83,29 @@ jobs:
           toolchain: '1.98.1'
           targets: x86_64-pc-windows-msvc
 
-      - name: Require version consistency and a production public key
+      - name: Require production secrets and a matching public key
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
         run: |
-          python scripts/updater/release_gate.py --expect-version '${{ inputs.version }}'
+          if ([string]::IsNullOrWhiteSpace($env:TAURI_SIGNING_PRIVATE_KEY)) {
+            throw '缺少正式签名私钥：请在 release 环境配置 TAURI_SIGNING_PRIVATE_KEY'
+          }
+          if ([string]::IsNullOrWhiteSpace($env:TAURI_UPDATER_PUBKEY)) {
+            throw '缺少正式更新公钥：请在 release 环境配置 TAURI_UPDATER_PUBKEY（与私钥配对）'
+          }
+          python scripts/updater/release_gate.py --expect-version $env:YIJING_VERSION_INPUT --expect-pubkey $env:TAURI_UPDATER_PUBKEY
           if ($LASTEXITCODE -ne 0) { throw 'version/public key gate failed' }
 
       - name: Require green CI for this exact commit
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $sha = $env:YIJING_SOURCE_SHA
-          $repo = $env:GITHUB_REPOSITORY
-          $runs = gh api "repos/$repo/commits/$sha/check-runs?per_page=100" | ConvertFrom-Json
-          $required = @(
-            'Windows x64 tests and NSIS candidate',
-            'Frontend tests and build',
-            'Backend regression tests',
-            'website-validation'
-          )
-          $bad = @()
-          foreach ($name in $required) {
-            $matches = @($runs.check_runs | Where-Object { $_.name -eq $name })
-            if ($matches.Count -eq 0) { $bad += "$name (missing)"; continue }
-            $latest = $matches | Sort-Object started_at -Descending | Select-Object -First 1
-            if ($latest.status -ne 'completed' -or $latest.conclusion -ne 'success') {
-              $bad += "$name ($($latest.status)/$($latest.conclusion))"
-            }
-          }
-          if ($bad.Count -gt 0) { throw "CI 未全绿：$($bad -join ', ')" }
-          Write-Output "CI green for $sha"
+          python scripts/updater/ci_gate.py `
+            --repo $env:GITHUB_REPOSITORY `
+            --sha $env:YIJING_PINNED_SHA `
+            --json-out ci-gate.json
+          if ($LASTEXITCODE -ne 0) { throw 'CI gate failed: 该 SHA 缺少必需检查或未全部通过' }
 
       - name: Install dependencies
         run: |
@@ -126,119 +124,237 @@ jobs:
           npm run typecheck
           Pop-Location
 
-      - name: Build sidecar and NSIS installer with the production signing key
+      - name: Build sidecar and NSIS installer with the production key
         working-directory: frontend
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
         run: |
-          if ([string]::IsNullOrWhiteSpace($env:TAURI_SIGNING_PRIVATE_KEY)) {
-            throw '缺少正式签名私钥：请在 release 环境配置 TAURI_SIGNING_PRIVATE_KEY'
-          }
+          $override = Join-Path $env:RUNNER_TEMP 'release-override.json'
+          # 关键：把正式公钥注入构建，而不是沿用仓库里的 QA 公钥
+          @{
+            bundle  = @{ createUpdaterArtifacts = $true }
+            plugins = @{ updater = @{ pubkey = $env:TAURI_UPDATER_PUBKEY } }
+          } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $override -Encoding utf8
+
           npm run build:sidecar
           if ($LASTEXITCODE -ne 0) { throw 'sidecar build failed' }
-          # createUpdaterArtifacts 在基础配置里是关闭的，只在正式构建时打开
-          npx tauri build --bundles nsis --config '{"bundle":{"createUpdaterArtifacts":true}}'
+          npx tauri build --bundles nsis --config $override
           if ($LASTEXITCODE -ne 0) { throw 'tauri build failed' }
 
-      - name: Assemble release directory and verify the contract (production gate)
+      - name: Smoke-test the packaged sidecar (synthetic profile only)
         run: |
-          $version = '${{ inputs.version }}'
+          & ./scripts/smoke_packaged_sidecar.ps1 `
+            -SidecarPath 'frontend/src-tauri/binaries/yijing-backend/yijing-backend.exe' `
+            -ReportPath (Join-Path $env:RUNNER_TEMP 'sidecar-smoke.json')
+          if ($LASTEXITCODE -ne 0) { throw 'packaged sidecar smoke failed' }
+          Copy-Item -LiteralPath (Join-Path $env:RUNNER_TEMP 'sidecar-smoke.json') -Destination 'sidecar-smoke.json' -Force
+
+      - name: Assemble release directory and verify the contract
+        env:
+          TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
+        run: |
           python scripts/updater/build_release_dir.py `
             --bundle-dir 'frontend/src-tauri/target/release/bundle/nsis' `
             --out 'release' `
-            --tag $env:TAG `
-            --version $version `
-            --notes-file '${{ inputs.notes_file }}' `
-            --source-sha $env:YIJING_SOURCE_SHA `
-            --source-ref '${{ github.ref }}' `
-            --source-trigger '${{ github.event_name }}' `
+            --tag "v$env:YIJING_VERSION_INPUT" `
+            --version $env:YIJING_VERSION_INPUT `
+            --notes-file $env:YIJING_NOTES_FILE `
+            --source-sha $env:YIJING_PINNED_SHA `
+            --source-ref $env:GITHUB_REF `
+            --source-trigger $env:GITHUB_EVENT_NAME `
             --workflow-run "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID" `
-            --sidecar 'frontend/src-tauri/binaries/yijing-backend/yijing-backend.exe'
+            --sidecar 'frontend/src-tauri/binaries/yijing-backend/yijing-backend.exe' `
+            --updater-pubkey $env:TAURI_UPDATER_PUBKEY
           if ($LASTEXITCODE -ne 0) { throw 'build_release_dir failed' }
 
-          python scripts/updater/verify_release.py release --tag $env:TAG --expected-version $version --production
+          # 用与 Tauri 同一套算法（minisign-verify）做真正的密码学验证
+          Push-Location frontend/src-tauri
+          cargo build --release --bin verify-updater-signature
+          if ($LASTEXITCODE -ne 0) { Pop-Location; throw 'signature verifier build failed' }
+          Pop-Location
+
+          python scripts/updater/verify_release.py release `
+            --tag "v$env:YIJING_VERSION_INPUT" `
+            --expected-version $env:YIJING_VERSION_INPUT `
+            --production `
+            --expect-pubkey $env:TAURI_UPDATER_PUBKEY `
+            --signature-verifier 'frontend/src-tauri/target/release/verify-updater-signature.exe'
           if ($LASTEXITCODE -ne 0) { throw 'production release verification failed' }
 
-      - name: Upload release bundle as workflow artifact (audit trail)
+      - name: Upload release bundle for audit and publishing
         uses: actions/upload-artifact@v4
         with:
-          name: release-${{ env.TAG }}
-          path: release/*
+          name: release-artifacts
+          path: |
+            release/*
+            ci-gate.json
+            sidecar-smoke.json
           if-no-files-found: error
           retention-days: 30
 
-      - name: Stop here on dry run
-        if: ${{ inputs.dry_run }}
-        run: Write-Output "dry_run=true：已构建并校验，但未创建 Release、未更新官网。"
+  publish:
+    needs: build
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    environment: release
+    # 只有这一步需要写权限；构建 job 拿不到
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: release
+
+      - name: Refuse to overwrite an existing tag or release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          TAG="v$VERSION"
+          if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" >/dev/null 2>&1; then
+            echo "release already exists for $TAG" >&2
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "tag already exists for $TAG" >&2
+            exit 1
+          fi
 
       - name: Create draft release and upload assets
-        if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+          NOTES_FILE: ${{ inputs.notes_file }}
+          TAG: v${{ inputs.version }}
         run: |
-          gh release create $env:TAG --draft --title "易经起卦工作台 $env:TAG" --notes-file '${{ inputs.notes_file }}'
-          if ($LASTEXITCODE -ne 0) { throw 'draft release creation failed' }
-          gh release upload $env:TAG (Get-ChildItem release -File | ForEach-Object { $_.FullName })
-          if ($LASTEXITCODE -ne 0) { throw 'asset upload failed' }
+          set -euo pipefail
+          gh release create "$TAG" --draft --title "易经起卦工作台 $TAG" --notes-file "$NOTES_FILE"
+          gh release upload "$TAG" \
+            "release/yijing-workbench-${TAG#v}-x64-setup.exe" \
+            "release/yijing-workbench-${TAG#v}-x64-setup.exe.sig" \
+            "release/latest.json" \
+            "release/SHA256SUMS.txt" \
+            "release/manifest.json" \
+            "release/PROVENANCE.md"
+          ls -la release
 
-      - name: Re-read published assets from the API and verify
-        if: ${{ !inputs.dry_run }}
+      - name: Re-read uploaded assets from the API and verify byte-for-byte
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: v${{ inputs.version }}
         run: |
-          $version = '${{ inputs.version }}'
-          $release = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$env:TAG" | ConvertFrom-Json
-          $names = @($release.assets | ForEach-Object { $_.name })
-          foreach ($required in @("yijing-workbench-$version-x64-setup.exe", "yijing-workbench-$version-x64-setup.exe.sig", 'latest.json', 'SHA256SUMS.txt', 'manifest.json', 'PROVENANCE.md')) {
-            if ($names -notcontains $required) { throw "Release 资产缺失：$required" }
-          }
-          $installer = $release.assets | Where-Object { $_.name -eq "yijing-workbench-$version-x64-setup.exe" }
-          $assets = Get-ChildItem release -File
-          $local = $assets | Where-Object { $_.Name -eq $installer.name }
-          if ($installer.size -ne $local.Length) { throw '上传后的安装包字节数与本地不一致' }
-          if ($installer.digest -and ($installer.digest -ne "sha256:$($local | ForEach-Object { (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower() })")) {
-            throw '上传后的安装包摘要与本地不一致'
-          }
-          Write-Output "assets verified: $($names -join ', ')"
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, os, subprocess, sys
+          tag = os.environ["TAG"]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          release = json.loads(subprocess.check_output(["gh", "api", f"repos/{repo}/releases/tags/{tag}"], text=True))
+          assets = {item["name"]: item for item in release["assets"]}
+          required = [
+              f"yijing-workbench-{tag.lstrip('v')}-x64-setup.exe",
+              f"yijing-workbench-{tag.lstrip('v')}-x64-setup.exe.sig",
+              "latest.json", "SHA256SUMS.txt", "manifest.json", "PROVENANCE.md",
+          ]
+          problems = [name for name in required if name not in assets]
+          for name in required:
+              local = os.path.join("release", name)
+              if not os.path.isfile(local):
+                  problems.append(f"本地缺少 {name}")
+                  continue
+              size = os.path.getsize(local)
+              if name in assets and assets[name]["size"] != size:
+                  problems.append(f"{name} 上传后字节数 {assets[name]['size']} != 本地 {size}")
+              digest = assets.get(name, {}).get("digest")
+              actual = "sha256:" + hashlib.sha256(open(local, "rb").read()).hexdigest()
+              if digest and digest != actual:
+                  problems.append(f"{name} 上传后摘要与本地不一致")
+          if problems:
+              print("\n".join(problems), file=sys.stderr)
+              sys.exit(1)
+          print("uploaded assets verified:", ", ".join(sorted(assets)))
+          PY
 
-      - name: Publish（不可逆：之后 latest.json 才会进入更新渠道）
-        if: ${{ !inputs.dry_run }}
+      - name: Publish the release (irreversible; latest.json enters the update channel)
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: v${{ inputs.version }}
         run: |
-          gh release edit $env:TAG --draft=false --latest
-          if ($LASTEXITCODE -ne 0) { throw 'publish failed' }
+          set -euo pipefail
+          gh release edit "$TAG" --draft=false --latest
+          latest_tag=$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name)
+          test "$latest_tag" = "$TAG"
 
       - name: Verify the public latest.json served by releases/latest
-        if: ${{ !inputs.dry_run }}
         run: |
-          $url = "https://github.com/$env:GITHUB_REPOSITORY/releases/latest/download/latest.json"
-          $local = Get-Content 'release/latest.json' -Raw
-          $ok = $false
-          for ($i = 0; $i -lt 10; $i++) {
-            try {
-              $remote = (Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 20).Content
-              if ($remote.Trim() -eq $local.Trim()) { $ok = $true; break }
-            } catch { }
-            Start-Sleep -Seconds 15
-          }
-          if (-not $ok) { throw '公开 latest.json 与本地不一致（CDN 未收敛或上传错误）' }
-          Write-Output 'public latest.json matches'
+          set -euo pipefail
+          url="https://github.com/$GITHUB_REPOSITORY/releases/latest/download/latest.json"
+          expected=$(cat release/latest.json)
+          for attempt in $(seq 1 10); do
+            remote=$(curl -fsSL "$url" || true)
+            if [ "$remote" = "$expected" ]; then
+              echo "public latest.json matches"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "public latest.json does not match (CDN not converged or wrong upload)" >&2
+          exit 1
 
-      - name: Update the website release facts and deploy Pages
-        if: ${{ !inputs.dry_run }}
+      - name: Update website release facts and let Pages redeploy
+        env:
+          TAG: v${{ inputs.version }}
         run: |
-          python scripts/updater/update_site_release.py --release-dir release --tag $env:TAG
-          if ($LASTEXITCODE -ne 0) { throw 'site facts update failed' }
+          set -euo pipefail
+          python scripts/updater/update_site_release.py --release-dir release --tag "$TAG"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add website/src/links.ts
-          git diff --cached --quiet; if ($LASTEXITCODE -eq 0) { Write-Output 'site already up to date'; return }
-          git commit -m "release(site): point download to $env:TAG"
-          git push origin HEAD:main
+          if git diff --cached --quiet; then
+            echo "site already up to date"
+          else
+            git commit -m "release(site): point download to $TAG"
+            git push origin HEAD:main
+          fi
 
-      - name: Summary
+  dry-run-check:
+    needs: build
+    if: ${{ inputs.dry_run }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Prove nothing was published
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ inputs.version }}
         run: |
-          Write-Output "tag=$env:TAG source=$env:YIJING_SOURCE_SHA dry_run=${{ inputs.dry_run }}"
-          Get-ChildItem release -File | Select-Object Name, Length | Format-Table -AutoSize
+          set -euo pipefail
+          if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" >/dev/null 2>&1; then
+            echo "dry run 竟然创建了 release：$TAG" >&2
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "dry run 竟然创建了 tag：$TAG" >&2
+            exit 1
+          fi
+          if grep -q "releases/tag/$TAG" website/src/links.ts; then
+            echo "dry run 竟然改动了官网下载入口：$TAG" >&2
+            exit 1
+          fi
+          echo "dry run 无副作用：无 tag、无 release、官网仍指向旧版本"

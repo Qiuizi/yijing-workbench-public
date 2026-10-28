@@ -59,6 +59,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--sidecar", type=Path, default=None)
     parser.add_argument("--pub-date", default=None)
     parser.add_argument("--allow-prerelease", action="store_true", help="QA/候选构建允许 3.3.2-qa.N")
+    parser.add_argument(
+        "--updater-pubkey",
+        default=None,
+        help="本次构建实际注入的 updater 公钥（base64）；正式发布必须传，默认取仓库配置（QA）",
+    )
     args = parser.parse_args(argv)
     manifest.enable_utf8_console()
 
@@ -98,8 +103,17 @@ def main(argv: list[str] | None = None) -> int:
     )
     manifest.write_latest_json(args.out / "latest.json", latest, allow_prerelease=args.allow_prerelease)
 
-    pubkey = app_public_key(REPO_ROOT)
+    injected_pubkey = (args.updater_pubkey or "").strip()
+    pubkey_source = "argument" if injected_pubkey else "repo_config"
+    pubkey = injected_pubkey or app_public_key(REPO_ROOT)
     info = describe_public_key(pubkey)
+    signature_key_id = manifest.signature_key_id(bundle.signature)
+    if not info.get("valid"):
+        raise SystemExit("注入的 updater 公钥不是有效的 minisign 公钥")
+    if signature_key_id and manifest.public_key_key_id(pubkey) != signature_key_id:
+        raise SystemExit(
+            f"公钥与签名的 key id 不一致：pubkey={manifest.public_key_key_id(pubkey)} signature={signature_key_id}"
+        )
     build_manifest = {
         "version": version,
         "tag": args.tag,
@@ -109,8 +123,11 @@ def main(argv: list[str] | None = None) -> int:
         "workflow_run": args.workflow_run,
         "install_mode": "currentUser",
         "updater_target": manifest.WINDOWS_TARGET,
+        "updater_pubkey_source": pubkey_source,
         "updater_pubkey_is_qa": is_qa_key(pubkey),
-        "updater_pubkey_key_id": info.get("key_id", ""),
+        "updater_pubkey_key_id": manifest.public_key_key_id(pubkey),
+        "updater_pubkey_fingerprint": manifest.public_key_fingerprint(pubkey),
+        "signature_key_id": signature_key_id,
         "installer": {
             "filename": bundle.filename,
             "original_filename": bundle.source_name,
@@ -134,7 +151,8 @@ def main(argv: list[str] | None = None) -> int:
         f"- 工作流运行：{args.workflow_run or '未提供'}",
         f"- 安装包：`{bundle.filename}`（{installer_out.stat().st_size} bytes；原始产物 `{bundle.source_name}`，仅重命名，字节不变）",
         f"- SHA-256：`{digest}`",
-        f"- 更新签名：`{signature_out.name}`（minisign/ed25519，公钥 key id `{info.get('key_id', '')}`）",
+        f"- 更新签名：`{signature_out.name}`（minisign/ed25519，公钥 key id `{manifest.public_key_key_id(pubkey)}`，签名 key id `{signature_key_id}`）",
+        f"- 公钥来源：{pubkey_source}（指纹 `{manifest.public_key_fingerprint(pubkey)}`）",
         f"- 更新公钥是否为 QA 测试密钥：{'是（禁止正式发布）' if is_qa_key(pubkey) else '否'}",
         f"- 安装模式：currentUser（NSIS）",
         "",
