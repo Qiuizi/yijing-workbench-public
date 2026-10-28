@@ -1,6 +1,9 @@
-name: Website PR build and internal link checks
+name: Website build and internal link checks
 
 on:
+  # 同 v1-learning-ci：main 上不加路径过滤，保证发布门禁能在最终 SHA 上拿到 website-validation
+  push:
+    branches: [main]
   pull_request:
     paths:
       - 'website/**'

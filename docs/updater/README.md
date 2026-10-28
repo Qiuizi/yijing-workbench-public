@@ -54,8 +54,11 @@
 | 公钥（QA） | `frontend/src-tauri/tauri.conf.json` → `plugins.updater.pubkey` | 仅用于候选构建与隔离升级实验，可公开 |
 | 公钥（正式） | 同上，**发布前必须替换** | 由维护者用正式私钥生成 |
 | 私钥（QA） | 本地 `frontend/src-tauri/.updater-qa/`（已 gitignore） | 不提交、不上传 |
-| 私钥（正式） | GitHub Environment `release` 的 `TAURI_SIGNING_PRIVATE_KEY` | 只有审批通过的发布任务能读取 |
+| 私钥（正式） | GitHub Environment `release` 的 `TAURI_SIGNING_PRIVATE_KEY` | 只有审批通过的 build job 能读取 |
 | 私钥口令 | 同环境 `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | 与私钥分开配置 |
+| 公钥（正式，环境侧） | 同环境 `TAURI_UPDATER_PUBKEY` | 必须与仓库内置公钥逐字一致，否则 `release_gate.py` 拒绝 |
+
+正式密钥的生成、备份、写入配置与轮换步骤见 [`PRODUCTION-SIGNING.md`](PRODUCTION-SIGNING.md)。
 
 规则：
 
@@ -96,8 +99,9 @@
 
 ### A. 候选构建（`.github/workflows/windows-rc.yml`）
 
-- 触发：PR / main push（`frontend/**`、`backend/**`、`scripts/updater/**` 等路径）。
-- 步骤：版本一致性 → 后端 213 项测试 → 前端 123 项测试 + typecheck → 构建 sidecar + NSIS →
+- 触发：PR（按路径过滤）/ **main push（不过滤）** / 手动 dispatch。
+  main push 不过滤是为了保证「最终 main SHA 上一定存在这四条检查」——正式发布门禁依赖它。
+- 步骤：版本一致性 → 后端测试 → 前端测试 + typecheck → 构建 sidecar + NSIS →
   sidecar 冒烟 → `build_release_dir.py` 生成 latest.json/SHA256SUMS/manifest/PROVENANCE →
   `verify_release.py`（非生产模式）→ 上传 Artifact。
 - 边界：不创建 Release、不写更新渠道、不接触正式私钥；产物 14 天过期。
@@ -106,12 +110,18 @@
 ### B. 正式发布（`.github/workflows/release.yml`）
 
 - 触发：`workflow_dispatch`，必须填 `version` + `confirm`，默认 `dry_run=true`。
-- 环境：`release`（需要人工审批）。
-- 步骤：固定 main SHA → 版本/公钥门禁 → **该 SHA 的 CI 全绿** → 正式私钥构建 →
-  组装 + `verify_release.py --production` → 上传 draft → 回读资产并核对字节/摘要 →
-  publish（`--latest`）→ 复核公开 `latest.json` → 更新官网静态事实并部署 Pages。
+- 三个 job，权限与风险分离：
+  - `build`（`contents: read` + `actions: read`，持有签名私钥）：预检输入/ref/SHA/Tag →
+    版本 + 公钥门禁（`release_gate.py --expect-pubkey`）→ **该 SHA 的四条检查全绿**
+    （`ci_gate.py`，按工作流文件判定 + check run 交叉核对）→ 用**注入的正式公钥**构建 →
+    组装 → 真实验签（`verify_release.py --signature-verifier`）→ 上传 Artifact。
+  - `publish`（`contents: write`，拿不到私钥）：仅在 `dry_run=false` 时运行；draft 上传 →
+    回读 API 核对字节/摘要 → publish `--latest` → 核对 `releases/latest` 与公开 `latest.json`
+    → 更新官网静态事实并推送。
+  - `dry-run-check`：仅在 `dry_run=true` 时运行，断言没有创建 tag/release、官网未被改动。
 - 任何一步失败都不会让半成品进入更新渠道：draft Release 不是 `releases/latest`。
-- 重试：整个流程可重复执行；已存在的 tag 会被 `gh release create` 拒绝，避免覆盖历史版本。
+- 已存在的 tag/release 在构建**之前**就会被拒绝（重试不会覆盖历史版本）。
+- 源码只认 `github.sha`；main 已前进时预检直接失败，要求重新触发。
 
 ## 7. 数据保全
 
@@ -186,8 +196,12 @@
 
 ## 11. 正式发布 v3.3.2 还需要什么（独立授权）
 
-1. 维护者生成正式密钥对（`npx tauri signer generate`），把私钥与口令放进 GitHub Environment `release`；
-2. 用正式公钥替换 `frontend/src-tauri/tauri.conf.json` 的 `plugins.updater.pubkey`；
-3. 配置 `release` 环境的必需审批人；
-4. 授权并执行 `release.yml`（先 `dry_run=true` 跑通，再 `dry_run=false`）；
+按 [`PRODUCTION-SIGNING.md`](PRODUCTION-SIGNING.md) 完成：
+
+1. 维护者本机生成正式密钥对并离线备份，私钥与口令放进 GitHub Environment `release`；
+2. 把正式公钥写进 `tauri.conf.json`（走 PR）并配置环境 Secret `TAURI_UPDATER_PUBKEY`；
+3. 配置 `release` 环境的必需审批人、只允许 `main` 部署；
+4. 授权执行 `release.yml`：先 `dry_run=true`，确认无副作用后再 `dry_run=false`；
 5. 发布后人工验证：官网下载区指向 v3.3.2、`latest.json` 可访问、已安装的 v3.3.2 能发现 v3.3.3（需要下一个版本配合）。
+
+当前状态：**BLOCKED**（缺正式密钥与环境配置）。审查细节见 [`release-gate-review.md`](release-gate-review.md)。

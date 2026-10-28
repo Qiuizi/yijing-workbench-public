@@ -17,8 +17,11 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
+import subprocess
+import tempfile
 import sys
 from pathlib import Path
 
@@ -39,6 +42,36 @@ def sha256_of(path: Path) -> str:
             digest.update(chunk)
     return digest.hexdigest().upper()
 
+def run_signature_verifier(verifier: Path, installer: Path, signature: str, pubkey: str) -> list[str]:
+    """调用 Rust 校验器做真正的 minisign/ed25519 验证（不是只看格式）。"""
+    pub_text = manifest.public_key_text(pubkey)
+    if pub_text is None:
+        return ["注入的公钥无法解码成 minisign 公钥文本"]
+    sig_lines = manifest.decode_signature(signature)
+    if sig_lines is None:
+        return ["签名文本无法解码成 minisign 签名"]
+    if not verifier.exists():
+        return [f"签名校验器不存在：{verifier}"]
+
+    with tempfile.TemporaryDirectory(prefix="yijing-sig-") as tmp:
+        tmp_dir = Path(tmp)
+        sig_path = tmp_dir / "signature.minisign.txt"
+        pub_path = tmp_dir / "pubkey.minisign.txt"
+        sig_path.write_text("\n".join(sig_lines) + "\n", encoding="utf-8")
+        pub_path.write_text(pub_text, encoding="utf-8")
+        result = subprocess.run(
+            [str(verifier), "--file", str(installer), "--signature", str(sig_path), "--pubkey", str(pub_path)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    output = (result.stdout + result.stderr).strip()
+    if result.returncode != 0:
+        return [f"签名验证失败（exit={result.returncode}）：{output[:200]}"]
+    print(f"     signature verifier: {output[:160]}")
+    return []
+
+
 def verify(
     release_dir: Path,
     *,
@@ -47,6 +80,8 @@ def verify(
     production: bool,
     expected_version: str | None,
     allow_prerelease: bool = False,
+    expect_pubkey: str | None = None,
+    signature_verifier: Path | None = None,
 ) -> list[str]:
     problems: list[str] = []
     if not release_dir.is_dir():
@@ -109,6 +144,30 @@ def verify(
         if not str(entry.get("url", "")).endswith(asset.filename):
             problems.append("latest.json 的 url 未指向本次安装包")
 
+    if production and not expect_pubkey:
+        problems.append("正式发布必须显式传入 --expect-pubkey（本次构建实际注入的公钥）")
+    if expect_pubkey:
+        expect_fingerprint = manifest.public_key_fingerprint(expect_pubkey)
+        if not expect_fingerprint:
+            problems.append("--expect-pubkey 不是有效的 minisign 公钥")
+        else:
+            recorded = str(build_manifest.get("updater_pubkey_fingerprint") or "")
+            if recorded and recorded != expect_fingerprint:
+                problems.append(
+                    f"manifest 记录的公钥指纹({recorded})与期望({expect_fingerprint})不一致：构建没有使用注入的公钥"
+                )
+            if build_manifest.get("updater_pubkey_source") not in (None, "argument"):
+                problems.append("manifest 显示构建未注入公钥（回落到仓库配置），正式发布不允许")
+            expected_kid = manifest.public_key_key_id(expect_pubkey)
+            if build_manifest.get("signature_key_id") and build_manifest["signature_key_id"] != expected_kid:
+                problems.append(
+                    f"签名 key id({build_manifest['signature_key_id']})与公钥 key id({expected_kid})不一致"
+                )
+            if production and is_qa_key(expect_pubkey):
+                problems.append("--expect-pubkey 仍是 QA 测试公钥")
+        if signature_verifier is not None:
+            problems.extend(run_signature_verifier(signature_verifier, asset.path, asset.signature, expect_pubkey))
+
     pubkey_info = describe_public_key(app_public_key(REPO_ROOT))
     if not pubkey_info.get("valid"):
         problems.append("tauri.conf.json 里的更新公钥不是有效的 minisign 公钥")
@@ -130,6 +189,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--expected-version", default=None)
     parser.add_argument("--production", action="store_true", help="正式渠道校验：拒绝 QA 公钥")
     parser.add_argument("--allow-prerelease", action="store_true", help="QA/候选构建允许 3.3.2-qa.N")
+    parser.add_argument("--expect-pubkey", default=None, help="本次构建实际注入的 updater 公钥（base64）")
+    parser.add_argument("--signature-verifier", type=Path, default=None, help="verify-updater-signature 可执行文件")
     args = parser.parse_args(argv)
     manifest.enable_utf8_console()
 
@@ -140,6 +201,8 @@ def main(argv: list[str] | None = None) -> int:
         production=args.production,
         expected_version=args.expected_version,
         allow_prerelease=args.allow_prerelease,
+        expect_pubkey=args.expect_pubkey,
+        signature_verifier=args.signature_verifier,
     )
     if problems:
         print("发布校验失败：", file=sys.stderr)

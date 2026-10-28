@@ -13,13 +13,33 @@ from scripts.updater.keys import QA_PUBLIC_KEY, app_public_key, describe_public_
 from scripts.updater.update_site_release import apply_to_source
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-# Tauri 的 .sig 是「整份 minisign 文件」的 base64，不是明文多行文本
-_MINISIGN_TEXT = (
-    "untrusted comment: signature from tauri secret key\n"
-    "dGVzdC1zaWduYXR1cmUtYnl0ZXMtZm9yLXVuaXQtdGVzdC0wMTIzNDU2Nzg5YWJjZGVm\n"
-    "trusted comment: timestamp:1793081026\tfile:test-setup.exe\n"
-    "dGVzdC1nbG9iYWwtc2lnbmF0dXJlLWJ5dGVzLWZvci11bml0LXRlc3QtYWJjZGVmZ2hp\n"
-)
+# Tauri 的 .sig 是「整份 minisign 文件」的 base64，不是明文多行文本。
+# 这里构造一对「key id 自洽」的假密钥/假签名：结构合法、密码学上不合法，
+# 足以驱动 manifest/contract 的格式与一致性校验（真实验签见 Rust 校验器）。
+_FAKE_KEY_ID = bytes.fromhex("1122334455667788")
+
+
+def _fake_public_key_b64() -> str:
+    payload = b"Ed" + _FAKE_KEY_ID + bytes(range(32))
+    text = "untrusted comment: minisign public key: TEST\n" + base64.b64encode(payload).decode() + "\n"
+    return base64.b64encode(text.encode()).decode()
+
+
+FAKE_PUBKEY = _fake_public_key_b64()
+
+
+def _fake_signature_text(key_id: bytes = _FAKE_KEY_ID) -> str:
+    sig_line = base64.b64encode(b"Ed" + key_id + bytes(64)).decode()
+    global_line = base64.b64encode(b"Ed" + key_id + bytes(64)).decode()
+    return (
+        "untrusted comment: signature from tauri secret key\n"
+        f"{sig_line}\n"
+        "trusted comment: timestamp:1793081026\tfile:test-setup.exe\n"
+        f"{global_line}\n"
+    )
+
+
+_MINISIGN_TEXT = _fake_signature_text()
 SIGNATURE = base64.b64encode(_MINISIGN_TEXT.encode("utf-8")).decode("ascii")
 
 
@@ -46,6 +66,7 @@ def _build_release(tmp_path: Path, version: str = "3.3.2", tag: str = "v3.3.2") 
         "--version", version,
         "--notes", "测试更新说明",
         "--source-sha", "deadbeef" * 5,
+        "--updater-pubkey", FAKE_PUBKEY,
     ]) == 0
     return out
 
@@ -196,9 +217,49 @@ def test_production_mode_refuses_qa_public_key(tmp_path):
     from scripts.updater.verify_release import verify
 
     release = _build_release(tmp_path)
-    problems = verify(release, tag="v3.3.2", repo="Qiuizi/yijing-workbench-public", production=True, expected_version="3.3.2")
+    problems = verify(
+        release,
+        tag="v3.3.2",
+        repo="Qiuizi/yijing-workbench-public",
+        production=True,
+        expected_version="3.3.2",
+        expect_pubkey=FAKE_PUBKEY,
+    )
     assert any("QA 测试公钥" in item for item in problems)
-    assert any("QA 公钥" in item for item in problems)
+
+
+def test_production_mode_requires_expect_pubkey(tmp_path):
+    from scripts.updater.verify_release import verify
+
+    release = _build_release(tmp_path)
+    problems = verify(
+        release,
+        tag="v3.3.2",
+        repo="Qiuizi/yijing-workbench-public",
+        production=True,
+        expected_version="3.3.2",
+    )
+    assert any("--expect-pubkey" in item for item in problems)
+
+
+def test_public_key_mismatch_is_rejected(tmp_path):
+    """注入的公钥与 manifest 记录的不一致 → 必须失败。"""
+    from scripts.updater.verify_release import verify
+
+    release = _build_release(tmp_path)
+    other_key = base64.b64encode(
+        ("untrusted comment: minisign public key: OTHER\n"
+         + base64.b64encode(b"Ed" + bytes.fromhex("99" * 8) + bytes(32)).decode() + "\n").encode()
+    ).decode()
+    problems = verify(
+        release,
+        tag="v3.3.2",
+        repo="Qiuizi/yijing-workbench-public",
+        production=False,
+        expected_version="3.3.2",
+        expect_pubkey=other_key,
+    )
+    assert any("指纹" in item and "不一致" in item for item in problems)
 
 
 def test_repo_public_key_is_a_valid_minisign_key():

@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import re
 import sys
@@ -23,6 +24,7 @@ from typing import Any
 SEMVER_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$")
 WINDOWS_TARGET = "windows-x86_64"
 SIGNATURE_MIN_LINES = 3
+PUBLIC_KEY_BYTES = 42  # "Ed" + 8 字节 key id + 32 字节 ed25519 公钥
 
 # 允许出现版本号的所有来源；新增来源时必须同步这里，否则一致性检查会漏。
 VERSION_SOURCES = (
@@ -142,6 +144,59 @@ def decode_signature(signature: str) -> list[str] | None:
     if not any(line.startswith("trusted comment:") for line in lines):
         return None
     return lines
+
+
+def public_key_text(public_key_b64: str) -> str | None:
+    """把 Tauri 配置里的公钥（整份 .pub 文件的 base64）解成两行文本。"""
+    compact = "".join((public_key_b64 or "").split())
+    if not compact:
+        return None
+    try:
+        text = base64.b64decode(compact, validate=True).decode("utf-8")
+    except (ValueError, UnicodeDecodeError):
+        return None
+    lines = [line for line in text.splitlines() if line.strip()]
+    if len(lines) < 2 or not lines[0].startswith("untrusted comment:"):
+        return None
+    try:
+        key_bytes = base64.b64decode(lines[1].strip(), validate=True)
+    except ValueError:
+        return None
+    if len(key_bytes) != PUBLIC_KEY_BYTES:
+        return None
+    return "\n".join(lines[:2]) + "\n"
+
+
+def public_key_key_id(public_key_b64: str) -> str:
+    """minisign 公钥里的 8 字节 key id（大写十六进制），用于与签名交叉核对。"""
+    text = public_key_text(public_key_b64)
+    if text is None:
+        return ""
+    key_bytes = base64.b64decode(text.splitlines()[1].strip())
+    return key_bytes[2:10].hex().upper()
+
+
+def public_key_fingerprint(public_key_b64: str) -> str:
+    """公钥文本的 SHA-256 前 16 位，用于在日志/清单里标识「是哪把钥匙」。"""
+    text = public_key_text(public_key_b64)
+    if text is None:
+        return ""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16].upper()
+
+
+def signature_key_id(signature_b64: str) -> str:
+    """从 .sig 里取出签名自带的 key id。"""
+    lines = decode_signature(signature_b64)
+    if lines is None:
+        return ""
+    for line in lines[1:]:
+        try:
+            raw = base64.b64decode(line.strip(), validate=True)
+        except ValueError:
+            continue
+        if len(raw) >= 10:
+            return raw[2:10].hex().upper()
+    return ""
 
 
 def read_signature(path: Path) -> str:
