@@ -75,6 +75,18 @@ FAIL  key id mismatch: 公钥与签名不是同一把钥匙（…）            
 
 `verify_release.py --production` 另有两道：缺 `--expect-pubkey` 直接拒绝；`manifest` 记录的指纹与期望不一致时拒绝。
 
+### 新门禁在 CI 上抓到的真实不一致
+
+候选流水线（`windows-rc.yml`）在没有仓库级候选密钥时会生成**临时密钥**签名，但组装元数据时仍按**仓库 QA 公钥**记录，于是：
+
+```
+公钥与签名的 key id 不一致：pubkey=7B072FC9CF8B402F signature=45D568B237A1A390
+```
+
+这正是 P2 的同类问题（签名用的钥匙 ≠ 记录/内置的钥匙），新的一致性检查在 CI 上直接拦住。
+修复：构建步骤把本次实际注入的公钥导出到 `YIJING_BUILD_PUBKEY`，组装时传给 `build_release_dir --updater-pubkey`，
+候选 manifest 里同时记录 `updater_pubkey_source` / `updater_pubkey_key_id` / `signature_key_id`，便于审计。
+
 ### 端到端（QA 产物，非正式）
 
 ```
