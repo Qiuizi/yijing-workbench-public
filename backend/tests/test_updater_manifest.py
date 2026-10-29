@@ -212,20 +212,22 @@ def test_signature_mismatch_between_sig_and_latest_json_is_rejected(tmp_path):
     assert any("signature 与 .sig 文件内容不一致" in item for item in problems)
 
 
-def test_production_mode_refuses_qa_public_key(tmp_path):
-    """仓库当前内置的是 QA 公钥，正式渠道校验必须拒绝。"""
-    from scripts.updater.verify_release import verify
+def test_production_mode_refuses_qa_public_key(tmp_path, monkeypatch):
+    """正式渠道必须拒绝 QA 公钥，不论它在仓库配置里还是在 --expect-pubkey 里。"""
+    from scripts.updater import verify_release
 
+    monkeypatch.setattr(verify_release, "app_public_key", lambda root: QA_PUBLIC_KEY)
     release = _build_release(tmp_path)
-    problems = verify(
+    problems = verify_release.verify(
         release,
         tag="v3.3.2",
         repo="Qiuizi/yijing-workbench-public",
         production=True,
         expected_version="3.3.2",
-        expect_pubkey=FAKE_PUBKEY,
+        expect_pubkey=QA_PUBLIC_KEY,
     )
-    assert any("QA 测试公钥" in item for item in problems)
+    assert any("正式发布禁止使用 QA 测试公钥" in item for item in problems)
+    assert any("--expect-pubkey 仍是 QA 测试公钥" in item for item in problems)
 
 
 def test_production_mode_requires_expect_pubkey(tmp_path):
@@ -263,34 +265,21 @@ def test_public_key_mismatch_is_rejected(tmp_path):
 
 
 def test_repo_public_key_is_a_valid_minisign_key():
-    info = describe_public_key(app_public_key(REPO_ROOT))
+    pubkey = app_public_key(REPO_ROOT)
+    info = describe_public_key(pubkey)
     assert info["valid"] is True
     assert info["bytes"] == 42
-    assert info["is_qa"] is True, "本轮提交的是 QA 公钥；正式发布前必须替换"
+    assert info["is_qa"] is False
+    assert info["key_id"] == "5D79EDB98FE951FF"
+    assert manifest.public_key_fingerprint(pubkey) == "05974A347E99A1D9"
 
 
-def test_release_gate_refuses_qa_key():
+def test_release_gate_accepts_production_repo_key():
     from scripts.updater.release_gate import check
 
     ok, message = check("3.3.2")
-    assert ok is False
-    assert "QA 测试公钥" in message
-
-
-def test_release_gate_reports_version_mismatch_first():
-    from scripts.updater.release_gate import check
-
-    ok, message = check("9.9.9")
-    assert ok is False
-    assert "不一致" in message
-
-
-def test_release_gate_refuses_qa_key():
-    from scripts.updater.release_gate import check
-
-    ok, message = check("3.3.2")
-    assert ok is False
-    assert "QA 测试公钥" in message
+    assert ok is True
+    assert message == "version=3.3.2 pubkey_key_id=5D79EDB98FE951FF"
 
 
 def test_release_gate_reports_version_mismatch_first():
