@@ -51,8 +51,8 @@
 
 | 项 | 位置 | 说明 |
 | --- | --- | --- |
-| 公钥（QA） | `frontend/src-tauri/tauri.conf.json` → `plugins.updater.pubkey` | 仅用于候选构建与隔离升级实验，可公开 |
-| 公钥（正式） | 同上，**发布前必须替换** | 由维护者用正式私钥生成 |
+| 公钥（正式） | `frontend/src-tauri/tauri.conf.json` → `plugins.updater.pubkey` | 当前仓库内置的是正式公钥，可公开 |
+| 公钥（QA） | `scripts/updater/keys.py` 的 `QA_PUBLIC_KEY` | 只给测试对照，正式发布会拒绝 |
 | 私钥（QA） | 本地 `frontend/src-tauri/.updater-qa/`（已 gitignore） | 不提交、不上传 |
 | 私钥（正式） | GitHub Environment `release` 的 `TAURI_SIGNING_PRIVATE_KEY` | 只有审批通过的 build job 能读取 |
 | 私钥口令 | 同环境 `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | 与私钥分开配置 |

@@ -1,7 +1,8 @@
 # 正式签名密钥与 release 环境配置（维护者操作手册）
 
-> 本轮**没有**生成任何正式密钥。仓库当前内置的仍是 QA 公钥（key id `7B072FC9CF8B402F`，指纹 `093E59E9B93FE19E`），
-> 因此正式发布门禁 `release_gate.py` 会明确拒绝，`release.yml` 无法进入构建阶段。
+> 正式密钥已在维护者本机生成，私钥和口令不在仓库里。仓库内置的是正式公钥（key id `5D79EDB98FE951FF`，指纹 `05974A347E99A1D9`）。
+> QA 公钥（key id `7B072FC9CF8B402F`，指纹 `093E59E9B93FE19E`）只留在 `scripts/updater/keys.py`，供测试对照。
+> 归档口令完成离线保管之前，不要合并后续发布，不要触发 `release.yml`。
 
 下面每一步都在**维护者自己的 Windows 机器**上执行；私钥与口令不要出现在聊天、Issue、PR、终端日志或 Actions 日志里。
 
@@ -15,38 +16,38 @@ New-Item -ItemType Directory -Force -Path $dir | Out-Null
 cd D:\Qiuizi\project\yijing\frontend
 npx tauri signer generate -w "$dir\yijing-release.key"
 # 会交互式要求输入口令两次。口令请单独存进密码管理器。
+# 如果 yijing-release.key 已经存在，不要加 -f，不要重新生成。
 ```
 
 产物：
 
 - `$dir\yijing-release.key`：私钥（含口令加密）
-- `$dir\yijing-release.key.pub`：公钥（两行文本：untrusted comment + base64）
+- `$dir\yijing-release.key.pub`：Tauri CLI 2.11 写出的单行文本，就是 `tauri.conf.json` 要的 `pubkey`。不要再做一次 Base64。
 
 **立即做离线备份**（U 盘 / 加密归档），并把口令单独保存。丢失私钥 = 已安装的用户再也收不到自动更新，只能手动重装。
 
 ## 2. 得到要提交进仓库的公钥
 
-Tauri 配置里存的是「整份 .pub 文件的 base64」，不是其中那行 key：
+Tauri CLI 2.11 的 `.key.pub` 本身就是要写进配置的那一行。再 Base64 一次，门禁会把它判成无效公钥。
 
 ```powershell
-$pubB64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("$dir\yijing-release.key.pub"))
-$pubB64 | Set-Clipboard
+$pub = (Get-Content -Raw "$dir\yijing-release.key.pub").Trim()
 ```
 
 核对 key id（应与你之后在发布日志里看到的一致）：
 
 ```powershell
 cd D:\Qiuizi\project\yijing
-.\.venv\Scripts\python.exe -c "from scripts.updater.manifest import public_key_key_id, public_key_fingerprint; import sys; k=sys.argv[1]; print('key_id=', public_key_key_id(k)); print('fingerprint=', public_key_fingerprint(k))" $pubB64
+.\.venv\Scripts\python.exe -c "from scripts.updater.manifest import public_key_key_id, public_key_fingerprint; import sys; k=sys.argv[1]; print('key_id=', public_key_key_id(k)); print('fingerprint=', public_key_fingerprint(k))" $pub
 ```
 
 ## 3. 把公钥写进 `tauri.conf.json` 并提 PR
 
-把 `frontend/src-tauri/tauri.conf.json` → `plugins.updater.pubkey` 的值替换为上一步的 `$pubB64`。
+把 `frontend/src-tauri/tauri.conf.json` → `plugins.updater.pubkey` 的值替换为上一步的 `$pub`。
 
 ```powershell
 cd D:\Qiuizi\project\yijing
-python scripts/updater/release_gate.py --expect-version 3.3.2 --expect-pubkey $pubB64
+python scripts/updater/release_gate.py --expect-version 3.3.2 --expect-pubkey $pub
 # 期望输出：OK  version=3.3.2 pubkey_key_id=<你的 key id>
 ```
 
@@ -65,7 +66,7 @@ python scripts/updater/release_gate.py --expect-version 3.3.2 --expect-pubkey $p
 | --- | --- | --- |
 | `TAURI_SIGNING_PRIVATE_KEY` | `$dir\yijing-release.key` 的**文件内容**（整段文本） | 私钥本体，含口令加密 |
 | `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | 生成时输入的口令 | 与私钥分开保存 |
-| `TAURI_UPDATER_PUBKEY` | 第 2 步的 `$pubB64` | 必须与仓库内置公钥逐字一致，否则门禁拒绝 |
+| `TAURI_UPDATER_PUBKEY` | 第 2 步的 `$pub` | 必须与仓库内置公钥逐字一致，否则门禁拒绝 |
 
 可用 PowerShell 把私钥内容读出来粘到网页（不要 echo 到日志）：
 
@@ -82,11 +83,12 @@ Get-Content -Raw "$dir\yijing-release.key" | Set-Clipboard
 
 | 项 | 状态 |
 | --- | --- |
-| 正式密钥对 | ❌ 未生成（需维护者本机执行 §1） |
-| 仓库内置公钥 | ⚠️ 仍是 QA 公钥 |
-| `release` 环境 | ❌ 未配置（需 §4） |
-| 三个 Secret | ❌ 未配置 |
-| 正式 Dry Run | ⛔ BLOCKED（缺上述三项） |
+| 正式密钥对 | ✅ 已在维护者本机生成。私钥和口令不入库 |
+| 仓库内置公钥 | ✅ 正式公钥，key id `5D79EDB98FE951FF` |
+| `release` 环境 | ✅ 已创建。审批人是维护者本人，部署分支只有 `main`，管理员不能绕过 |
+| 三个 Secret | ✅ 已写入 `release` 环境。GitHub 不回读明文 |
+| 离线备份 | ⚠️ 加密归档已写到外置磁盘。归档口令还要由维护者另行保存，两样不要放在一起 |
+| 正式 Dry Run | ⛔ 等待维护者单独授权。口令未离线保管前不要触发 |
 | Tag / Release | ✅ 未创建，仍停在 v3.3.1 |
 
 ## 6. 密钥轮换与丢失

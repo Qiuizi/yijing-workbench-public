@@ -114,8 +114,9 @@ jobs:
           "YIJING_VC_REDIST_DIR=$redist" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Write-Output "Verified Microsoft CRT at $redist"
 
-      # 更新签名只在构建步骤内可见：优先用仓库级候选密钥；缺失时为本次运行生成临时密钥。
-      # 两条路径产出的 .sig 都能与构建时注入的公钥配对，且都不会触及正式私钥。
+      # 更新签名只在构建步骤内可见，且绝不使用正式私钥。
+      # tauri.conf.json 里现在是正式公钥，不能再拿另一把候选私钥给它签名。
+      # 没有候选密钥时，本步骤生成临时密钥，并把临时公钥注入这次构建。
       - name: Build PyInstaller sidecar and updater-signed NSIS candidate
         working-directory: frontend
         env:
@@ -134,9 +135,7 @@ jobs:
             $pubkey = (Get-Content -LiteralPath "$keyPath.pub" -Raw)
             Write-Output 'signing: ephemeral candidate key (no repository secret configured)'
           } else {
-            $env:TAURI_SIGNING_PRIVATE_KEY = $env:YIJING_CANDIDATE_SIGNING_KEY
-            $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = $env:YIJING_CANDIDATE_SIGNING_KEY_PASSWORD
-            Write-Output 'signing: repository candidate key'
+            throw 'tauri.conf.json 已是正式公钥，不能用仓库候选私钥给它签名。请删除 YIJING_CANDIDATE_SIGNING_KEY，让本步骤生成临时密钥。'
           }
 
           @{
