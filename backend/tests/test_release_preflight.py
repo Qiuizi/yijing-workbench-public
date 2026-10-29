@@ -101,3 +101,63 @@ def test_existing_release_on_github_blocks_release(monkeypatch):
     with pytest.raises(PreflightError) as error:
         ensure_tag_absent("Qiuizi/yijing-workbench-public", "v3.3.2", "")
     assert "已存在 release" in str(error.value)
+
+
+def _gh_result(returncode: int, stderr: str):
+    class Result:
+        stdout = ""
+
+    result = Result()
+    result.returncode = returncode
+    result.stderr = stderr
+    return result
+
+
+def test_missing_gh_token_is_not_treated_as_absent_release(monkeypatch):
+    """没有 GH_TOKEN 时 gh 会失败。这必须拦住发布，不能当成「Release 不存在」。"""
+    monkeypatch.setattr(
+        "scripts.updater.release_preflight.subprocess.run",
+        lambda *args, **kwargs: _gh_result(
+            1,
+            "gh: To use GitHub CLI in a GitHub Actions workflow,\nset the GH_TOKEN environment variable.\n",
+        ),
+    )
+    with pytest.raises(PreflightError) as error:
+        ensure_tag_absent("Qiuizi/yijing-workbench-public", "v3.3.2", "v3.3.1\n")
+    assert "失败" in str(error.value)
+
+
+def test_failed_github_api_is_not_treated_as_absent_release(monkeypatch):
+    monkeypatch.setattr(
+        "scripts.updater.release_preflight.subprocess.run",
+        lambda *args, **kwargs: _gh_result(1, "HTTP 502"),
+    )
+    with pytest.raises(PreflightError) as error:
+        ensure_tag_absent("Qiuizi/yijing-workbench-public", "v3.3.2", "")
+    assert "失败" in str(error.value)
+
+
+def test_preflight_command_fails_when_github_cli_has_no_credentials(monkeypatch, capsys):
+    from scripts.updater.release_preflight import main
+
+    monkeypatch.setattr(
+        "scripts.updater.release_preflight.subprocess.run",
+        lambda *args, **kwargs: _gh_result(
+            1,
+            "gh: To use GitHub CLI in a GitHub Actions workflow, set the GH_TOKEN environment variable.",
+        ),
+    )
+    code = main(
+        [
+            "--version", "3.3.2",
+            "--confirm", "3.3.2",
+            "--notes-file", "docs/release-notes-v3.3.2.md",
+            "--pinned-sha", SHA,
+            "--ref", "refs/heads/main",
+            "--repo", "Qiuizi/yijing-workbench-public",
+            "--git-head", SHA,
+            "--git-tags", "v3.3.1\n",
+        ]
+    )
+    assert code == 1
+    assert "GH_TOKEN" in capsys.readouterr().err

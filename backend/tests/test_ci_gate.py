@@ -169,6 +169,29 @@ def test_failed_check_run_blocks_even_when_workflow_succeeded():
     assert any("check run 未通过" in item for item in report.problems)
 
 
+def test_github_api_failure_is_not_an_empty_success(monkeypatch):
+    """认证失败或 API 失败必须抛出，不能被当成「没有任何检查所以通过」。"""
+    from scripts.updater import ci_gate
+
+    def fake_run(*args, **kwargs):
+        class Result:
+            returncode = 1
+            stdout = ""
+            stderr = "Bad credentials"
+
+        return Result()
+
+    monkeypatch.setattr(ci_gate.subprocess, "run", fake_run)
+    with pytest.raises(RuntimeError, match="失败"):
+        ci_gate.collect_from_api("Qiuizi/yijing-workbench-public", SHA)
+
+
+def test_empty_check_run_list_blocks_release():
+    report = evaluate(all_green_runs(), SHA, check_runs=[])
+    assert report.ok is False
+    assert any("缺少 check run" in item for item in report.problems)
+
+
 def test_invalid_sha_is_rejected():
     report = evaluate(all_green_runs(), "main")
     assert report.ok is False
