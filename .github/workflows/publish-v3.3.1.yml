@@ -1,4 +1,6 @@
 # One-time v3.3.1 publication: reuse ONLY SHA-256 verified main-push Windows binary.
+# Archived: v3.3.1 is already public. The publish job is unconditionally disabled.
+# Do not remove `if: false`. Pushing this file must not create a tag, Release, or main commit.
 name: Publish v3.3.1 (64 reviewed guides, acknowledged untested risks)
 
 on:
@@ -12,7 +14,7 @@ on:
       - '.github/workflows/publish-v3.3.1.yml'
 
 permissions:
-  contents: write
+  contents: read
   actions: read
 
 concurrency:
@@ -21,7 +23,8 @@ concurrency:
 
 jobs:
   verify-and-publish:
-    if: github.repository == 'Qiuizi/yijing-workbench-public'
+    # Historical release is immutable. Archived job intentionally disabled.
+    if: false
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -130,7 +133,8 @@ jobs:
           PY
 
       - name: Publish immutable v3.3.1 release and verify uploaded hash (main only)
-        if: github.event_name == 'push'
+        # Previously limited to push. Archived with the job; this step must never run.
+        if: false
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
