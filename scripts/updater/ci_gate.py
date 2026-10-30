@@ -176,15 +176,35 @@ def evaluate(
 
 
 def _gh_api(path: str) -> Any:
-    result = subprocess.run(
-        ["gh", "api", path],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    """读取 gh api。与预检相同，避开 Windows CP1252 文本模式。
+
+    actions/runs 的 head_commit.message 含中文。text=True 时读线程用
+    CP1252 解码失败，stdout 变成 None，json.loads 再抛 TypeError。
+    """
+    try:
+        result = subprocess.run(
+            ["gh", "api", path],
+            capture_output=True,
+            text=False,
+            check=False,
+        )
+    except OSError as error:
+        raise RuntimeError(f"gh 不可执行：{error}") from error
+
+    stderr = (result.stderr or b"").decode("utf-8", errors="replace").strip()
     if result.returncode != 0:
-        raise RuntimeError(f"gh api {path} 失败：{result.stderr.strip()[:200]}")
-    return json.loads(result.stdout)
+        raise RuntimeError(f"gh api {path} 失败：{stderr[:200] or f'exit {result.returncode}'}")
+    raw = result.stdout
+    if raw is None or not raw.strip():
+        raise RuntimeError(f"gh api {path} 返回空响应")
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise RuntimeError(f"gh api {path} 的响应不是 UTF-8：{error}") from error
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as error:
+        raise RuntimeError(f"gh api {path} 返回的不是 JSON：{error}") from error
 
 
 def collect_from_api(repo: str, sha: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
