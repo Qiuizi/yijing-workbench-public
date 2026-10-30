@@ -298,9 +298,16 @@ def test_release_discovers_signed_vc143_before_the_sidecar_build():
     assert redist_at < _step_index(build_steps, SIDECAR_STEP)
 
     step = _named_step(build_steps, REDIST_STEP)
+    assert step.get("uses") == "./.github/actions/discover-vc143"
+    assert "run" not in step
     assert "env" not in step
     assert "GH_TOKEN" not in step
-    run = step["run"]
+    action = parse_workflow(
+        (REPO_ROOT / ".github" / "actions" / "discover-vc143" / "action.yml").read_text(encoding="utf-8")
+    )
+    action_steps = action["runs"]["steps"]
+    assert len(action_steps) == 1
+    run = action_steps[0]["run"]
     lines = _script_lines(run)
 
     vswhere = [line for line in lines if line.startswith("$vsWhere")]
@@ -349,4 +356,6 @@ def test_release_discovers_signed_vc143_before_the_sidecar_build():
         (REPO_ROOT / ".github" / "workflows" / "windows-rc.yml").read_text(encoding="utf-8")
     )
     candidate_steps = _steps(next(iter(_jobs(candidate_workflow).values())))
-    assert _named_step(candidate_steps, REDIST_STEP)["run"] == run
+    candidate_step = _named_step(candidate_steps, REDIST_STEP)
+    assert candidate_step.get("uses") == step["uses"]
+    assert "run" not in candidate_step

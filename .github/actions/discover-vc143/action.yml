@@ -1,0 +1,46 @@
+name: Discover and verify VC143 x64 redist
+description: >-
+  Locate the newest VS2022 Microsoft.VC143.CRT x64 directory with vswhere,
+  require vcruntime140.dll and vcruntime140_1.dll, and accept only a valid
+  Microsoft Authenticode signature. Exports YIJING_VC_REDIST_DIR for later
+  steps. Does not hardcode a runner install path and does not accept signing
+  secrets.
+
+outputs:
+  redist-dir:
+    description: Verified Microsoft.VC143.CRT x64 directory.
+    value: ${{ steps.discover.outputs.redist-dir }}
+
+runs:
+  using: composite
+  steps:
+    - name: Find and verify the VS2022 VC143 x64 redist
+      id: discover
+      shell: pwsh
+      run: |
+        $vsWhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+        if (-not (Test-Path -LiteralPath $vsWhere)) { throw 'vswhere.exe not found on Windows runner' }
+        $installs = @(& $vsWhere -products '*' -property installationPath)
+        $candidates = @()
+        foreach ($install in $installs) {
+          $root = Join-Path $install 'VC\Redist\MSVC'
+          if (-not (Test-Path -LiteralPath $root)) { continue }
+          foreach ($version in @(Get-ChildItem -LiteralPath $root -Directory | Sort-Object Name -Descending)) {
+            $candidate = Join-Path $version.FullName 'x64\Microsoft.VC143.CRT'
+            if ((Test-Path -LiteralPath (Join-Path $candidate 'vcruntime140.dll')) -and
+                (Test-Path -LiteralPath (Join-Path $candidate 'vcruntime140_1.dll'))) {
+              $candidates += $candidate
+            }
+          }
+        }
+        if ($candidates.Count -eq 0) { throw 'VS2022 Microsoft.VC143.CRT x64 redist not found' }
+        $redist = $candidates[0]
+        foreach ($name in @('vcruntime140.dll','vcruntime140_1.dll')) {
+          $sig = Get-AuthenticodeSignature -LiteralPath (Join-Path $redist $name)
+          if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notmatch 'O=Microsoft Corporation') {
+            throw "Invalid signature: $name"
+          }
+        }
+        "YIJING_VC_REDIST_DIR=$redist" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "redist-dir=$redist" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+        Write-Output "Verified Microsoft CRT at $redist"

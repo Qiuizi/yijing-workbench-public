@@ -76,32 +76,7 @@ jobs:
         run: npm run typecheck
 
       - name: Find and verify the VS2022 VC143 x64 redist
-        run: |
-          $vsWhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
-          if (-not (Test-Path -LiteralPath $vsWhere)) { throw 'vswhere.exe not found on Windows runner' }
-          $installs = @(& $vsWhere -products '*' -property installationPath)
-          $candidates = @()
-          foreach ($install in $installs) {
-            $root = Join-Path $install 'VC\Redist\MSVC'
-            if (-not (Test-Path -LiteralPath $root)) { continue }
-            foreach ($version in @(Get-ChildItem -LiteralPath $root -Directory | Sort-Object Name -Descending)) {
-              $candidate = Join-Path $version.FullName 'x64\Microsoft.VC143.CRT'
-              if ((Test-Path -LiteralPath (Join-Path $candidate 'vcruntime140.dll')) -and
-                  (Test-Path -LiteralPath (Join-Path $candidate 'vcruntime140_1.dll'))) {
-                $candidates += $candidate
-              }
-            }
-          }
-          if ($candidates.Count -eq 0) { throw 'VS2022 Microsoft.VC143.CRT x64 redist not found' }
-          $redist = $candidates[0]
-          foreach ($name in @('vcruntime140.dll','vcruntime140_1.dll')) {
-            $sig = Get-AuthenticodeSignature -LiteralPath (Join-Path $redist $name)
-            if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notmatch 'O=Microsoft Corporation') {
-              throw "Invalid signature: $name"
-            }
-          }
-          "YIJING_VC_REDIST_DIR=$redist" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          Write-Output "Verified Microsoft CRT at $redist"
+        uses: ./.github/actions/discover-vc143
 
       # 更新签名只在构建步骤内可见，且绝不使用正式私钥。
       # tauri.conf.json 里现在是正式公钥，不能再拿另一把候选私钥给它签名。
