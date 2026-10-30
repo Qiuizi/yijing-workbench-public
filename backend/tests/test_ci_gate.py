@@ -3,6 +3,9 @@
 这些用例模拟 GitHub API 的真实返回，不访问网络。
 """
 
+import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -174,16 +177,45 @@ def test_github_api_failure_is_not_an_empty_success(monkeypatch):
     from scripts.updater import ci_gate
 
     def fake_run(*args, **kwargs):
-        class Result:
-            returncode = 1
-            stdout = ""
-            stderr = "Bad credentials"
-
-        return Result()
+        return subprocess.CompletedProcess(
+            args,
+            1,
+            stdout=b"",
+            stderr=b"Bad credentials",
+        )
 
     monkeypatch.setattr(ci_gate.subprocess, "run", fake_run)
     with pytest.raises(RuntimeError, match="失败"):
         ci_gate.collect_from_api("Qiuizi/yijing-workbench-public", SHA)
+
+
+def test_collect_from_api_decodes_utf8_when_cp1252_would_drop_stdout(monkeypatch, tmp_path):
+    """actions/runs 含中文提交说明。text=True 在 CP1252 下会把 stdout 丢成 None。"""
+    from scripts.updater import ci_gate
+
+    message = "修复预检提交"
+    runs_payload = json.dumps(
+        {"workflow_runs": [{"head_commit": {"message": message}}]},
+        ensure_ascii=False,
+    ).encode("utf-8")
+    checks_payload = json.dumps({"check_runs": []}).encode("utf-8")
+    assert b"\x8f" in runs_payload
+    real_run = subprocess.run
+
+    def run_like_windows(cmd, **kwargs):
+        raw = runs_payload if "actions/runs" in cmd[-1] else checks_payload
+        script = tmp_path / ("runs.py" if raw is runs_payload else "checks.py")
+        script.write_bytes(b"import sys\nsys.stdout.buffer.write(" + repr(raw).encode("ascii") + b")\n")
+        forwarded = dict(kwargs)
+        if forwarded.get("text") or forwarded.get("encoding") or forwarded.get("universal_newlines"):
+            forwarded["text"] = True
+            forwarded["encoding"] = "cp1252"
+        return real_run([sys.executable, str(script)], **forwarded)
+
+    monkeypatch.setattr(ci_gate.subprocess, "run", run_like_windows)
+    runs, checks = ci_gate.collect_from_api("Qiuizi/yijing-workbench-public", SHA)
+    assert runs[0]["head_commit"]["message"] == message
+    assert checks == []
 
 
 def test_empty_check_run_list_blocks_release():

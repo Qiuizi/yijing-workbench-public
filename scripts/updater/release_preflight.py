@@ -96,12 +96,44 @@ def validate_sha(sha: str, git_head: str, main_tip: str | None) -> None:
 
 
 def _gh_json(api_path: str) -> dict | None:
-    result = subprocess.run(["gh", "api", api_path], capture_output=True, text=True, check=False)
+    """读取 gh api 的 JSON 对象。
+
+    拿原始字节再按 UTF-8 解码。Windows Runner 上 text=True 会用 CP1252
+    在读线程里解码；中文提交说明里的字节（例如 0x8F）解不开时，异常留在
+    读线程，stdout 变成 None，json.loads 接着抛 TypeError。
+    只有退出码非 0 且 stderr 明确包含 Not Found / 404，才表示资源不存在。
+    """
+    try:
+        result = subprocess.run(
+            ["gh", "api", api_path],
+            capture_output=True,
+            text=False,
+            check=False,
+        )
+    except OSError as error:
+        raise PreflightError(f"gh 不可执行：{error}") from error
+
+    stderr = (result.stderr or b"").decode("utf-8", errors="replace")
     if result.returncode != 0:
-        if "Not Found" in result.stderr or "404" in result.stderr:
+        if "Not Found" in stderr or "404" in stderr:
             return None
-        raise PreflightError(f"gh api {api_path} 失败：{result.stderr.strip()[:200]}")
-    return json.loads(result.stdout)
+        detail = stderr.strip()[:200] or f"exit {result.returncode}"
+        raise PreflightError(f"gh api {api_path} 失败：{detail}")
+
+    raw = result.stdout
+    if raw is None or not raw.strip():
+        raise PreflightError(f"gh api {api_path} 返回空响应")
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise PreflightError(f"gh api {api_path} 的响应不是 UTF-8：{error}") from error
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as error:
+        raise PreflightError(f"gh api {api_path} 返回的不是 JSON：{error}") from error
+    if not isinstance(data, dict):
+        raise PreflightError(f"gh api {api_path} 返回的 JSON 不是对象：{type(data).__name__}")
+    return data
 
 
 def ensure_tag_absent(repo: str, tag: str, git_tags: str) -> None:
