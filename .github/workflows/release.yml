@@ -58,6 +58,8 @@ jobs:
           fetch-depth: 0
 
       - name: Preflight inputs, ref, SHA and tag availability
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           python scripts/updater/release_preflight.py `
             --version $env:YIJING_VERSION_INPUT `
