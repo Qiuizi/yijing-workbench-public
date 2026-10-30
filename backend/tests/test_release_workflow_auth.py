@@ -258,3 +258,95 @@ def test_non_cli_steps_are_not_given_a_workflow_wide_token():
 def test_parser_rejects_broken_indent():
     with pytest.raises(ValueError, match="缩进"):
         parse_workflow("name: ok\n  dangling: true\n")
+
+
+REDIST_STEP = "Find and verify the VS2022 VC143 x64 redist"
+REGRESSION_STEP = "Regression tests before the release build"
+SIDECAR_STEP = "Build sidecar and NSIS installer with the production key"
+REQUIRED_DLLS = ("vcruntime140.dll", "vcruntime140_1.dll")
+
+
+def _named_step(steps: list[dict], name: str) -> dict:
+    matches = [step for step in steps if step.get("name") == name]
+    assert len(matches) == 1, name
+    return matches[0]
+
+
+def _step_index(steps: list[dict], name: str) -> int:
+    return [step.get("name") for step in steps].index(name)
+
+
+def _script_lines(run: str) -> list[str]:
+    return [line.strip() for line in run.splitlines() if line.strip()]
+
+
+def test_release_discovers_signed_vc143_before_the_sidecar_build():
+    """正式构建必须先自动发现并验签 VC143，再进入 Sidecar。
+
+    这是工作流结构检查，不是生产 Dry Run 的执行结果。
+    """
+    workflow = load_workflow()
+    assert workflow["permissions"] == {"contents": "read", "actions": "read"}
+    jobs = _jobs(workflow)
+    assert jobs["publish"]["if"] == "${{ !inputs.dry_run }}"
+    assert jobs["dry-run-check"]["if"] == "${{ inputs.dry_run }}"
+    assert workflow["on"]["workflow_dispatch"]["inputs"]["dry_run"]["default"] == "true"
+
+    build_steps = _steps(jobs["build"])
+    redist_at = _step_index(build_steps, REDIST_STEP)
+    assert _step_index(build_steps, REGRESSION_STEP) < redist_at
+    assert redist_at < _step_index(build_steps, SIDECAR_STEP)
+
+    step = _named_step(build_steps, REDIST_STEP)
+    assert "env" not in step
+    assert "GH_TOKEN" not in step
+    run = step["run"]
+    lines = _script_lines(run)
+
+    vswhere = [line for line in lines if line.startswith("$vsWhere")]
+    assert len(vswhere) == 1
+    assert "Join-Path" in vswhere[0]
+    assert "vswhere.exe" in vswhere[0]
+    assert "ProgramFiles(x86)" in vswhere[0]
+    assert re.search(r"[A-Za-z]:\\", vswhere[0]) is None
+
+    assert any("VC\\Redist\\MSVC" in line for line in lines)
+    version_scan = [line for line in lines if "Get-ChildItem" in line and "Sort-Object Name -Descending" in line]
+    assert len(version_scan) == 1
+    candidate = [line for line in lines if line.startswith("$candidate =")]
+    assert len(candidate) == 1
+    assert r"x64\Microsoft.VC143.CRT" in candidate[0]
+
+    presence_at = next(
+        index for index, line in enumerate(lines)
+        if "Test-Path" in line and "vcruntime140.dll" in line and "vcruntime140_1.dll" not in line
+    )
+    assert lines[presence_at].endswith("-and")
+    assert "Test-Path" in lines[presence_at + 1]
+    assert "vcruntime140_1.dll" in lines[presence_at + 1]
+    signature_names = [line for line in lines if line.startswith("foreach ($name in")]
+    assert len(signature_names) == 1
+    assert all(dll in signature_names[0] for dll in REQUIRED_DLLS)
+    signature = [line for line in lines if "Get-AuthenticodeSignature" in line]
+    assert len(signature) == 1
+    assert "$redist" in signature[0]
+    guard = [line for line in lines if "$sig.Status" in line]
+    assert len(guard) == 1
+    assert "'Valid'" in guard[0]
+    assert "O=Microsoft Corporation" in guard[0]
+
+    chosen = [line for line in lines if line.startswith("$redist")]
+    assert chosen == ["$redist = $candidates[0]"]
+    published = [line for line in lines if "YIJING_VC_REDIST_DIR" in line]
+    assert published == [
+        '"YIJING_VC_REDIST_DIR=$redist" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8'
+    ]
+    assert any(line.startswith("Write-Output") and "$redist" in line for line in lines)
+    assert re.search(r"YIJING_VC_REDIST_DIR=[A-Za-z]:\\", run) is None
+    assert re.search(r"[A-Za-z]:\\Program Files\\Microsoft Visual Studio", run) is None
+
+    candidate_workflow = parse_workflow(
+        (REPO_ROOT / ".github" / "workflows" / "windows-rc.yml").read_text(encoding="utf-8")
+    )
+    candidate_steps = _steps(next(iter(_jobs(candidate_workflow).values())))
+    assert _named_step(candidate_steps, REDIST_STEP)["run"] == run
