@@ -61,7 +61,11 @@ jobs:
           frontend: 'false'
 
       - name: Windows backend regression tests
-        run: .\.venv\Scripts\python.exe -X utf8 -m pytest
+        uses: ./.github/actions/run-windows-regression
+        with:
+          backend: 'true'
+          vitest: 'false'
+          typecheck: 'false'
 
       - name: Install frontend locked dependencies
         uses: ./.github/actions/install-frozen-windows-deps
@@ -70,12 +74,18 @@ jobs:
           frontend: 'true'
 
       - name: Frontend regression tests
-        working-directory: frontend
-        run: npm test
+        uses: ./.github/actions/run-windows-regression
+        with:
+          backend: 'false'
+          vitest: 'true'
+          typecheck: 'false'
 
       - name: Typecheck
-        working-directory: frontend
-        run: npm run typecheck
+        uses: ./.github/actions/run-windows-regression
+        with:
+          backend: 'false'
+          vitest: 'false'
+          typecheck: 'true'
 
       - name: Find and verify the VS2022 VC143 x64 redist
         uses: ./.github/actions/discover-vc143

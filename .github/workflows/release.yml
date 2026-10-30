@@ -101,12 +101,7 @@ jobs:
         uses: ./.github/actions/install-frozen-windows-deps
 
       - name: Regression tests before the release build
-        run: |
-          .\.venv\Scripts\python.exe -X utf8 -m pytest
-          Push-Location frontend
-          npm test
-          npm run typecheck
-          Pop-Location
+        uses: ./.github/actions/run-windows-regression
 
       - name: Find and verify the VS2022 VC143 x64 redist
         uses: ./.github/actions/discover-vc143
