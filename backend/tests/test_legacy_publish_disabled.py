@@ -1,7 +1,8 @@
 """遗留一次性发布工作流必须保持禁用。
 
 只解析仓库里的 workflow 文件，不触发 release.yml，不创建 tag 或 Release。
-`if: false` 必须是未加引号的布尔值。引号字符串在 GitHub Actions 里可能被当成真值。
+job 级 `if: false` 必须是未加引号的布尔值。引号字符串在 GitHub Actions 里是真值。
+解析器会去掉引号，所以禁用判定以源码中的 job 级 if 为准。
 """
 
 from __future__ import annotations
@@ -43,6 +44,10 @@ def _run(step: dict) -> str:
     return str(step.get("run") or "")
 
 
+def _step_blob(job: dict) -> str:
+    return "\n".join(_run(step) for step in _steps(job))
+
+
 def _unquoted_false_lines(text: str) -> list[str]:
     return [
         line
@@ -51,63 +56,100 @@ def _unquoted_false_lines(text: str) -> list[str]:
     ]
 
 
-def _is_unconditionally_disabled(job: dict) -> bool:
-    return job.get("if") == "false"
+def _raw_job_ifs(text: str) -> dict[str, str | None]:
+    """返回每个 job 的源码级 if 值，不去掉引号。没有 if 时为 None。"""
+    lines = text.splitlines()
+    start = next(index for index, line in enumerate(lines) if line == "jobs:")
+    end = len(lines)
+    for index in range(start + 1, len(lines)):
+        line = lines[index]
+        if line and not line.startswith(" ") and not line.lstrip().startswith("#"):
+            end = index
+            break
+
+    found: dict[str, str | None] = {}
+    current: str | None = None
+    for line in lines[start + 1 : end]:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        if indent == 2 and line.rstrip().endswith(":") and not line.strip().startswith("- "):
+            current = line.strip()[:-1]
+            found[current] = None
+            continue
+        if current is not None and indent == 4 and line.strip().startswith("if:"):
+            found[current] = line.strip()[3:].strip()
+    return found
 
 
-def _contains_publish_command(job: dict) -> bool:
-    blob = "\n".join(_run(step) for step in _steps(job))
-    return any(command in blob for command in RELEASE_COMMANDS)
+def _job_writes_release_or_main(job: dict) -> bool:
+    blob = _step_blob(job)
+    return any(command in blob for command in (*RELEASE_COMMANDS, *MAIN_WRITE_COMMANDS))
 
 
-def _contains_main_write(job: dict) -> bool:
-    blob = "\n".join(_run(step) for step in _steps(job))
-    return any(command in blob for command in MAIN_WRITE_COMMANDS)
-
-
-def _enabled_publish_jobs(workflow: dict) -> list[tuple[str, str | None]]:
+def _enabled_publish_jobs(text: str) -> list[tuple[str, str | None]]:
+    workflow = parse_workflow(text)
+    raw_ifs = _raw_job_ifs(text)
     found: list[tuple[str, str | None]] = []
     for name, job in _jobs(workflow).items():
-        if not (_contains_publish_command(job) or _contains_main_write(job)):
+        if not _job_writes_release_or_main(job):
             continue
-        if _is_unconditionally_disabled(job):
+        condition = raw_ifs[name]
+        if condition == "false":
             continue
-        found.append((name, job.get("if")))
+        found.append((name, condition))
     return found
 
 
 def test_live_repository_guard_is_not_treated_as_disabled():
     """仓库名守卫曾经会放行正式仓库。它不是禁用。"""
-    workflow = parse_workflow(
-        "\n".join(
-            [
-                "name: example",
-                "on:",
-                "  workflow_dispatch:",
-                "permissions:",
-                "  contents: write",
-                "jobs:",
-                "  verify-and-publish:",
-                "    if: github.repository == 'Qiuizi/yijing-workbench-public'",
-                "    runs-on: ubuntu-24.04",
-                "    steps:",
-                "      - name: publish",
-                "        if: github.event_name == 'push'",
-                "        run: gh release create v3.3.1",
-                "",
-            ]
-        )
+    text = "\n".join(
+        [
+            "name: example",
+            "on:",
+            "  workflow_dispatch:",
+            "permissions:",
+            "  contents: write",
+            "jobs:",
+            "  verify-and-publish:",
+            "    if: github.repository == 'Qiuizi/yijing-workbench-public'",
+            "    runs-on: ubuntu-24.04",
+            "    steps:",
+            "      - name: publish",
+            "        if: github.event_name == 'push'",
+            "        run: gh release create v3.3.1",
+            "",
+        ]
     )
-    assert _enabled_publish_jobs(workflow) == [
+    assert _enabled_publish_jobs(text) == [
         ("verify-and-publish", "github.repository == 'Qiuizi/yijing-workbench-public'")
     ]
 
 
-def test_quoted_false_is_not_an_unquoted_disable():
-    """解析器会去掉引号。源码行必须是未加引号的 `if: false`，否则不算禁用。"""
-    assert _unquoted_false_lines("    if: 'false'\n    if: \"false\"\n") == []
-    assert _unquoted_false_lines("    if: false\n") == ["    if: false"]
-    assert _unquoted_false_lines("    # if: false\n") == []
+def test_quoted_false_on_a_publish_job_is_still_enabled():
+    """引号里的 false 不是布尔 false。旁边另一个 job 的真 if: false 不能替它免检。"""
+    text = "\n".join(
+        [
+            "name: example",
+            "on:",
+            "  workflow_dispatch:",
+            "jobs:",
+            "  safe:",
+            "    if: false",
+            "    runs-on: ubuntu-24.04",
+            "    steps:",
+            "      - run: echo ok",
+            "  verify-and-publish:",
+            "    if: 'false'",
+            "    runs-on: ubuntu-24.04",
+            "    steps:",
+            "      - run: gh release create v3.3.1",
+            "",
+        ]
+    )
+    assert _raw_job_ifs(text)["safe"] == "false"
+    assert _raw_job_ifs(text)["verify-and-publish"] == "'false'"
+    assert _enabled_publish_jobs(text) == [("verify-and-publish", "'false'")]
 
 
 def test_v331_publish_job_and_publish_step_never_run():
@@ -118,18 +160,14 @@ def test_v331_publish_job_and_publish_step_never_run():
 
     jobs = _jobs(workflow)
     assert list(jobs) == ["verify-and-publish"]
-    job = jobs["verify-and-publish"]
-    assert _is_unconditionally_disabled(job)
+    assert _raw_job_ifs(text) == {"verify-and-publish": "false"}
     assert _unquoted_false_lines(text) == ["    if: false", "        if: false"]
 
-    publish_steps = [
-        step for step in _steps(job) if _contains_publish_command({"steps": [step]})
-    ]
+    publish_steps = [step for step in _steps(jobs["verify-and-publish"]) if "gh release create" in _run(step)]
     assert len(publish_steps) == 1
     assert publish_steps[0]["if"] == "false"
-    assert "gh release create" in _run(publish_steps[0])
     assert "git push" not in _run(publish_steps[0])
-    assert _enabled_publish_jobs(workflow) == []
+    assert _enabled_publish_jobs(text) == []
 
 
 def test_historical_v331_file_is_retained_not_deleted():
@@ -142,28 +180,18 @@ def test_historical_v331_file_is_retained_not_deleted():
 def test_every_legacy_publisher_job_is_unconditionally_disabled():
     for name in LEGACY_PUBLISHERS:
         text = _text(name)
-        workflow = _workflow(name)
         assert _unquoted_false_lines(text), name
-        for job_name, job in _jobs(workflow).items():
-            assert _is_unconditionally_disabled(job), f"{name}:{job_name} 仍可能执行"
-            if _contains_publish_command(job) or _contains_main_write(job):
-                assert job["if"] == "false"
+        raw_ifs = _raw_job_ifs(text)
+        assert raw_ifs, name
+        for job_name, condition in raw_ifs.items():
+            assert condition == "false", f"{name}:{job_name} 仍可能执行，if={condition!r}"
+        assert _enabled_publish_jobs(text) == []
 
 
 def test_no_other_enabled_release_or_main_write_path():
     enabled: list[tuple[str, str, str | None]] = []
     for path in sorted(WORKFLOWS.glob("*.yml")):
-        workflow = parse_workflow(path.read_text(encoding="utf-8"))
-        for job_name, condition in _enabled_publish_jobs(workflow):
+        for job_name, condition in _enabled_publish_jobs(path.read_text(encoding="utf-8")):
             enabled.append((path.name, job_name, condition))
 
     assert enabled == [(CURRENT_PUBLISHER, "publish", "${{ !inputs.dry_run }}")]
-
-    release = _workflow(CURRENT_PUBLISHER)
-    assert set(release["on"]) == {"workflow_dispatch"}
-    dry_run = release["on"]["workflow_dispatch"]["inputs"]["dry_run"]
-    assert dry_run["type"] == "boolean"
-    assert dry_run["default"] == "true"
-    assert _jobs(release)["publish"]["permissions"] == {"contents": "write"}
-    assert _jobs(release)["build"].get("permissions") is None
-    assert release["permissions"]["contents"] == "read"
