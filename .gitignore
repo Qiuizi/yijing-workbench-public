@@ -10,6 +10,8 @@ htmlcov/
 **/node_modules/
 frontend/dist/
 frontend/src-tauri/target/
+scripts/updater/verifier-proof/target/
+target-proof/
 frontend/src-tauri/binaries/
 backend/data/history.sqlite3*
 *.sqlite

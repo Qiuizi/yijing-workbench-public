@@ -35,7 +35,6 @@ jobs:
     outputs:
       artifact-id: ${{ steps.upload-candidate.outputs.artifact-id }}
       artifact-digest: ${{ steps.upload-candidate.outputs.artifact-digest }}
-      verifier-artifact-id: ${{ steps.upload-verifier.outputs.artifact-id }}
     defaults:
       run:
         shell: pwsh
@@ -215,20 +214,6 @@ jobs:
             --artifact-name "yijing-workbench-$($env:YIJING_VERSION)-windows-x64-rc"
           if ($LASTEXITCODE -ne 0) { throw 'provenance write failed' }
 
-      - name: Build signature verifier only
-        working-directory: frontend/src-tauri
-        run: cargo build --release --bin verify-updater-signature
-
-      - name: Upload signature verifier
-        id: upload-verifier
-        uses: actions/upload-artifact@v4
-        with:
-          name: yijing-signature-verifier-${{ env.YIJING_VERSION }}
-          path: frontend/src-tauri/target/release/verify-updater-signature.exe
-          if-no-files-found: error
-          retention-days: 14
-          overwrite: false
-
       - name: Upload candidate artifacts (never a public Release, never the update channel)
         id: upload-candidate
         uses: actions/upload-artifact@v4
@@ -243,7 +228,7 @@ jobs:
     name: Verify immutable candidate artifact
     needs: windows-rc
     runs-on: windows-2022
-    timeout-minutes: 40
+    timeout-minutes: 60
     permissions:
       contents: read
       actions: read
@@ -258,46 +243,62 @@ jobs:
       - name: Set up Windows toolchain
         uses: ./.github/actions/setup-windows-toolchain
 
-      - name: Download the uploaded artifact by id
-        id: download
-        uses: actions/download-artifact@v4
-        with:
-          artifact-ids: ${{ needs.windows-rc.outputs.artifact-id }}
-          path: downloaded-artifact
-          merge-multiple: true
+      - name: Compile signature verifier from this checkout
+        working-directory: frontend/src-tauri
+        env:
+          YIJING_SKIP_TAURI_BUILD: "1"
+        run: cargo build --release --bin verify-updater-signature
 
-      - name: Download the signature verifier by id
-        uses: actions/download-artifact@v4
-        with:
-          artifact-ids: ${{ needs.windows-rc.outputs.verifier-artifact-id }}
-          path: downloaded-verifier
-          merge-multiple: true
-
-      - name: Verify downloaded artifact identity, hashes, manifest and signature
+      - name: Download the exact artifact zip and fail on digest mismatch
         env:
           GH_TOKEN: ${{ github.token }}
           ARTIFACT_ID: ${{ needs.windows-rc.outputs.artifact-id }}
           EXPECTED_DIGEST: ${{ needs.windows-rc.outputs.artifact-digest }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
           test -n "$ARTIFACT_ID"
           test -n "$EXPECTED_DIGEST"
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID" > artifact.json
+          curl --fail --location --retry 3 --silent --show-error \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "Accept: application/vnd.github+json" \
+            --output artifact.zip \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip"
+          python scripts/updater/artifact_digest.py \
+            --metadata artifact.json \
+            --zip-path artifact.zip \
+            --expected-digest "$EXPECTED_DIGEST" \
+            --expected-artifact-id "$ARTIFACT_ID" \
+            --expected-run-id "$GITHUB_RUN_ID" \
+            --expected-head-sha "$EXPECTED_HEAD_SHA" \
+            --extract-dir downloaded-artifact
+
+      - name: Verify downloaded artifact identity, hashes, manifest and signature
+        env:
+          ARTIFACT_ID: ${{ needs.windows-rc.outputs.artifact-id }}
+          EXPECTED_DIGEST: ${{ needs.windows-rc.outputs.artifact-digest }}
+        run: |
+          set -euo pipefail
+          expected_version="$(python -c "import json; print(json.load(open('frontend/src-tauri/tauri.conf.json', encoding='utf-8'))['version'])")"
+          test -n "$expected_version"
           python scripts/updater/provenance.py verify \
             --bundle-dir downloaded-artifact \
             --expected-repository "$GITHUB_REPOSITORY" \
             --expected-source-sha "$GITHUB_SHA" \
+            --expected-workflow-ref "$GITHUB_WORKFLOW_REF" \
+            --expected-workflow-sha "$GITHUB_WORKFLOW_SHA" \
             --expected-run-id "$GITHUB_RUN_ID" \
             --expected-run-attempt "$GITHUB_RUN_ATTEMPT" \
             --expected-event-name "$GITHUB_EVENT_NAME" \
             --expected-signing-mode ephemeral_candidate \
+            --expected-version "$expected_version" \
             --expected-artifact-id "$ARTIFACT_ID" \
             --observed-artifact-id "$(python -c 'import json; print(json.load(open("artifact.json"))["id"])')" \
             --expected-artifact-digest "$EXPECTED_DIGEST" \
             --observed-artifact-digest "$(python -c 'import json; print(json.load(open("artifact.json"))["digest"])')" \
             --observed-artifact-name "$(python -c 'import json; print(json.load(open("artifact.json"))["name"])')" \
-            --signature-verifier downloaded-verifier/verify-updater-signature.exe
-          test "$(python -c 'import json; print(str(json.load(open("artifact.json"))["expired"]).lower())')" = "false"
+            --signature-verifier frontend/src-tauri/target/release/verify-updater-signature.exe
 
   attest-candidate-artifact:
     name: Attest immutable candidate artifact
@@ -306,31 +307,134 @@ jobs:
       - verify-candidate-artifact
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     permissions:
       contents: read
       actions: read
       id-token: write
       attestations: write
     steps:
-      - name: Download the same artifact by id
-        id: download
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
         with:
-          artifact-ids: ${{ needs.windows-rc.outputs.artifact-id }}
-          path: downloaded-artifact
-          merge-multiple: true
+          ref: ${{ github.sha }}
+
+      - name: Download the same artifact zip and fail on digest mismatch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ needs.windows-rc.outputs.artifact-id }}
+          EXPECTED_DIGEST: ${{ needs.windows-rc.outputs.artifact-digest }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test -n "$ARTIFACT_ID"
+          test -n "$EXPECTED_DIGEST"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID" > artifact.json
+          curl --fail --location --retry 3 --silent --show-error \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "Accept: application/vnd.github+json" \
+            --output artifact.zip \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip"
+          python3 scripts/updater/artifact_digest.py \
+            --metadata artifact.json \
+            --zip-path artifact.zip \
+            --expected-digest "$EXPECTED_DIGEST" \
+            --expected-artifact-id "$ARTIFACT_ID" \
+            --expected-run-id "$GITHUB_RUN_ID" \
+            --expected-head-sha "$EXPECTED_HEAD_SHA" \
+            --extract-dir downloaded-artifact
 
       - name: Attest the verified candidate files
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: downloaded-artifact/**
 
-      - name: Verify the GitHub attestation
+      - name: Reject a different workflow, source SHA, or OIDC issuer
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          installer=$(find downloaded-artifact -type f -name '*-x64-setup.exe' | head -n 1)
+          if ! printf '%s' "$GITHUB_SHA" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "GITHUB_SHA is not a 40-character hex digest" >&2
+            exit 1
+          fi
+          installer=$(find downloaded-artifact -type f -name '*-x64-setup.exe' -print -quit)
           test -n "$installer"
-          gh attestation verify "$installer" --repo "$GITHUB_REPOSITORY"
+          identity="https://github.com/${GITHUB_REPOSITORY}/.github/workflows/windows-rc.yml@${GITHUB_REF}"
+          set +e
+          gh attestation verify "$installer" \
+            --repo "$GITHUB_REPOSITORY" \
+            --cert-identity "https://github.com/${GITHUB_REPOSITORY}/.github/workflows/release.yml@refs/heads/main" \
+            --source-digest "$GITHUB_SHA" \
+            --cert-oidc-issuer "https://token.actions.githubusercontent.com" \
+            --format json > wrong-workflow.json
+          wrong_workflow=$?
+          gh attestation verify "$installer" \
+            --repo "$GITHUB_REPOSITORY" \
+            --cert-identity "$identity" \
+            --source-digest "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" \
+            --cert-oidc-issuer "https://token.actions.githubusercontent.com" \
+            --format json > wrong-source.json
+          wrong_source=$?
+          gh attestation verify "$installer" \
+            --repo "$GITHUB_REPOSITORY" \
+            --cert-identity "$identity" \
+            --source-digest "$GITHUB_SHA" \
+            --cert-oidc-issuer "https://evil.example" \
+            --format json > wrong-issuer.json
+          wrong_issuer=$?
+          set -e
+          test "$wrong_workflow" -ne 0
+          test "$wrong_source" -ne 0
+          test "$wrong_issuer" -ne 0
+          echo "rejected wrong workflow, source SHA, and OIDC issuer"
+
+      - name: Verify attestation identity, run, and every subject
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if ! printf '%s' "$GITHUB_SHA" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "GITHUB_SHA is not a 40-character hex digest" >&2
+            exit 1
+          fi
+          if ! printf '%s' "$GITHUB_WORKFLOW_SHA" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "GITHUB_WORKFLOW_SHA is not a 40-character hex digest" >&2
+            exit 1
+          fi
+          # gh 2.103.3 rejects combining --cert-identity with --signer-workflow.
+          # The SAN is the exact workflow path and ref. Run ID is checked from
+          # the certificate afterwards; it is not a gh flag.
+          identity="https://github.com/${GITHUB_REPOSITORY}/.github/workflows/windows-rc.yml@${GITHUB_REF}"
+          mapfile -d '' files < <(find downloaded-artifact -type f -print0)
+          test "${#files[@]}" -eq 9
+          for file in "${files[@]}"; do
+            gh attestation verify "$file" \
+              --repo "$GITHUB_REPOSITORY" \
+              --cert-identity "$identity" \
+              --source-ref "$GITHUB_REF" \
+              --source-digest "$GITHUB_SHA" \
+              --signer-digest "$GITHUB_WORKFLOW_SHA" \
+              --cert-oidc-issuer "https://token.actions.githubusercontent.com" \
+              --deny-self-hosted-runners \
+              --format json > attestation-verify.json
+          done
+          python3 scripts/updater/attestation_identity.py \
+            --verification-json attestation-verify.json \
+            --bundle-dir downloaded-artifact \
+            --expected-repository "$GITHUB_REPOSITORY" \
+            --expected-ref "$GITHUB_REF" \
+            --expected-source-sha "$GITHUB_SHA" \
+            --expected-workflow-sha "$GITHUB_WORKFLOW_SHA" \
+            --expected-run-id "$GITHUB_RUN_ID" \
+            --expected-run-attempt "$GITHUB_RUN_ATTEMPT"
+          python3 scripts/updater/attestation_identity.py \
+            --verification-json attestation-verify.json \
+            --bundle-dir downloaded-artifact \
+            --expected-repository "$GITHUB_REPOSITORY" \
+            --expected-ref "$GITHUB_REF" \
+            --expected-source-sha "$GITHUB_SHA" \
+            --expected-workflow-sha "$GITHUB_WORKFLOW_SHA" \
+            --expected-run-id 1 \
+            --expected-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            && { echo "wrong Run ID was accepted" >&2; exit 1; }
+          echo "rejected wrong Run ID"

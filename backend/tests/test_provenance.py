@@ -97,6 +97,8 @@ def _expect(bundle: Path, **overrides):
         expected_event_name=context["event_name"],
         expected_signing_mode=context["signing_mode"],
         expected_version=context["version"],
+        expected_workflow_ref=context["workflow_ref"],
+        expected_workflow_sha=context["workflow_sha"],
         expected_artifact_id="13029132070",
         observed_artifact_id="13029132070",
         expected_artifact_digest="sha256:" + "ab" * 32,
@@ -225,39 +227,71 @@ def test_missing_field_invalid_json_and_secret_rejection(tmp_path):
         build_provenance(secret, **{**_context(), "updater_pubkey": QA_PUBLIC_KEY})
 
 
+def test_windows_absolute_path_traversal_case_and_sha_format(tmp_path):
+    bundle, document = _write_bundle(tmp_path)
+    document["files"].append({"name": "C:/Windows/win.ini", "size_bytes": 1, "sha256": "ab" * 32})
+    (bundle / PROVENANCE_FILENAME).write_text(json.dumps(document), encoding="utf-8")
+    problems = _expect(bundle)
+    assert any("绝对路径" in item or "非法文件名" in item for item in problems)
+    assert not any(item.startswith("C:/Windows/win.ini 的 SHA-256") for item in problems)
+
+    bundle, document = _write_bundle(tmp_path / "dotdot")
+    document["files"].append({"name": "../secret", "size_bytes": 1, "sha256": "ab" * 32})
+    (bundle / PROVENANCE_FILENAME).write_text(json.dumps(document), encoding="utf-8")
+    assert any("路径穿越" in item or "非法文件名" in item for item in _expect(bundle))
+
+    bundle, document = _write_bundle(tmp_path / "unc")
+    document["files"].append({"name": "//server/share", "size_bytes": 1, "sha256": "ab" * 32})
+    (bundle / PROVENANCE_FILENAME).write_text(json.dumps(document), encoding="utf-8")
+    assert any("绝对路径" in item or "非法文件名" in item for item in _expect(bundle))
+
+    bundle, document = _write_bundle(tmp_path / "case")
+    first = document["files"][0]
+    document["files"].append({**first, "name": first["name"].upper()})
+    (bundle / PROVENANCE_FILENAME).write_text(json.dumps(document), encoding="utf-8")
+    assert any("大小写" in item or "重复" in item for item in _expect(bundle))
+
+    bundle, document = _write_bundle(tmp_path / "sha")
+    document["files"][0]["sha256"] = "g" * 64
+    (bundle / PROVENANCE_FILENAME).write_text(json.dumps(document), encoding="utf-8")
+    assert any("sha256 格式无效" in item for item in _expect(bundle))
+    assert any("workflow_ref" in item for item in _expect(bundle, expected_workflow_ref="other.yml@refs/heads/main"))
+    assert any("workflow_sha" in item for item in _expect(bundle, expected_workflow_sha="d" * 40))
+    assert any("Source SHA 格式无效" in item for item in _expect(bundle, expected_source_sha="not-a-sha"))
+
+
 def test_candidate_workflow_uploads_once_and_verify_job_does_not_rebuild():
     workflow = parse_workflow(WORKFLOW.read_text(encoding="utf-8"))
     build = workflow["jobs"]["windows-rc"]
     uploads = [step for step in build["steps"] if step.get("uses") == "actions/upload-artifact@v4"]
-    by_name = {step["with"]["name"]: step for step in uploads}
-    assert list(by_name) == [
-        "yijing-signature-verifier-${{ env.YIJING_VERSION }}",
-        "yijing-workbench-${{ env.YIJING_VERSION }}-windows-x64-rc",
-    ]
-    for step in uploads:
-        assert step["with"]["overwrite"] == "false"
-        assert step["with"]["retention-days"] == "14"
-    assert by_name["yijing-workbench-${{ env.YIJING_VERSION }}-windows-x64-rc"]["id"] == "upload-candidate"
+    assert len(uploads) == 1
+    assert uploads[0]["with"]["overwrite"] == "false"
+    assert uploads[0]["with"]["retention-days"] == "14"
+    assert uploads[0]["with"]["name"] == "yijing-workbench-${{ env.YIJING_VERSION }}-windows-x64-rc"
+    assert uploads[0]["id"] == "upload-candidate"
+    assert "verifier-artifact-id" not in build.get("outputs", {})
     assert build["outputs"]["artifact-id"] == "${{ steps.upload-candidate.outputs.artifact-id }}"
     assert build["outputs"]["artifact-digest"] == "${{ steps.upload-candidate.outputs.artifact-digest }}"
 
     verify = workflow["jobs"]["verify-candidate-artifact"]
     assert verify["needs"] == "windows-rc"
-    download = next(step for step in verify["steps"] if step.get("uses") == "actions/download-artifact@v4")
-    assert download["with"]["artifact-ids"] == "${{ needs.windows-rc.outputs.artifact-id }}"
-    assert "name" not in download["with"]
+    assert all(step.get("uses") != "actions/download-artifact@v4" for step in verify["steps"])
     joined = "\n".join(str(step.get("run") or "") for step in verify["steps"])
+    assert "actions/artifacts/${ARTIFACT_ID}/zip" in joined
+    assert "artifact_digest.py" in joined
     assert "tauri build" not in joined
     assert "build:sidecar" not in joined
     assert "PyInstaller" not in joined
-    assert "cargo build" not in joined
-    assert "downloaded-verifier/verify-updater-signature.exe" in joined
+    assert "YIJING_SKIP_TAURI_BUILD" in joined or any(
+        step.get("env", {}).get("YIJING_SKIP_TAURI_BUILD") == "1" for step in verify["steps"]
+    )
+    assert "cargo build --release --bin verify-updater-signature" in joined
+    assert "downloaded-verifier" not in joined
+    assert "frontend/src-tauri/target/release/verify-updater-signature.exe" in joined
+    assert "--expected-version" in joined
+    assert "--expected-workflow-ref" in joined
+    assert "--expected-workflow-sha" in joined
     assert "provenance.py verify" in joined
-    verifier_download = [
-        step for step in verify["steps"]
-        if step.get("with", {}).get("artifact-ids") == "${{ needs.windows-rc.outputs.verifier-artifact-id }}"
-    ]
-    assert len(verifier_download) == 1
 
     attest = workflow["jobs"]["attest-candidate-artifact"]
     assert attest["needs"] == ["windows-rc", "verify-candidate-artifact"]
@@ -265,7 +299,12 @@ def test_candidate_workflow_uploads_once_and_verify_job_does_not_rebuild():
     assert attest["permissions"]["id-token"] == "write"
     assert attest["permissions"]["attestations"] == "write"
     assert attest["permissions"]["contents"] == "read"
-    attest_uses = [step.get("uses") for step in attest["steps"]]
+    attest_uses = [step.get("uses") for step in attest["steps"] if step.get("uses")]
     assert any(item.startswith("actions/attest-build-provenance@") and "@v" not in item for item in attest_uses)
-    assert "gh attestation verify" in "\n".join(str(step.get("run") or "") for step in attest["steps"])
+    attest_run = "\n".join(str(step.get("run") or "") for step in attest["steps"])
+    assert "gh attestation verify" in attest_run
+    assert "--cert-identity" in attest_run
+    assert 'gh attestation verify "$installer" --repo "$GITHUB_REPOSITORY"' not in attest_run
+    assert "artifact_digest.py" in attest_run
+    assert "actions/download-artifact@v4" not in "\n".join(str(step.get("uses") or "") for step in attest["steps"])
     assert public_key_key_id(_pubkey()) == "1122334455667788"
