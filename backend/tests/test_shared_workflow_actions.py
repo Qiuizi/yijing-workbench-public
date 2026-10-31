@@ -109,8 +109,8 @@ def test_toolchain_pin_is_single_sourced_and_cache_is_unchanged():
     windows = _workflow("windows-rc.yml")
     build_uses = [step.get("uses") for step in _steps(windows["jobs"]["windows-rc"])]
     assert "dtolnay/rust-toolchain@stable" not in build_uses
-    verifier = _named(_steps(windows["jobs"]["verify-candidate-artifact"]), "Build signature verifier only")
-    assert "verify-updater-signature" in verifier["run"]
+    verifier = _named(_steps(windows["jobs"]["windows-rc"]), "Build signature verifier only")
+    assert verifier["run"] == "cargo build --release --bin verify-updater-signature"
     assert "tauri build" not in verifier["run"]
 
 

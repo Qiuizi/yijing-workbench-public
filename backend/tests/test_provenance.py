@@ -229,10 +229,15 @@ def test_candidate_workflow_uploads_once_and_verify_job_does_not_rebuild():
     workflow = parse_workflow(WORKFLOW.read_text(encoding="utf-8"))
     build = workflow["jobs"]["windows-rc"]
     uploads = [step for step in build["steps"] if step.get("uses") == "actions/upload-artifact@v4"]
-    assert len(uploads) == 1
-    assert uploads[0]["with"]["overwrite"] == "false"
-    assert uploads[0]["with"]["name"] == "yijing-workbench-${{ env.YIJING_VERSION }}-windows-x64-rc"
-    assert uploads[0]["with"]["retention-days"] == "14"
+    by_name = {step["with"]["name"]: step for step in uploads}
+    assert list(by_name) == [
+        "yijing-signature-verifier-${{ env.YIJING_VERSION }}",
+        "yijing-workbench-${{ env.YIJING_VERSION }}-windows-x64-rc",
+    ]
+    for step in uploads:
+        assert step["with"]["overwrite"] == "false"
+        assert step["with"]["retention-days"] == "14"
+    assert by_name["yijing-workbench-${{ env.YIJING_VERSION }}-windows-x64-rc"]["id"] == "upload-candidate"
     assert build["outputs"]["artifact-id"] == "${{ steps.upload-candidate.outputs.artifact-id }}"
     assert build["outputs"]["artifact-digest"] == "${{ steps.upload-candidate.outputs.artifact-digest }}"
 
@@ -245,8 +250,14 @@ def test_candidate_workflow_uploads_once_and_verify_job_does_not_rebuild():
     assert "tauri build" not in joined
     assert "build:sidecar" not in joined
     assert "PyInstaller" not in joined
-    assert "verify-updater-signature" in joined
+    assert "cargo build" not in joined
+    assert "downloaded-verifier/verify-updater-signature.exe" in joined
     assert "provenance.py verify" in joined
+    verifier_download = [
+        step for step in verify["steps"]
+        if step.get("with", {}).get("artifact-ids") == "${{ needs.windows-rc.outputs.verifier-artifact-id }}"
+    ]
+    assert len(verifier_download) == 1
 
     attest = workflow["jobs"]["attest-candidate-artifact"]
     assert attest["needs"] == ["windows-rc", "verify-candidate-artifact"]

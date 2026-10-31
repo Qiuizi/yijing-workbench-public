@@ -35,6 +35,7 @@ jobs:
     outputs:
       artifact-id: ${{ steps.upload-candidate.outputs.artifact-id }}
       artifact-digest: ${{ steps.upload-candidate.outputs.artifact-digest }}
+      verifier-artifact-id: ${{ steps.upload-verifier.outputs.artifact-id }}
     defaults:
       run:
         shell: pwsh
@@ -214,6 +215,20 @@ jobs:
             --artifact-name "yijing-workbench-$($env:YIJING_VERSION)-windows-x64-rc"
           if ($LASTEXITCODE -ne 0) { throw 'provenance write failed' }
 
+      - name: Build signature verifier only
+        working-directory: frontend/src-tauri
+        run: cargo build --release --bin verify-updater-signature
+
+      - name: Upload signature verifier
+        id: upload-verifier
+        uses: actions/upload-artifact@v4
+        with:
+          name: yijing-signature-verifier-${{ env.YIJING_VERSION }}
+          path: frontend/src-tauri/target/release/verify-updater-signature.exe
+          if-no-files-found: error
+          retention-days: 14
+          overwrite: false
+
       - name: Upload candidate artifacts (never a public Release, never the update channel)
         id: upload-candidate
         uses: actions/upload-artifact@v4
@@ -251,9 +266,12 @@ jobs:
           path: downloaded-artifact
           merge-multiple: true
 
-      - name: Build signature verifier only
-        working-directory: frontend/src-tauri
-        run: cargo build --release --bin verify-updater-signature
+      - name: Download the signature verifier by id
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ needs.windows-rc.outputs.verifier-artifact-id }}
+          path: downloaded-verifier
+          merge-multiple: true
 
       - name: Verify downloaded artifact identity, hashes, manifest and signature
         env:
@@ -278,7 +296,7 @@ jobs:
             --expected-artifact-digest "$EXPECTED_DIGEST" \
             --observed-artifact-digest "$(python -c 'import json; print(json.load(open("artifact.json"))["digest"])')" \
             --observed-artifact-name "$(python -c 'import json; print(json.load(open("artifact.json"))["name"])')" \
-            --signature-verifier frontend/src-tauri/target/release/verify-updater-signature.exe
+            --signature-verifier downloaded-verifier/verify-updater-signature.exe
           test "$(python -c 'import json; print(str(json.load(open("artifact.json"))["expired"]).lower())')" = "false"
 
   attest-candidate-artifact:
