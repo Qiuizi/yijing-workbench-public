@@ -17,8 +17,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -33,8 +34,10 @@ REPO_ROOT = _REPO_ROOT
 SCHEMA_VERSION = 1
 PROVENANCE_FILENAME = "provenance.json"
 SIGNING_MODES = frozenset({"ephemeral_candidate", "production"})
-SHA256_RE = r"^[0-9a-f]{64}$"
-SHA_RE = r"^[0-9a-f]{40}$"
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+_DRIVE_RE = re.compile(r"^[A-Za-z]:")
+_ARTIFACT_NAME_RE = re.compile(r"^yijing-workbench-(.+)-windows-x64-rc$")
 FORBIDDEN_TEXT = (
     "TAURI_SIGNING_PRIVATE_KEY",
     "PRIVATE KEY",
@@ -62,6 +65,45 @@ def normalize_sha256(value: str) -> str:
     if text.startswith("sha256:"):
         text = text.split(":", 1)[1]
     return text
+
+
+def require_git_sha(value: str, label: str) -> str:
+    text = (value or "").strip().lower()
+    if not SHA_RE.fullmatch(text):
+        raise ProvenanceError(f"{label} 不是 40 位十六进制 Git SHA")
+    return text
+
+
+def require_sha256(value: str, label: str) -> str:
+    text = normalize_sha256(value)
+    if not SHA256_RE.fullmatch(text):
+        raise ProvenanceError(f"{label} 不是 64 位十六进制 SHA-256")
+    return text
+
+
+def reject_bundle_relative_path(name: str) -> str | None:
+    """Reject path tricks before any filesystem join. The same rules apply on Windows and Linux."""
+    if not isinstance(name, str) or not name or name != name.strip():
+        return "非法文件名"
+    if name in (PROVENANCE_FILENAME, ".", ".."):
+        return "非法文件名"
+    if "\x00" in name or "\\" in name or ":" in name:
+        return "非法文件名"
+    if name.startswith("/") or name.startswith("\\") or name.startswith("//"):
+        return "绝对路径"
+    if _DRIVE_RE.match(name):
+        return "Windows 绝对路径"
+    parts = PurePosixPath(name).parts
+    if not parts or any(part in ("", ".", "..") for part in parts):
+        return "路径穿越"
+    if ".." in Path(name).parts:
+        return "路径穿越"
+    return None
+
+
+def version_from_artifact_name(name: str) -> str | None:
+    match = _ARTIFACT_NAME_RE.fullmatch(name or "")
+    return match.group(1) if match else None
 
 
 def _reject_secret_material(value: str, label: str) -> None:
@@ -95,10 +137,20 @@ def collect_files(bundle_dir: Path) -> list[dict[str, object]]:
     if not bundle_dir.is_dir():
         raise ProvenanceError(f"产物目录不存在：{bundle_dir}")
     records: list[dict[str, object]] = []
+    seen_folded: set[str] = set()
     for path in sorted(p for p in bundle_dir.rglob("*") if p.is_file()):
         relative = path.relative_to(bundle_dir).as_posix()
         if relative == PROVENANCE_FILENAME:
             continue
+        if path.is_symlink():
+            raise ProvenanceError(f"拒绝符号链接：{relative}")
+        reason = reject_bundle_relative_path(relative)
+        if reason:
+            raise ProvenanceError(f"{reason}：{relative}")
+        folded = relative.casefold()
+        if folded in seen_folded:
+            raise ProvenanceError(f"大小写文件名冲突：{relative}")
+        seen_folded.add(folded)
         records.append(
             {
                 "name": relative,
@@ -154,6 +206,8 @@ def build_provenance(
         _reject_secret_material(str(value), label)
     if signing_mode not in SIGNING_MODES:
         raise ProvenanceError(f"未知签名模式：{signing_mode}")
+    source_sha = require_git_sha(source_sha, "source_sha")
+    workflow_sha = require_git_sha(workflow_sha, "workflow_sha")
     info = _require_public_key(updater_pubkey)
     key_id = str(info.get("key_id") or "")
     repo_key_id = public_key_key_id(app_public_key(REPO_ROOT))
@@ -165,9 +219,9 @@ def build_provenance(
         "schema_version": SCHEMA_VERSION,
         "repository": repository,
         "version": version,
-        "source_sha": source_sha.strip().lower(),
+        "source_sha": source_sha,
         "workflow_ref": workflow_ref,
-        "workflow_sha": workflow_sha.strip().lower(),
+        "workflow_sha": workflow_sha,
         "run_id": str(run_id),
         "run_attempt": str(run_attempt),
         "event_name": event_name,
@@ -220,14 +274,24 @@ def _problems_for_files(bundle_dir: Path, listed: list[dict[str, Any]]) -> list[
         name = item.get("name")
         size = item.get("size_bytes")
         digest = item.get("sha256")
-        if not isinstance(name, str) or not name or name == PROVENANCE_FILENAME or ".." in Path(name).parts:
-            problems.append(f"非法文件名：{name!r}")
+        reason = reject_bundle_relative_path(name) if isinstance(name, str) else "非法文件名"
+        if reason:
+            problems.append(f"{reason}：{name!r}")
             continue
-        if name in seen:
-            problems.append(f"文件重复列出：{name}")
+        if name in seen or name.casefold() in {item.casefold() for item in seen}:
+            problems.append(f"文件重复列出或大小写冲突：{name}")
         seen.add(name)
         listed_names.add(name)
         path = bundle_dir / name
+        if path.is_symlink():
+            problems.append(f"拒绝符号链接：{name}")
+            continue
+        try:
+            resolved = path.resolve()
+            resolved.relative_to(bundle_dir.resolve())
+        except (OSError, ValueError):
+            problems.append(f"路径解析到产物目录之外：{name}")
+            continue
         if not path.is_file():
             problems.append(f"清单引用了不存在的文件：{name}")
             continue
@@ -235,9 +299,10 @@ def _problems_for_files(bundle_dir: Path, listed: list[dict[str, Any]]) -> list[
             problems.append(f"{name} 的 size_bytes 不是整数")
         elif path.stat().st_size != size:
             problems.append(f"{name} 文件大小不一致：实际 {path.stat().st_size}，清单 {size}")
-        if not isinstance(digest, str) or len(normalize_sha256(digest)) != 64:
+        normalized = normalize_sha256(digest) if isinstance(digest, str) else ""
+        if not SHA256_RE.fullmatch(normalized):
             problems.append(f"{name} 的 sha256 格式无效")
-        elif sha256_file(path) != normalize_sha256(digest):
+        elif sha256_file(path) != normalized:
             problems.append(f"{name} 的 SHA-256 与清单不一致")
     actual = {
         path.relative_to(bundle_dir).as_posix()
@@ -333,7 +398,9 @@ def validate_provenance(
     expected_run_attempt: str,
     expected_event_name: str,
     expected_signing_mode: str,
-    expected_version: str | None = None,
+    expected_version: str,
+    expected_workflow_ref: str,
+    expected_workflow_sha: str,
     expected_artifact_id: str | None = None,
     observed_artifact_id: str | None = None,
     expected_artifact_digest: str | None = None,
@@ -380,8 +447,20 @@ def validate_provenance(
             break
     if document.get("repository") != expected_repository:
         problems.append("repository 不一致")
-    if str(document.get("source_sha") or "").lower() != expected_source_sha.strip().lower():
+    expected_source = expected_source_sha.strip().lower()
+    recorded_source = str(document.get("source_sha") or "").strip().lower()
+    if not SHA_RE.fullmatch(expected_source) or not SHA_RE.fullmatch(recorded_source):
+        problems.append("Source SHA 格式无效")
+    elif recorded_source != expected_source:
         problems.append("Source SHA 不一致")
+    expected_workflow = expected_workflow_sha.strip().lower()
+    recorded_workflow = str(document.get("workflow_sha") or "").strip().lower()
+    if not SHA_RE.fullmatch(expected_workflow) or not SHA_RE.fullmatch(recorded_workflow):
+        problems.append("workflow_sha 格式无效")
+    elif recorded_workflow != expected_workflow:
+        problems.append("workflow_sha 不一致")
+    if document.get("workflow_ref") != expected_workflow_ref:
+        problems.append("workflow_ref 不一致")
     if str(document.get("run_id")) != str(expected_run_id):
         problems.append("Run ID 不一致")
     if str(document.get("run_attempt")) != str(expected_run_attempt):
@@ -390,7 +469,7 @@ def validate_provenance(
         problems.append("event_name 不一致")
     if document.get("signing_mode") != expected_signing_mode:
         problems.append("签名模式不一致")
-    if expected_version is not None and document.get("version") != expected_version:
+    if not expected_version or document.get("version") != expected_version:
         problems.append("版本号不一致")
     toolchain = document.get("toolchain")
     if not isinstance(toolchain, dict) or not all(toolchain.get(key) for key in ("python", "node", "rust", "vc143")):
@@ -408,6 +487,10 @@ def validate_provenance(
             problems.append("Artifact Digest 格式无效")
     if observed_artifact_name is not None and observed_artifact_name != document.get("artifact_name"):
         problems.append("Artifact 名称与来源证明不一致")
+    artifact_name = str(observed_artifact_name or document.get("artifact_name") or "")
+    named_version = version_from_artifact_name(artifact_name)
+    if named_version != expected_version:
+        problems.append("Artifact 名称中的版本与预期版本不一致")
     return problems
 
 
@@ -455,7 +538,9 @@ def _parser() -> argparse.ArgumentParser:
     verify.add_argument("--expected-run-attempt", required=True)
     verify.add_argument("--expected-event-name", required=True)
     verify.add_argument("--expected-signing-mode", required=True)
-    verify.add_argument("--expected-version", default=None)
+    verify.add_argument("--expected-version", required=True)
+    verify.add_argument("--expected-workflow-ref", required=True)
+    verify.add_argument("--expected-workflow-sha", required=True)
     verify.add_argument("--expected-artifact-id", default=None)
     verify.add_argument("--observed-artifact-id", default=None)
     verify.add_argument("--expected-artifact-digest", default=None)
@@ -502,6 +587,8 @@ def main(argv: list[str] | None = None) -> int:
             expected_event_name=args.expected_event_name,
             expected_signing_mode=args.expected_signing_mode,
             expected_version=args.expected_version,
+            expected_workflow_ref=args.expected_workflow_ref,
+            expected_workflow_sha=args.expected_workflow_sha,
             expected_artifact_id=args.expected_artifact_id,
             observed_artifact_id=args.observed_artifact_id,
             expected_artifact_digest=args.expected_artifact_digest,
