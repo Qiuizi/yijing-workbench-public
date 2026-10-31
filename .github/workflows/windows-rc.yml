@@ -227,15 +227,21 @@ jobs:
   verify-candidate-artifact:
     name: Verify immutable candidate artifact
     needs: windows-rc
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    runs-on: windows-2022
+    timeout-minutes: 40
     permissions:
       contents: read
       actions: read
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
+
+      - name: Set up Windows toolchain
+        uses: ./.github/actions/setup-windows-toolchain
 
       - name: Download the uploaded artifact by id
         id: download
@@ -244,10 +250,6 @@ jobs:
           artifact-ids: ${{ needs.windows-rc.outputs.artifact-id }}
           path: downloaded-artifact
           merge-multiple: true
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: '1.98.1'
 
       - name: Build signature verifier only
         working-directory: frontend/src-tauri
@@ -276,7 +278,7 @@ jobs:
             --expected-artifact-digest "$EXPECTED_DIGEST" \
             --observed-artifact-digest "$(python -c 'import json; print(json.load(open("artifact.json"))["digest"])')" \
             --observed-artifact-name "$(python -c 'import json; print(json.load(open("artifact.json"))["name"])')" \
-            --signature-verifier frontend/src-tauri/target/release/verify-updater-signature
+            --signature-verifier frontend/src-tauri/target/release/verify-updater-signature.exe
           test "$(python -c 'import json; print(str(json.load(open("artifact.json"))["expired"]).lower())')" = "false"
 
   attest-candidate-artifact:
