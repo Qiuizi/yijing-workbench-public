@@ -71,6 +71,16 @@ def test_missing_or_mismatched_digest_fails_without_a_name_lookup(tmp_path):
     ))
 
 
+def test_extract_allows_provenance_and_rejects_absolute_entries(tmp_path):
+    archive = tmp_path / "good.zip"
+    with zipfile.ZipFile(archive, "w") as bundle:
+        bundle.writestr("provenance.json", b"{}")
+        bundle.writestr("SHA256SUMS.txt", b"ok")
+    out = tmp_path / "out"
+    extract_archive(archive, out)
+    assert (out / "provenance.json").read_bytes() == b"{}"
+
+
 def test_extract_rejects_absolute_and_traversal_entries(tmp_path):
     archive = tmp_path / "bad.zip"
     with zipfile.ZipFile(archive, "w") as bundle:

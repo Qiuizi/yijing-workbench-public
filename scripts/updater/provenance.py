@@ -85,7 +85,7 @@ def reject_bundle_relative_path(name: str) -> str | None:
     """Reject path tricks before any filesystem join. The same rules apply on Windows and Linux."""
     if not isinstance(name, str) or not name or name != name.strip():
         return "非法文件名"
-    if name in (PROVENANCE_FILENAME, ".", ".."):
+    if name in (".", ".."):
         return "非法文件名"
     if "\x00" in name or "\\" in name or ":" in name:
         return "非法文件名"
@@ -274,6 +274,9 @@ def _problems_for_files(bundle_dir: Path, listed: list[dict[str, Any]]) -> list[
         name = item.get("name")
         size = item.get("size_bytes")
         digest = item.get("sha256")
+        if name == PROVENANCE_FILENAME:
+            problems.append(f"非法文件名：{name!r}")
+            continue
         reason = reject_bundle_relative_path(name) if isinstance(name, str) else "非法文件名"
         if reason:
             problems.append(f"{reason}：{name!r}")
