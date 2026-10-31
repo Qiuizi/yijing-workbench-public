@@ -194,8 +194,13 @@ def test_invalid_signature_key_and_verifier_failure(tmp_path):
     problems = _expect(bundle)
     assert any("签名无效" in item for item in problems)
 
-    verifier = tmp_path / "fail.cmd"
-    verifier.write_text("@echo signature is invalid\r\n@exit /b 1\r\n", encoding="utf-8")
+    if __import__("os").name == "nt":
+        verifier = tmp_path / "fail.cmd"
+        verifier.write_text("@echo signature is invalid\r\n@exit /b 1\r\n", encoding="utf-8")
+    else:
+        verifier = tmp_path / "fail.sh"
+        verifier.write_text("#!/bin/sh\necho signature is invalid\nexit 1\n", encoding="utf-8")
+        verifier.chmod(0o755)
     bundle2, _ = _write_bundle(tmp_path / "verifier")
     verified = _expect(bundle2, signature_verifier=verifier)
     assert any("签名验证失败" in item for item in verified)
