@@ -194,4 +194,8 @@ def test_no_other_enabled_release_or_main_write_path():
         for job_name, condition in _enabled_publish_jobs(path.read_text(encoding="utf-8")):
             enabled.append((path.name, job_name, condition))
 
-    assert enabled == [(CURRENT_PUBLISHER, "publish", "${{ !inputs.dry_run }}")]
+    assert enabled == [(
+        CURRENT_PUBLISHER,
+        "publish",
+        "${{ !inputs.dry_run && needs.verify-signed.result == 'success' && needs.production-sign.result == 'success' }}",
+    )]

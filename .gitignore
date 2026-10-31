@@ -11,6 +11,7 @@ htmlcov/
 frontend/dist/
 frontend/src-tauri/target/
 scripts/updater/verifier-proof/target/
+scripts/updater/sign-artifact/target/
 target-proof/
 frontend/src-tauri/binaries/
 backend/data/history.sqlite3*

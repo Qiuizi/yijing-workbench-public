@@ -173,7 +173,7 @@ def test_candidate_and_release_call_the_same_build_actions_in_safe_order():
         release, "Find and verify the VS2022 VC143 x64 redist"
     )
     assert _index(release, "Find and verify the VS2022 VC143 x64 redist") < _index(
-        release, "Build sidecar and NSIS installer with the production key"
+        release, "Build sidecar and unsigned NSIS installer"
     )
 
 
@@ -247,12 +247,18 @@ def test_signing_boundaries_stay_in_the_caller_workflows():
     assert "secrets.TAURI_SIGNING_PRIVATE_KEY" not in _run(build)
 
     release = _steps(_workflow("release.yml")["jobs"]["build"])
-    production = _named(release, "Build sidecar and NSIS installer with the production key")
-    assert production["env"]["TAURI_SIGNING_PRIVATE_KEY"] == "${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}"
-    assert production["env"]["TAURI_SIGNING_PRIVATE_KEY_PASSWORD"] == "${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}"
-    assert production["env"]["TAURI_UPDATER_PUBKEY"] == "${{ secrets.TAURI_UPDATER_PUBKEY }}"
-    assert "uses" not in production
+    production = _named(release, "Build sidecar and unsigned NSIS installer")
+    assert "env" not in production
+    assert "secrets.TAURI_SIGNING_PRIVATE_KEY" not in _run(production)
+    assert "createUpdaterArtifacts" in _run(production)
     assert "npx tauri build --bundles nsis --config $override" in _run(production)
+    sign = _named(
+        _steps(_workflow("release.yml")["jobs"]["production-sign"]),
+        "Sign the verified installer with the production key",
+    )
+    assert sign["env"]["TAURI_SIGNING_PRIVATE_KEY"] == "${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}"
+    assert sign["env"]["TAURI_SIGNING_PRIVATE_KEY_PASSWORD"] == "${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}"
+    assert sign["env"]["TAURI_UPDATER_PUBKEY"] == "${{ secrets.TAURI_UPDATER_PUBKEY }}"
     assert "YIJING_CANDIDATE_SIGNING_KEY" not in release_text
 
 
@@ -264,13 +270,14 @@ def test_release_auth_environment_and_artifact_contracts_are_unchanged():
     assert dry_run["type"] == "boolean"
     assert dry_run["default"] == "true"
     jobs = release["jobs"]
-    assert jobs["build"]["environment"] == "release"
-    assert "permissions" not in jobs["build"]
-    assert jobs["publish"]["if"] == "${{ !inputs.dry_run }}"
+    assert "environment" not in jobs["build"]
+    assert jobs["build"]["permissions"] == {"contents": "read", "actions": "read"}
+    assert jobs["production-sign"]["environment"] == "release"
+    assert "needs.verify-signed.result == 'success'" in jobs["publish"]["if"]
     assert jobs["publish"]["environment"] == "release"
     assert jobs["publish"]["permissions"] == {"contents": "write"}
-    assert jobs["publish"]["needs"] == "build"
-    assert jobs["dry-run-check"]["if"] == "${{ inputs.dry_run }}"
+    assert jobs["publish"]["needs"] == ["production-sign", "verify-signed"]
+    assert "inputs.dry_run &&" in jobs["dry-run-check"]["if"]
     assert jobs["dry-run-check"]["permissions"] == {"contents": "read"}
     assert "environment" not in jobs["dry-run-check"]
 
@@ -279,14 +286,13 @@ def test_release_auth_environment_and_artifact_contracts_are_unchanged():
     ci_gate = _named(_steps(jobs["build"]), "Require green CI for this exact commit")
     assert ci_gate["env"]["GH_TOKEN"] == "${{ github.token }}"
 
-    upload = _named(_steps(jobs["build"]), "Upload release bundle for audit and publishing")
+    upload = _named(_steps(jobs["build"]), "Upload unsigned staging artifact")
     assert upload["uses"] == "actions/upload-artifact@v4"
-    assert upload["with"]["name"] == "release-artifacts"
-    assert upload["with"]["retention-days"] == "30"
+    assert upload["with"]["name"] == "yijing-workbench-${{ env.YIJING_VERSION_INPUT }}-windows-x64-staging"
+    assert upload["with"]["retention-days"] == "14"
     assert upload["with"]["if-no-files-found"] == "error"
-    assert "release/*" in upload["with"]["path"]
-    assert "ci-gate.json" in upload["with"]["path"]
-    assert "sidecar-smoke.json" in upload["with"]["path"]
+    assert upload["with"]["overwrite"] == "false"
+    assert "yijing-staging-" in upload["with"]["path"]
 
     candidate = _workflow("windows-rc.yml")
     assert candidate["permissions"] == {"contents": "read"}

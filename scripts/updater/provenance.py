@@ -27,17 +27,17 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.updater.keys import app_public_key, describe_public_key, is_qa_key
-from scripts.updater.manifest import public_key_key_id, read_signature, signature_key_id
+from scripts.updater.manifest import decode_signature, public_key_key_id, read_signature, signature_key_id
 from scripts.updater.verify_release import run_signature_verifier
 
 REPO_ROOT = _REPO_ROOT
 SCHEMA_VERSION = 1
 PROVENANCE_FILENAME = "provenance.json"
-SIGNING_MODES = frozenset({"ephemeral_candidate", "production"})
+SIGNING_MODES = frozenset({"ephemeral_candidate", "production", "unsigned_staging"})
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 _DRIVE_RE = re.compile(r"^[A-Za-z]:")
-_ARTIFACT_NAME_RE = re.compile(r"^yijing-workbench-(.+)-windows-x64-rc$")
+_ARTIFACT_NAME_RE = re.compile(r"^yijing-workbench-(.+)-windows-x64-(?:rc|staging|signed)$")
 FORBIDDEN_TEXT = (
     "TAURI_SIGNING_PRIVATE_KEY",
     "PRIVATE KEY",
@@ -124,6 +124,13 @@ def locate_bundle_file(bundle_dir: Path, name: object) -> tuple[Path | None, str
     if resolved.is_symlink() or not resolved.is_file():
         return None, f"清单引用了不存在的文件：{name}"
     return resolved, None
+
+
+def _signed_names(bundle_dir: Path) -> list[str]:
+    names = [path.name for path in bundle_dir.glob("*.sig")]
+    if (bundle_dir / "latest.json").exists():
+        names.append("latest.json")
+    return names
 
 
 def version_from_artifact_name(name: str) -> str | None:
@@ -238,8 +245,10 @@ def build_provenance(
     repo_key_id = public_key_key_id(app_public_key(REPO_ROOT))
     if signing_mode == "ephemeral_candidate" and key_id == repo_key_id:
         raise ProvenanceError("候选构建不能使用仓库内置的正式公钥对应的钥匙")
-    if signing_mode == "production" and repo_key_id and key_id != repo_key_id:
-        raise ProvenanceError("正式签名模式的公钥与仓库内置正式公钥不一致")
+    if signing_mode in {"production", "unsigned_staging"} and repo_key_id and key_id != repo_key_id:
+        raise ProvenanceError("正式公钥与仓库内置正式公钥不一致")
+    if signing_mode == "unsigned_staging" and _signed_names(bundle_dir):
+        raise ProvenanceError("未签名 staging 不能包含 .sig 或 latest.json")
     document = {
         "schema_version": SCHEMA_VERSION,
         "repository": repository,
@@ -374,6 +383,13 @@ def _check_manifest_and_sums(bundle_dir: Path, document: dict[str, Any]) -> list
         problems.append("manifest 版本与来源证明不一致")
     if str(manifest_doc.get("source_sha") or "").lower() != str(document.get("source_sha") or ""):
         problems.append("manifest source_sha 与来源证明不一致")
+    if document.get("signing_mode") == "unsigned_staging":
+        if manifest_doc.get("signature_file"):
+            problems.append("未签名 staging 不能引用签名文件")
+        signed = _signed_names(bundle_dir)
+        if signed:
+            problems.append("未签名 staging 不能包含签名或 latest.json：" + ", ".join(signed))
+        return problems
     signature_name = manifest_doc.get("signature_file")
     signature_path, signature_error = locate_bundle_file(bundle_dir, signature_name)
     if signature_error:
@@ -405,6 +421,10 @@ def _check_signature(
     if not manifest_path.is_file():
         return problems
     manifest_doc = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if document.get("signing_mode") == "unsigned_staging":
+        if manifest_doc.get("signature_file") or _signed_names(bundle_dir):
+            problems.append("未签名 staging 不能包含正式签名或 latest.json")
+        return problems
     signature_name = manifest_doc.get("signature_file")
     signature_path, signature_error = locate_bundle_file(bundle_dir, signature_name)
     if signature_error:
@@ -415,6 +435,13 @@ def _check_signature(
     if not sig_key or sig_key != info.get("key_id"):
         problems.append(f"签名无效：签名 key id {sig_key or '缺失'} 与公钥 {info.get('key_id')} 不一致")
         return problems
+    if document.get("signing_mode") == "production":
+        lines = decode_signature(signature) or []
+        trusted = next((line.split(":", 1)[1].strip() for line in lines if line.startswith("trusted comment:")), "")
+        version_field = f"version:{document.get('version')}"
+        if version_field not in trusted.split("\t"):
+            problems.append("正式签名没有把版本绑定进 trusted comment")
+            return problems
     if signature_verifier is not None:
         installer_name = manifest_doc.get("installer", {}).get("filename") if isinstance(manifest_doc.get("installer"), dict) else None
         installer_path, installer_error = locate_bundle_file(bundle_dir, installer_name)

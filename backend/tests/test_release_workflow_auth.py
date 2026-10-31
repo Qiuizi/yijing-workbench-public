@@ -175,14 +175,31 @@ def test_workflow_file_parses_and_keeps_least_privilege():
     assert "GH_TOKEN" not in (workflow.get("env") or {})
 
     jobs = _jobs(workflow)
-    assert set(jobs) == {"build", "publish", "dry-run-check"}
-    assert "permissions" not in jobs["build"]
+    assert set(jobs) == {
+        "build",
+        "verify-staging",
+        "attest-staging",
+        "production-sign",
+        "verify-signed",
+        "attest-signed",
+        "publish",
+        "dry-run-check",
+    }
+    assert jobs["build"]["permissions"] == {"contents": "read", "actions": "read"}
+    assert "environment" not in jobs["build"]
     assert "GH_TOKEN" not in (jobs["build"].get("env") or {})
     assert jobs["publish"]["permissions"] == {"contents": "write"}
     assert jobs["dry-run-check"]["permissions"] == {"contents": "read"}
 
     for name, job in jobs.items():
         permissions = job.get("permissions", workflow["permissions"])
+        if name in {"attest-staging", "attest-signed"}:
+            assert permissions["contents"] == "read"
+            assert permissions["actions"] == "read"
+            assert permissions["id-token"] == "write"
+            assert permissions["attestations"] == "write"
+            assert set(permissions) == {"contents", "actions", "id-token", "attestations"}
+            continue
         assert set(permissions) <= {"contents", "actions"}
         for scope, level in permissions.items():
             if name == "publish":
@@ -221,10 +238,10 @@ def test_dry_run_cannot_create_tag_or_release_and_publish_requires_opt_in():
     assert dry_input["default"] == "true"
 
     jobs = _jobs(workflow)
-    assert jobs["publish"]["if"] == "${{ !inputs.dry_run }}"
-    assert jobs["dry-run-check"]["if"] == "${{ inputs.dry_run }}"
-    assert jobs["publish"].get("needs") == "build"
-    assert jobs["dry-run-check"].get("needs") == "build"
+    assert jobs["publish"]["if"] == "${{ !inputs.dry_run && needs.verify-signed.result == 'success' && needs.production-sign.result == 'success' }}"
+    assert "inputs.dry_run &&" in jobs["dry-run-check"]["if"]
+    assert jobs["publish"].get("needs") == ["production-sign", "verify-signed"]
+    assert "build" in jobs["dry-run-check"].get("needs")
 
     for job_name, job in jobs.items():
         for step in _steps(job):
@@ -247,8 +264,8 @@ def test_non_cli_steps_are_not_given_a_workflow_wide_token():
     """构建、验签和公开文件核对不调用 gh，也不应靠全局 Token。"""
     build_steps = _steps(_jobs(load_workflow())["build"])
     names = [step.get("name") for step in build_steps]
-    assert "Require production secrets and a matching public key" in names
-    assert "Assemble release directory and verify the contract" in names
+    assert "Require the committed production public key" in names
+    assert "Assemble unsigned staging bundle" in names
     for step in build_steps:
         if step_calls_github_cli(step):
             continue
@@ -262,7 +279,7 @@ def test_parser_rejects_broken_indent():
 
 REDIST_STEP = "Find and verify the VS2022 VC143 x64 redist"
 REGRESSION_STEP = "Regression tests before the release build"
-SIDECAR_STEP = "Build sidecar and NSIS installer with the production key"
+SIDECAR_STEP = "Build sidecar and unsigned NSIS installer"
 REQUIRED_DLLS = ("vcruntime140.dll", "vcruntime140_1.dll")
 
 
@@ -288,8 +305,8 @@ def test_release_discovers_signed_vc143_before_the_sidecar_build():
     workflow = load_workflow()
     assert workflow["permissions"] == {"contents": "read", "actions": "read"}
     jobs = _jobs(workflow)
-    assert jobs["publish"]["if"] == "${{ !inputs.dry_run }}"
-    assert jobs["dry-run-check"]["if"] == "${{ inputs.dry_run }}"
+    assert "needs.verify-signed.result == 'success'" in jobs["publish"]["if"]
+    assert "inputs.dry_run &&" in jobs["dry-run-check"]["if"]
     assert workflow["on"]["workflow_dispatch"]["inputs"]["dry_run"]["default"] == "true"
 
     build_steps = _steps(jobs["build"])

@@ -37,6 +37,21 @@ REQUIRED_BUNDLE_FILES = (
     "sidecar-smoke.json",
 )
 INSTALLER_RE = re.compile(r"^yijing-workbench-.+-x64-setup\.exe$")
+RELEASE_STAGING_FILES = (
+    "PROVENANCE.md",
+    "SHA256SUMS.txt",
+    "ci-gate.json",
+    "manifest.json",
+    "provenance.json",
+    "sidecar-smoke.json",
+)
+RELEASE_SIGNED_FILES = (
+    "PROVENANCE.md",
+    "SHA256SUMS.txt",
+    "latest.json",
+    "manifest.json",
+    "provenance.json",
+)
 
 
 class AttestationIdentityError(ValueError):
@@ -72,6 +87,29 @@ def expected_bundle_files(bundle_dir: Path) -> list[str]:
     return sorted(expected)
 
 
+def expected_files_for_profile(bundle_dir: Path, profile: str) -> list[str]:
+    present = {path.name for path in bundle_dir.iterdir() if path.is_file()}
+    installers = sorted(name for name in present if INSTALLER_RE.fullmatch(name))
+    signatures = sorted(
+        name for name in present if name.endswith(".sig") and INSTALLER_RE.fullmatch(name[: -len(".sig")])
+    )
+    if profile == "candidate":
+        return expected_bundle_files(bundle_dir)
+    if profile == "release-staging":
+        expected = list(RELEASE_STAGING_FILES)
+        if len(installers) == 1 and not signatures:
+            expected.append(installers[0])
+        return sorted(expected)
+    if profile == "release-signed":
+        expected = list(RELEASE_SIGNED_FILES)
+        if len(installers) == 1:
+            expected.append(installers[0])
+        if len(signatures) == 1:
+            expected.append(signatures[0])
+        return sorted(expected)
+    raise AttestationIdentityError(f"未知 attestation bundle profile：{profile}")
+
+
 def _require_sha(value: str, label: str, problems: list[str]) -> str:
     text = (value or "").strip().lower()
     if not GIT_SHA_RE.fullmatch(text):
@@ -102,18 +140,19 @@ def _statement(entry: dict[str, Any]) -> dict[str, Any] | None:
     return statement
 
 
-def _subject_problems(statement: dict[str, Any], bundle_dir: Path) -> list[str]:
+def _subject_problems(statement: dict[str, Any], bundle_dir: Path, profile: str = "candidate") -> list[str]:
     problems: list[str] = []
     if statement.get("predicateType") != PREDICATE_TYPE:
         problems.append("attestation predicateType 不是 SLSA provenance v1")
     subjects = statement.get("subject")
     if not isinstance(subjects, list) or not subjects:
         return problems + ["attestation 没有 subject"]
-    expected = expected_bundle_files(bundle_dir)
+    expected = expected_files_for_profile(bundle_dir, profile)
     actual_files = sorted(path.name for path in bundle_dir.iterdir() if path.is_file())
-    if actual_files != expected or len(expected) != 9:
+    required_count = {"candidate": 9, "release-staging": 7, "release-signed": 7}[profile]
+    if actual_files != expected or len(expected) != required_count:
         problems.append(
-            "bundle 文件集合不是预期的 9 个交付文件：" + ", ".join(actual_files)
+            f"bundle 文件集合不是预期的 {required_count} 个交付文件：" + ", ".join(actual_files)
         )
     seen: set[str] = set()
     folded: set[str] = set()
@@ -165,6 +204,7 @@ def validate_verification_payload(
     expected_run_id: str,
     expected_run_attempt: str,
     workflow_path: str = WORKFLOW_PATH,
+    bundle_profile: str = "candidate",
 ) -> list[str]:
     problems: list[str] = []
     if not isinstance(payload, list) or not payload:
@@ -206,7 +246,7 @@ def validate_verification_payload(
             problems.append("Run ID 或 Run Attempt 不一致")
         if certificate.get("runnerEnvironment") != "github-hosted":
             problems.append("runner 不是 github-hosted")
-        problems.extend(_subject_problems(statement, bundle_dir))
+        problems.extend(_subject_problems(statement, bundle_dir, bundle_profile))
     return problems
 
 
@@ -221,6 +261,8 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--expected-run-id", required=True)
     parser.add_argument("--expected-run-attempt", required=True)
     parser.add_argument("--expected-issuer", default=GITHUB_OIDC_ISSUER)
+    parser.add_argument("--workflow-path", default=WORKFLOW_PATH)
+    parser.add_argument("--bundle-profile", default="candidate")
     return parser
 
 
@@ -242,6 +284,8 @@ def main(argv: list[str] | None = None) -> int:
             expected_issuer=args.expected_issuer,
             expected_run_id=args.expected_run_id,
             expected_run_attempt=args.expected_run_attempt,
+            workflow_path=args.workflow_path,
+            bundle_profile=args.bundle_profile,
         )
     except AttestationIdentityError as error:
         print(f"FAIL  {error}", file=sys.stderr)
