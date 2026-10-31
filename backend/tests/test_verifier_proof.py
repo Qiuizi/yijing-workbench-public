@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -14,20 +15,20 @@ TAURI = REPO / "frontend" / "src-tauri"
 PROOF = REPO / "scripts" / "updater" / "verifier-proof"
 
 
-@pytest.mark.skipif(shutil.which("cargo") is None or shutil.which("rustc") is None, reason="cargo required")
-def test_build_gate_executes_both_paths():
-    binary = Path(os.environ.get("TEMP", ".")) / "tauri_build_gate_test.exe"
+@pytest.mark.skipif(shutil.which("rustc") is None, reason="rustc required")
+def test_build_gate_executes_both_paths(tmp_path):
+    binary = tmp_path / ("tauri_build_gate_test.exe" if sys.platform == "win32" else "tauri_build_gate_test")
     subprocess.run(
         ["rustc", "--test", "frontend/src-tauri/tauri_build_gate.rs", "-o", str(binary)],
         cwd=REPO,
         check=True,
     )
-    completed = subprocess.run([str(binary)], check=True, capture_output=True, text=True)
+    completed = subprocess.run([str(binary)], check=True, capture_output=True, text=True, encoding="utf-8", errors="replace")
     assert "normal_builds_do_not_skip" in completed.stdout
     assert "isolated_verifier_skips_only_the_exact_switch" in completed.stdout
 
 
-@pytest.mark.skipif(shutil.which("cargo") is None, reason="cargo required")
+@pytest.mark.skipif(sys.platform != "win32" or shutil.which("cargo") is None, reason="Windows cargo required to compile the candidate verifier")
 def test_compiled_verifier_accepts_real_signature_and_rejects_tampering(tmp_path):
     env = os.environ.copy()
     env["YIJING_SKIP_TAURI_BUILD"] = "1"
