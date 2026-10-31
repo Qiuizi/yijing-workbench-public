@@ -101,6 +101,31 @@ def reject_bundle_relative_path(name: str) -> str | None:
     return None
 
 
+def locate_bundle_file(bundle_dir: Path, name: object) -> tuple[Path | None, str | None]:
+    """Return a regular file inside the bundle, or an error.
+
+    String checks run before any join or open, so a Windows absolute name is
+    rejected on Linux without touching that path.
+    """
+    if not isinstance(name, str):
+        return None, "非法文件名"
+    reason = reject_bundle_relative_path(name)
+    if reason:
+        return None, f"{reason}：{name!r}"
+    root = bundle_dir.resolve()
+    candidate = bundle_dir / name
+    if candidate.is_symlink():
+        return None, f"拒绝符号链接：{name}"
+    try:
+        resolved = candidate.resolve()
+        resolved.relative_to(root)
+    except (OSError, ValueError):
+        return None, f"路径解析到产物目录之外：{name}"
+    if resolved.is_symlink() or not resolved.is_file():
+        return None, f"清单引用了不存在的文件：{name}"
+    return resolved, None
+
+
 def version_from_artifact_name(name: str) -> str | None:
     match = _ARTIFACT_NAME_RE.fullmatch(name or "")
     return match.group(1) if match else None
@@ -277,27 +302,14 @@ def _problems_for_files(bundle_dir: Path, listed: list[dict[str, Any]]) -> list[
         if name == PROVENANCE_FILENAME:
             problems.append(f"非法文件名：{name!r}")
             continue
-        reason = reject_bundle_relative_path(name) if isinstance(name, str) else "非法文件名"
-        if reason:
-            problems.append(f"{reason}：{name!r}")
+        path, error = locate_bundle_file(bundle_dir, name)
+        if error:
+            problems.append(error)
             continue
         if name in seen or name.casefold() in {item.casefold() for item in seen}:
             problems.append(f"文件重复列出或大小写冲突：{name}")
         seen.add(name)
         listed_names.add(name)
-        path = bundle_dir / name
-        if path.is_symlink():
-            problems.append(f"拒绝符号链接：{name}")
-            continue
-        try:
-            resolved = path.resolve()
-            resolved.relative_to(bundle_dir.resolve())
-        except (OSError, ValueError):
-            problems.append(f"路径解析到产物目录之外：{name}")
-            continue
-        if not path.is_file():
-            problems.append(f"清单引用了不存在的文件：{name}")
-            continue
         if not isinstance(size, int) or isinstance(size, bool):
             problems.append(f"{name} 的 size_bytes 不是整数")
         elif path.stat().st_size != size:
@@ -334,11 +346,15 @@ def _check_manifest_and_sums(bundle_dir: Path, document: dict[str, Any]) -> list
     if not isinstance(installer, dict):
         return problems + ["manifest.json 没有 installer 对象"]
     filename = installer.get("filename")
-    if not isinstance(filename, str) or not (bundle_dir / filename).is_file():
-        problems.append(f"manifest 引用了不存在的安装包：{filename!r}")
+    installer_path, installer_error = locate_bundle_file(bundle_dir, filename)
+    if installer_error:
+        if installer_error.startswith("清单引用了不存在的文件"):
+            problems.append(f"manifest 引用了不存在的安装包：{filename!r}")
+        else:
+            problems.append(f"manifest 安装包路径被拒绝：{installer_error}")
         return problems
-    actual_size = (bundle_dir / filename).stat().st_size
-    actual_hash = sha256_file(bundle_dir / filename)
+    actual_size = installer_path.stat().st_size
+    actual_hash = sha256_file(installer_path)
     if installer.get("bytes") != actual_size:
         problems.append("manifest 安装包大小与文件不一致")
     recorded = str(installer.get("sha256") or "")
@@ -349,8 +365,12 @@ def _check_manifest_and_sums(bundle_dir: Path, document: dict[str, Any]) -> list
     if str(manifest_doc.get("source_sha") or "").lower() != str(document.get("source_sha") or ""):
         problems.append("manifest source_sha 与来源证明不一致")
     signature_name = manifest_doc.get("signature_file")
-    if not isinstance(signature_name, str) or not (bundle_dir / signature_name).is_file():
-        problems.append(f"manifest 引用了不存在的签名文件：{signature_name!r}")
+    signature_path, signature_error = locate_bundle_file(bundle_dir, signature_name)
+    if signature_error:
+        if signature_error.startswith("清单引用了不存在的文件"):
+            problems.append(f"manifest 引用了不存在的签名文件：{signature_name!r}")
+        else:
+            problems.append(f"manifest 签名路径被拒绝：{signature_error}")
     if sums_path.is_file():
         lines = [line.split() for line in sums_path.read_text(encoding="utf-8").splitlines() if line.strip()]
         recorded_sums = {parts[-1]: parts[0] for parts in lines if len(parts) >= 2}
@@ -375,9 +395,10 @@ def _check_signature(
     if not manifest_path.is_file():
         return problems
     manifest_doc = json.loads(manifest_path.read_text(encoding="utf-8"))
-    signature_name = str(manifest_doc.get("signature_file") or "")
-    signature_path = bundle_dir / signature_name
-    if not signature_path.is_file():
+    signature_name = manifest_doc.get("signature_file")
+    signature_path, signature_error = locate_bundle_file(bundle_dir, signature_name)
+    if signature_error:
+        problems.append(f"签名文件路径被拒绝：{signature_error}")
         return problems
     signature = read_signature(signature_path)
     sig_key = signature_key_id(signature)
@@ -385,9 +406,12 @@ def _check_signature(
         problems.append(f"签名无效：签名 key id {sig_key or '缺失'} 与公钥 {info.get('key_id')} 不一致")
         return problems
     if signature_verifier is not None:
-        installer_name = manifest_doc.get("installer", {}).get("filename")
-        installer = bundle_dir / str(installer_name)
-        problems.extend(run_signature_verifier(signature_verifier, installer, signature, pubkey))
+        installer_name = manifest_doc.get("installer", {}).get("filename") if isinstance(manifest_doc.get("installer"), dict) else None
+        installer_path, installer_error = locate_bundle_file(bundle_dir, installer_name)
+        if installer_error:
+            problems.append(f"签名校验的安装包路径被拒绝：{installer_error}")
+            return problems
+        problems.extend(run_signature_verifier(signature_verifier, installer_path, signature, pubkey))
     return problems
 
 

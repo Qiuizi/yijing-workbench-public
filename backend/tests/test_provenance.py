@@ -10,11 +10,13 @@ import pytest
 
 from scripts.updater.keys import QA_PUBLIC_KEY
 from scripts.updater.manifest import public_key_key_id
+from scripts.updater import provenance
 from scripts.updater.provenance import (
     PROVENANCE_FILENAME,
     ProvenanceError,
     build_provenance,
     load_provenance,
+    locate_bundle_file,
     validate_provenance,
     write_provenance,
 )
@@ -258,6 +260,156 @@ def test_windows_absolute_path_traversal_case_and_sha_format(tmp_path):
     assert any("workflow_ref" in item for item in _expect(bundle, expected_workflow_ref="other.yml@refs/heads/main"))
     assert any("workflow_sha" in item for item in _expect(bundle, expected_workflow_sha="d" * 40))
     assert any("Source SHA 格式无效" in item for item in _expect(bundle, expected_source_sha="not-a-sha"))
+
+
+def _retarget_manifest(bundle: Path, *, installer: str | None = None, signature: str | None = None) -> None:
+    manifest_path = bundle / "manifest.json"
+    document = json.loads((bundle / PROVENANCE_FILENAME).read_text(encoding="utf-8"))
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if installer is not None:
+        manifest["installer"]["filename"] = installer
+    if signature is not None:
+        manifest["signature_file"] = signature
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    data = manifest_path.read_bytes()
+    for item in document["files"]:
+        if item["name"] == "manifest.json":
+            item["sha256"] = __import__("hashlib").sha256(data).hexdigest()
+            item["size_bytes"] = len(data)
+    (bundle / PROVENANCE_FILENAME).write_text(json.dumps(document), encoding="utf-8")
+
+
+def _forbid_external_access(monkeypatch, marker: str) -> None:
+    def wrap(method):
+        def wrapped(self, *args, **kwargs):
+            if marker.lower() in str(self).lower():
+                raise AssertionError(f"external filesystem access via {method.__name__}: {self}")
+            return method(self, *args, **kwargs)
+
+        return wrapped
+
+    monkeypatch.setattr(Path, "open", wrap(Path.open))
+    monkeypatch.setattr(Path, "stat", wrap(Path.stat))
+    monkeypatch.setattr(Path, "is_file", wrap(Path.is_file))
+    monkeypatch.setattr(Path, "is_symlink", wrap(Path.is_symlink))
+    monkeypatch.setattr(Path, "resolve", wrap(Path.resolve))
+    real_hash = provenance.sha256_file
+
+    def guarded_hash(path):
+        if marker.lower() in str(path).lower():
+            raise AssertionError(f"hashed external file: {path}")
+        return real_hash(path)
+
+    monkeypatch.setattr(provenance, "sha256_file", guarded_hash)
+
+
+@pytest.mark.parametrize(
+    "field, malicious",
+    [
+        ("installer", "C:/Windows/win.ini"),
+        ("installer", "C:\\Windows\\win.ini"),
+        ("installer", "//server/share/file"),
+        ("installer", "\\\\server\\share\\file"),
+        ("installer", "/etc/passwd"),
+        ("installer", "../outside.exe"),
+        ("installer", "subdir/../../outside.exe"),
+        ("signature", "C:/Windows/win.ini"),
+        ("signature", "C:\\Windows\\win.ini"),
+        ("signature", "//server/share/file"),
+        ("signature", "\\\\server\\share\\file"),
+        ("signature", "/etc/passwd"),
+        ("signature", "../outside.exe"),
+        ("signature", "subdir/../../outside.exe"),
+    ],
+)
+def test_manifest_path_escapes_are_rejected_before_external_access(tmp_path, monkeypatch, field, malicious):
+    bundle, _ = _write_bundle(tmp_path)
+    if field == "installer":
+        _retarget_manifest(bundle, installer=malicious)
+    else:
+        _retarget_manifest(bundle, signature=malicious)
+    _forbid_external_access(monkeypatch, "win.ini" if "win.ini" in malicious else malicious.replace("\\", "/").split("/")[-1])
+    problems = _expect(bundle)
+    assert any("路径被拒绝" in item or "非法文件名" in item or "绝对路径" in item or "路径穿越" in item for item in problems)
+    assert not any("SHA-256" in item and malicious in item for item in problems)
+
+
+def test_manifest_windows_path_does_not_hash_win_ini(tmp_path, monkeypatch):
+    bundle, _ = _write_bundle(tmp_path)
+    _retarget_manifest(bundle, installer="C:/Windows/win.ini")
+    _forbid_external_access(monkeypatch, "win.ini")
+    problems = _expect(bundle)
+    assert any("安装包路径被拒绝" in item for item in problems)
+
+    bundle, _ = _write_bundle(tmp_path / "sig")
+    _retarget_manifest(bundle, signature="C:\\Windows\\win.ini")
+    _forbid_external_access(monkeypatch, "win.ini")
+    problems = _expect(bundle)
+    assert any("签名路径被拒绝" in item or "签名文件路径被拒绝" in item for item in problems)
+
+
+def test_manifest_symlink_flag_is_rejected_before_open(tmp_path, monkeypatch):
+    bundle, _ = _write_bundle(tmp_path)
+    outside = tmp_path / "outside.exe"
+    outside.write_bytes(b"outside-bytes")
+    link = bundle / "linked.exe"
+    link.write_bytes(b"not-the-target")
+    _retarget_manifest(bundle, installer="linked.exe")
+    real_is_symlink = Path.is_symlink
+    real_open = Path.open
+
+    def fake_is_symlink(self):
+        if self.name == "linked.exe":
+            return True
+        return real_is_symlink(self)
+
+    def guarded_open(self, *args, **kwargs):
+        if self.name == "outside.exe":
+            raise AssertionError(f"followed symlink to {self}")
+        return real_open(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "is_symlink", fake_is_symlink)
+    monkeypatch.setattr(Path, "open", guarded_open)
+    problems = _expect(bundle)
+    assert any("符号链接" in item for item in problems)
+
+
+def test_manifest_symlink_is_rejected_before_following_it(tmp_path, monkeypatch):
+    bundle, _ = _write_bundle(tmp_path)
+    outside = tmp_path / "outside.exe"
+    outside.write_bytes(b"outside-bytes")
+    link = bundle / "linked.exe"
+    try:
+        link.symlink_to(outside)
+    except OSError as error:
+        pytest.skip(f"symlink not permitted: {error}")
+    _retarget_manifest(bundle, installer="linked.exe")
+    real_open = Path.open
+
+    def guarded_open(self, *args, **kwargs):
+        if self.name == "outside.exe":
+            raise AssertionError(f"followed symlink to {self}")
+        return real_open(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", guarded_open)
+    problems = _expect(bundle)
+    assert any("符号链接" in item for item in problems)
+
+
+def test_manifest_missing_signature_file_is_rejected(tmp_path):
+    bundle, _ = _write_bundle(tmp_path)
+    _retarget_manifest(bundle, signature="missing.sig")
+    problems = _expect(bundle)
+    assert any("不存在的签名文件" in item or "不存在" in item for item in problems)
+
+
+def test_normal_installer_and_signature_names_are_accepted(tmp_path):
+    bundle, _ = _write_bundle(tmp_path)
+    installer, installer_error = locate_bundle_file(bundle, "yijing-workbench-3.3.2-x64-setup.exe")
+    signature, signature_error = locate_bundle_file(bundle, "yijing-workbench-3.3.2-x64-setup.exe.sig")
+    assert installer_error is None and installer is not None and installer.is_file()
+    assert signature_error is None and signature is not None and signature.is_file()
+    assert _expect(bundle) == []
 
 
 def test_candidate_workflow_uploads_once_and_verify_job_does_not_rebuild():
