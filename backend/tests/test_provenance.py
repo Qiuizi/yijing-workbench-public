@@ -396,6 +396,24 @@ def test_manifest_symlink_is_rejected_before_following_it(tmp_path, monkeypatch)
     assert any("符号链接" in item for item in problems)
 
 
+def test_case_collision_is_reported_when_the_other_case_is_missing(tmp_path, monkeypatch):
+    bundle, document = _write_bundle(tmp_path)
+    first = document["files"][0]
+    upper = first["name"].upper()
+    document["files"].append({**first, "name": upper})
+    (bundle / PROVENANCE_FILENAME).write_text(json.dumps(document), encoding="utf-8")
+    real_locate = provenance.locate_bundle_file
+
+    def missing_other_case(bundle_dir, name):
+        if name == upper:
+            return None, f"清单引用了不存在的文件：{name}"
+        return real_locate(bundle_dir, name)
+
+    monkeypatch.setattr(provenance, "locate_bundle_file", missing_other_case)
+    problems = _expect(bundle)
+    assert any("大小写" in item or "重复" in item for item in problems)
+
+
 def test_manifest_missing_signature_file_is_rejected(tmp_path):
     bundle, _ = _write_bundle(tmp_path)
     _retarget_manifest(bundle, signature="missing.sig")

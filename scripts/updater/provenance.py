@@ -299,17 +299,27 @@ def _problems_for_files(bundle_dir: Path, listed: list[dict[str, Any]]) -> list[
         name = item.get("name")
         size = item.get("size_bytes")
         digest = item.get("sha256")
+        if not isinstance(name, str):
+            problems.append("非法文件名")
+            continue
         if name == PROVENANCE_FILENAME:
             problems.append(f"非法文件名：{name!r}")
             continue
-        path, error = locate_bundle_file(bundle_dir, name)
-        if error:
-            problems.append(error)
+        reason = reject_bundle_relative_path(name)
+        if reason:
+            problems.append(f"{reason}：{name!r}")
             continue
+        # Case collisions are a string property. Check them before locating the
+        # file, or a case-sensitive filesystem reports the second name as missing
+        # and never reaches this rejection.
         if name in seen or name.casefold() in {item.casefold() for item in seen}:
             problems.append(f"文件重复列出或大小写冲突：{name}")
         seen.add(name)
         listed_names.add(name)
+        path, error = locate_bundle_file(bundle_dir, name)
+        if error:
+            problems.append(error)
+            continue
         if not isinstance(size, int) or isinstance(size, bool):
             problems.append(f"{name} 的 size_bytes 不是整数")
         elif path.stat().st_size != size:
