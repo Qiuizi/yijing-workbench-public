@@ -1,0 +1,37 @@
+name: Install frozen Windows dependencies
+description: >-
+  Install the locked Windows Python release dependencies and/or the locked
+  frontend dependencies. Uses requirements-win.lock.txt, requirements-build.txt,
+  and npm ci. Does not refresh lockfiles and does not accept signing secrets.
+
+inputs:
+  python:
+    description: Install requirements-win.lock.txt and requirements-build.txt into .venv.
+    required: false
+    default: 'true'
+  frontend:
+    description: Run npm ci in frontend from package-lock.json.
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Require at least one install target
+      if: ${{ inputs.python != 'true' && inputs.frontend != 'true' }}
+      shell: pwsh
+      run: throw 'install-frozen-windows-deps requires python or frontend'
+
+    - name: Install frozen Python release dependencies
+      if: ${{ inputs.python == 'true' }}
+      shell: pwsh
+      run: |
+        python -m venv .venv
+        .\.venv\Scripts\python.exe -m pip install -r requirements-win.lock.txt
+        .\.venv\Scripts\python.exe -m pip install -r requirements-build.txt
+
+    - name: Install frontend locked dependencies
+      if: ${{ inputs.frontend == 'true' }}
+      shell: pwsh
+      working-directory: frontend
+      run: npm ci

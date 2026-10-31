@@ -1,0 +1,44 @@
+name: Run Windows regression checks
+description: >-
+  Run the Windows checks already used by the candidate and release workflows:
+  backend pytest, frontend vitest, and TypeScript typecheck. Each requested
+  check is its own step. Does not accept signing secrets.
+
+inputs:
+  backend:
+    description: Run backend pytest with the project virtualenv.
+    required: false
+    default: 'true'
+  vitest:
+    description: Run frontend npm test.
+    required: false
+    default: 'true'
+  typecheck:
+    description: Run frontend npm run typecheck.
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Require at least one regression check
+      if: ${{ inputs.backend != 'true' && inputs.vitest != 'true' && inputs.typecheck != 'true' }}
+      shell: pwsh
+      run: throw 'run-windows-regression requires backend, vitest, or typecheck'
+
+    - name: Windows backend regression tests
+      if: ${{ inputs.backend == 'true' }}
+      shell: pwsh
+      run: .\.venv\Scripts\python.exe -X utf8 -m pytest
+
+    - name: Frontend regression tests
+      if: ${{ inputs.vitest == 'true' }}
+      shell: pwsh
+      working-directory: frontend
+      run: npm test
+
+    - name: Typecheck
+      if: ${{ inputs.typecheck == 'true' }}
+      shell: pwsh
+      working-directory: frontend
+      run: npm run typecheck

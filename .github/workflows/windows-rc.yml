@@ -15,6 +15,7 @@ on:
       - 'requirements-win.lock.txt'
       - 'requirements-build.txt'
       - '.github/workflows/windows-rc.yml'
+      - '.github/actions/**'
   workflow_dispatch:
 
 permissions:
@@ -37,20 +38,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: '1.98.1'
-          targets: x86_64-pc-windows-msvc
+      - name: Set up Windows toolchain
+        uses: ./.github/actions/setup-windows-toolchain
 
       - name: Read and validate application version
         run: |
@@ -66,53 +55,40 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'version consistency check failed' }
 
       - name: Install frozen Python release dependencies
-        run: |
-          python -m venv .venv
-          .\.venv\Scripts\python.exe -m pip install -r requirements-win.lock.txt
-          .\.venv\Scripts\python.exe -m pip install -r requirements-build.txt
+        uses: ./.github/actions/install-frozen-windows-deps
+        with:
+          python: 'true'
+          frontend: 'false'
 
       - name: Windows backend regression tests
-        run: .\.venv\Scripts\python.exe -X utf8 -m pytest
+        uses: ./.github/actions/run-windows-regression
+        with:
+          backend: 'true'
+          vitest: 'false'
+          typecheck: 'false'
 
       - name: Install frontend locked dependencies
-        working-directory: frontend
-        run: npm ci
+        uses: ./.github/actions/install-frozen-windows-deps
+        with:
+          python: 'false'
+          frontend: 'true'
 
       - name: Frontend regression tests
-        working-directory: frontend
-        run: npm test
+        uses: ./.github/actions/run-windows-regression
+        with:
+          backend: 'false'
+          vitest: 'true'
+          typecheck: 'false'
 
       - name: Typecheck
-        working-directory: frontend
-        run: npm run typecheck
+        uses: ./.github/actions/run-windows-regression
+        with:
+          backend: 'false'
+          vitest: 'false'
+          typecheck: 'true'
 
       - name: Find and verify the VS2022 VC143 x64 redist
-        run: |
-          $vsWhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
-          if (-not (Test-Path -LiteralPath $vsWhere)) { throw 'vswhere.exe not found on Windows runner' }
-          $installs = @(& $vsWhere -products '*' -property installationPath)
-          $candidates = @()
-          foreach ($install in $installs) {
-            $root = Join-Path $install 'VC\Redist\MSVC'
-            if (-not (Test-Path -LiteralPath $root)) { continue }
-            foreach ($version in @(Get-ChildItem -LiteralPath $root -Directory | Sort-Object Name -Descending)) {
-              $candidate = Join-Path $version.FullName 'x64\Microsoft.VC143.CRT'
-              if ((Test-Path -LiteralPath (Join-Path $candidate 'vcruntime140.dll')) -and
-                  (Test-Path -LiteralPath (Join-Path $candidate 'vcruntime140_1.dll'))) {
-                $candidates += $candidate
-              }
-            }
-          }
-          if ($candidates.Count -eq 0) { throw 'VS2022 Microsoft.VC143.CRT x64 redist not found' }
-          $redist = $candidates[0]
-          foreach ($name in @('vcruntime140.dll','vcruntime140_1.dll')) {
-            $sig = Get-AuthenticodeSignature -LiteralPath (Join-Path $redist $name)
-            if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notmatch 'O=Microsoft Corporation') {
-              throw "Invalid signature: $name"
-            }
-          }
-          "YIJING_VC_REDIST_DIR=$redist" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          Write-Output "Verified Microsoft CRT at $redist"
+        uses: ./.github/actions/discover-vc143
 
       # 更新签名只在构建步骤内可见，且绝不使用正式私钥。
       # tauri.conf.json 里现在是正式公钥，不能再拿另一把候选私钥给它签名。
