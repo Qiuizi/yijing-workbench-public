@@ -104,8 +104,18 @@ def test_toolchain_pin_is_single_sourced_and_cache_is_unchanged():
         text = _text(WORKFLOWS / name)
         assert "actions/setup-python@" not in text
         assert "actions/setup-node@" not in text
-        assert "dtolnay/rust-toolchain@" not in text
         assert "python-version:" not in text
+    assert "dtolnay/rust-toolchain@" not in _text(WORKFLOWS / "release.yml")
+    windows = _workflow("windows-rc.yml")
+    build_uses = [step.get("uses") for step in _steps(windows["jobs"]["windows-rc"])]
+    assert "dtolnay/rust-toolchain@stable" not in build_uses
+    build_steps = _steps(windows["jobs"]["windows-rc"])
+    assert all(step.get("name") != "Build signature verifier only" for step in build_steps)
+    assert "YIJING_SKIP_TAURI_BUILD" not in "\n".join(str(step.get("run") or "") for step in build_steps)
+    verifier = _named(_steps(windows["jobs"]["verify-candidate-artifact"]), "Compile signature verifier from this checkout")
+    assert verifier["env"]["YIJING_SKIP_TAURI_BUILD"] == "1"
+    assert verifier["run"] == "cargo build --release --bin verify-updater-signature"
+    assert "tauri build" not in verifier["run"]
 
 
 def test_candidate_and_release_call_the_same_build_actions_in_safe_order():
