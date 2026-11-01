@@ -83,3 +83,4 @@ try {
     Remove-Item Env:YIJING_SERVER_PORT,Env:YIJING_API_TOKEN,Env:YIJING_DB_PATH,Env:YIJING_LOG_PATH,Env:YIJING_BACKUP_DIR,Env:YIJING_DESKTOP_DEV -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $work -Recurse -Force -ErrorAction SilentlyContinue
 }
+exit 0
