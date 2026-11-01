@@ -188,7 +188,14 @@ def test_workflow_file_parses_and_keeps_least_privilege():
     assert jobs["build"]["permissions"] == {"contents": "read", "actions": "read"}
     assert "environment" not in jobs["build"]
     assert "GH_TOKEN" not in (jobs["build"].get("env") or {})
-    assert jobs["publish"]["permissions"] == {"contents": "write"}
+    assert jobs["publish"]["permissions"] == {
+        "contents": "write",
+        "actions": "read",
+        "attestations": "read",
+        "pull-requests": "write",
+    }
+    assert jobs["publish"]["permissions"].get("id-token") != "write"
+    assert jobs["publish"]["permissions"].get("attestations") != "write"
     assert jobs["dry-run-check"]["permissions"] == {"contents": "read"}
 
     for name, job in jobs.items():
@@ -200,13 +207,17 @@ def test_workflow_file_parses_and_keeps_least_privilege():
             assert permissions["attestations"] == "write"
             assert set(permissions) == {"contents", "actions", "id-token", "attestations"}
             continue
+        if name == "publish":
+            assert set(permissions) == {"contents", "actions", "attestations", "pull-requests"}
+            assert permissions["contents"] == "write"
+            assert permissions["actions"] == "read"
+            assert permissions["attestations"] == "read"
+            assert permissions["pull-requests"] == "write"
+            continue
         assert set(permissions) <= {"contents", "actions"}
         for scope, level in permissions.items():
-            if name == "publish":
-                assert (scope, level) == ("contents", "write")
-            else:
-                assert level == "read"
-                assert scope in {"contents", "actions"}
+            assert level == "read"
+            assert scope in {"contents", "actions"}
 
 
 def test_preflight_and_every_github_cli_step_has_a_step_token():
@@ -238,9 +249,15 @@ def test_dry_run_cannot_create_tag_or_release_and_publish_requires_opt_in():
     assert dry_input["default"] == "true"
 
     jobs = _jobs(workflow)
-    assert jobs["publish"]["if"] == "${{ !inputs.dry_run && needs.verify-signed.result == 'success' && needs.production-sign.result == 'success' }}"
+    assert jobs["publish"]["if"] == (
+        "${{ !cancelled() && !inputs.dry_run && needs.build.result == 'success' "
+        "&& needs.production-sign.result == 'success' && needs.verify-signed.result == 'success' "
+        "&& needs.attest-signed.result == 'success' }}"
+    )
+    assert "always()" not in jobs["publish"]["if"]
+    assert "skipped" not in jobs["publish"]["if"]
     assert jobs["dry-run-check"]["if"].startswith("${{ always() && inputs.dry_run &&")
-    assert jobs["publish"].get("needs") == ["production-sign", "verify-signed"]
+    assert jobs["publish"].get("needs") == ["build", "production-sign", "verify-signed", "attest-signed"]
     assert "build" in jobs["dry-run-check"].get("needs")
 
     for job_name, job in jobs.items():

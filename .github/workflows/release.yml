@@ -7,7 +7,9 @@
 # 默认 dry_run=true 且 exercise_production_sign=false：只构建、验证、证明，
 # 不进 release 环境，不读私钥，不创建 tag/release，不改官网。
 # exercise_production_sign=true 仍保持 dry_run，可以做非公开正式签名演练。
-# dry_run=false 才会发布；本阶段不运行那条路径。
+# dry_run=false 才会发布。Publish 还必须看到 attest-signed=success，
+# 并在任何写入之前重查 Artifact、来源证明和 Attestation 身份。
+# 官网入口只开 PR，不直接推 main。
 name: Publish stable release (updater-enabled)
 
 on:
@@ -543,7 +545,8 @@ jobs:
           name: yijing-workbench-${{ inputs.version }}-windows-x64-signed
           path: ${{ runner.temp }}/yijing-signed-${{ inputs.version }}/*
           if-no-files-found: error
-          retention-days: 14
+          # 演练产物缩短到 1 天。正式发布仍保留 14 天，供发布后审计重取。
+          retention-days: ${{ inputs.dry_run && 1 || 14 }}
           overwrite: false
 
   verify-signed:
@@ -754,17 +757,37 @@ jobs:
             --expected-run-attempt "$GITHUB_RUN_ATTEMPT" \
             --workflow-path .github/workflows/release.yml \
             --bundle-profile release-signed
+          python3 scripts/updater/attestation_identity.py \
+            --verification-json attestation-verify.json \
+            --bundle-dir downloaded-artifact \
+            --expected-repository "$GITHUB_REPOSITORY" \
+            --expected-ref "$GITHUB_REF" \
+            --expected-source-sha "$GITHUB_SHA" \
+            --expected-workflow-sha "$GITHUB_WORKFLOW_SHA" \
+            --expected-run-id 1 \
+            --expected-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --workflow-path .github/workflows/release.yml \
+            --bundle-profile release-signed \
+            && { echo "wrong Run ID was accepted" >&2; exit 1; }
+          echo "rejected wrong Run ID"
 
   publish:
     needs:
+      - build
       - production-sign
       - verify-signed
-    if: ${{ !inputs.dry_run && needs.verify-signed.result == 'success' && needs.production-sign.result == 'success' }}
+      - attest-signed
+    # cancelled() 使依赖失败时仍计算本条件；只有 success 能通过。
+    # 不要改成 always()，也不要把 skipped 当成可发布。
+    if: ${{ !cancelled() && !inputs.dry_run && needs.build.result == 'success' && needs.production-sign.result == 'success' && needs.verify-signed.result == 'success' && needs.attest-signed.result == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     environment: release
     permissions:
       contents: write
+      actions: read
+      attestations: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -808,6 +831,87 @@ jobs:
           print("OK  publish bytes match verified signed artifact")
           PY
 
+      - name: Re-check provenance, signature binding, and attestation identity
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ needs.production-sign.outputs.artifact-id }}
+          EXPECTED_DIGEST: ${{ needs.production-sign.outputs.artifact-digest }}
+          EXPECTED_INSTALLER_SHA256: ${{ needs.verify-signed.outputs.installer-sha256 }}
+          STAGING_ARTIFACT_ID: ${{ needs.build.outputs.artifact-id }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          test -n "$ARTIFACT_ID"
+          test -n "$EXPECTED_DIGEST"
+          test -n "$EXPECTED_INSTALLER_SHA256"
+          test "$GITHUB_SHA" = "${{ github.sha }}"
+          pubkey="$(python3 -c "import json; print(json.load(open('frontend/src-tauri/tauri.conf.json', encoding='utf-8'))['plugins']['updater']['pubkey'])")"
+          python3 scripts/updater/provenance.py verify \
+            --bundle-dir downloaded-artifact \
+            --expected-repository "$GITHUB_REPOSITORY" \
+            --expected-source-sha "$GITHUB_SHA" \
+            --expected-workflow-ref "$GITHUB_WORKFLOW_REF" \
+            --expected-workflow-sha "$GITHUB_WORKFLOW_SHA" \
+            --expected-run-id "$GITHUB_RUN_ID" \
+            --expected-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --expected-event-name "$GITHUB_EVENT_NAME" \
+            --expected-signing-mode production \
+            --expected-version "$VERSION" \
+            --expected-artifact-id "$ARTIFACT_ID" \
+            --observed-artifact-id "$(python3 -c 'import json; print(json.load(open("artifact.json"))["id"])')" \
+            --expected-artifact-digest "$EXPECTED_DIGEST" \
+            --observed-artifact-digest "$(python3 -c 'import json; print(json.load(open("artifact.json"))["digest"])')" \
+            --observed-artifact-name "$(python3 -c 'import json; print(json.load(open("artifact.json"))["name"])')"
+          python3 scripts/updater/verify_release.py downloaded-artifact \
+            --tag "v$VERSION" \
+            --expected-version "$VERSION" \
+            --production \
+            --expect-pubkey "$pubkey"
+          python3 scripts/updater/production_sign.py verify-chain \
+            --signed-dir downloaded-artifact \
+            --expected-version "$VERSION" \
+            --expected-installer-sha256 "$EXPECTED_INSTALLER_SHA256" \
+            --expected-staging-artifact-id "$STAGING_ARTIFACT_ID" \
+            --expected-source-sha "$GITHUB_SHA"
+          identity="https://github.com/${GITHUB_REPOSITORY}/.github/workflows/release.yml@${GITHUB_REF}"
+          mapfile -d '' files < <(find downloaded-artifact -type f -print0)
+          test "${#files[@]}" -eq 7
+          for file in "${files[@]}"; do
+            gh attestation verify "$file" \
+              --repo "$GITHUB_REPOSITORY" \
+              --cert-identity "$identity" \
+              --source-ref "$GITHUB_REF" \
+              --source-digest "$GITHUB_SHA" \
+              --signer-digest "$GITHUB_WORKFLOW_SHA" \
+              --cert-oidc-issuer "https://token.actions.githubusercontent.com" \
+              --deny-self-hosted-runners \
+              --format json > attestation-verify.json
+          done
+          python3 scripts/updater/attestation_identity.py \
+            --verification-json attestation-verify.json \
+            --bundle-dir downloaded-artifact \
+            --expected-repository "$GITHUB_REPOSITORY" \
+            --expected-ref "$GITHUB_REF" \
+            --expected-source-sha "$GITHUB_SHA" \
+            --expected-workflow-sha "$GITHUB_WORKFLOW_SHA" \
+            --expected-run-id "$GITHUB_RUN_ID" \
+            --expected-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --workflow-path .github/workflows/release.yml \
+            --bundle-profile release-signed
+          python3 scripts/updater/attestation_identity.py \
+            --verification-json attestation-verify.json \
+            --bundle-dir downloaded-artifact \
+            --expected-repository "$GITHUB_REPOSITORY" \
+            --expected-ref "$GITHUB_REF" \
+            --expected-source-sha "$GITHUB_SHA" \
+            --expected-workflow-sha "$GITHUB_WORKFLOW_SHA" \
+            --expected-run-id 1 \
+            --expected-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --workflow-path .github/workflows/release.yml \
+            --bundle-profile release-signed \
+            && { echo "wrong Run ID was accepted" >&2; exit 1; }
+          echo "rejected wrong Run ID"
+
       - name: Refuse to overwrite an existing tag or release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -825,6 +929,7 @@ jobs:
           fi
 
       - name: Create draft release and upload assets
+        id: draft
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
@@ -877,7 +982,38 @@ jobs:
           print("uploaded assets verified:", ", ".join(sorted(assets)))
           PY
 
+      - name: Open a pull request for website release facts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          case "$TAG" in
+            v3.3.0|v3.3.1) echo "refusing to retarget a historical release" >&2; exit 1 ;;
+          esac
+          python3 scripts/updater/update_site_release.py --release-dir downloaded-artifact --tag "$TAG"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add website/src/links.ts
+          if git diff --cached --quiet; then
+            echo "site already up to date"
+            exit 0
+          fi
+          branch="release/site-$TAG"
+          git checkout -B "$branch"
+          git commit -m "release(site): point download to $TAG"
+          git push --force-with-lease origin "HEAD:refs/heads/$branch"
+          existing="$(gh pr list --head "$branch" --base main --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            echo "site PR #$existing already open"
+            exit 0
+          fi
+          gh pr create --base main --head "$branch" \
+            --title "release(site): point download to $TAG" \
+            --body "Update the public download fallback after $TAG is published. This pull request does not push to main."
+
       - name: Publish the release (irreversible; latest.json enters the update channel)
+        id: publish-release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: v${{ inputs.version }}
@@ -903,21 +1039,26 @@ jobs:
           echo "public latest.json does not match (CDN not converged or wrong upload)" >&2
           exit 1
 
-      - name: Update website release facts and let Pages redeploy
+      - name: Delete the unpublished draft if a later step failed
+        if: ${{ failure() && steps.draft.outcome == 'success' && steps.publish-release.outcome != 'success' }}
         env:
+          GH_TOKEN: ${{ github.token }}
           TAG: v${{ inputs.version }}
         run: |
           set -euo pipefail
-          python3 scripts/updater/update_site_release.py --release-dir downloaded-artifact --tag "$TAG"
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add website/src/links.ts
-          if git diff --cached --quiet; then
-            echo "site already up to date"
-          else
-            git commit -m "release(site): point download to $TAG"
-            git push origin HEAD:main
+          case "$TAG" in
+            v3.3.0|v3.3.1) echo "refusing to delete a historical release" >&2; exit 1 ;;
+          esac
+          draft="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq .draft)"
+          test "$draft" = "true"
+          gh release delete "$TAG" --yes --cleanup-tag
+          branch="release/site-$TAG"
+          number="$(gh pr list --head "$branch" --base main --state open --json number --jq '.[0].number // empty')"
+          if [ -n "$number" ]; then
+            gh pr close "$number" --comment "Release $TAG was not published."
+            git push origin --delete "$branch" || true
           fi
+          echo "deleted unpublished draft $TAG"
 
   dry-run-check:
     needs:
@@ -927,7 +1068,7 @@ jobs:
       - production-sign
       - verify-signed
       - attest-signed
-    if: ${{ always() && inputs.dry_run && needs.build.result == 'success' && needs.verify-staging.result == 'success' && needs.attest-staging.result == 'success' && (needs.production-sign.result == 'success' || needs.production-sign.result == 'skipped') && (needs.verify-signed.result == 'success' || needs.verify-signed.result == 'skipped') && (needs.attest-signed.result == 'success' || needs.attest-signed.result == 'skipped') && (inputs.exercise_production_sign != true || needs.verify-signed.result == 'success') }}
+    if: ${{ always() && inputs.dry_run && needs.build.result == 'success' && needs.verify-staging.result == 'success' && needs.attest-staging.result == 'success' && (needs.production-sign.result == 'success' || needs.production-sign.result == 'skipped') && (needs.verify-signed.result == 'success' || needs.verify-signed.result == 'skipped') && (needs.attest-signed.result == 'success' || needs.attest-signed.result == 'skipped') && (inputs.exercise_production_sign != true || (needs.verify-signed.result == 'success' && needs.attest-signed.result == 'success')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
