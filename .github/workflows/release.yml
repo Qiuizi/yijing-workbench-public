@@ -921,7 +921,7 @@ jobs:
       - production-sign
       - verify-signed
       - attest-signed
-    if: ${{ inputs.dry_run && needs.build.result == 'success' && needs.verify-staging.result == 'success' && needs.attest-staging.result == 'success' && (needs.production-sign.result == 'success' || needs.production-sign.result == 'skipped') && (needs.verify-signed.result == 'success' || needs.verify-signed.result == 'skipped') && (needs.attest-signed.result == 'success' || needs.attest-signed.result == 'skipped') && (inputs.exercise_production_sign != true || needs.verify-signed.result == 'success') }}
+    if: ${{ always() && inputs.dry_run && needs.build.result == 'success' && needs.verify-staging.result == 'success' && needs.attest-staging.result == 'success' && (needs.production-sign.result == 'success' || needs.production-sign.result == 'skipped') && (needs.verify-signed.result == 'success' || needs.verify-signed.result == 'skipped') && (needs.attest-signed.result == 'success' || needs.attest-signed.result == 'skipped') && (inputs.exercise_production_sign != true || needs.verify-signed.result == 'success') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
