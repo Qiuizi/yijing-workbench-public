@@ -197,5 +197,5 @@ def test_no_other_enabled_release_or_main_write_path():
     assert enabled == [(
         CURRENT_PUBLISHER,
         "publish",
-        "${{ !inputs.dry_run && needs.verify-signed.result == 'success' && needs.production-sign.result == 'success' }}",
+        "${{ !cancelled() && !inputs.dry_run && needs.build.result == 'success' && needs.production-sign.result == 'success' && needs.verify-signed.result == 'success' && needs.attest-signed.result == 'success' }}",
     )]

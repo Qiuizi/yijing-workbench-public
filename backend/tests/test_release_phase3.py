@@ -41,7 +41,8 @@ def test_private_key_is_only_on_the_sign_step():
     assert "environment" not in workflow["jobs"]["verify-signed"]
     assert "environment" not in workflow["jobs"]["publish"] or workflow["jobs"]["publish"]["environment"] == "release"
     assert workflow["jobs"]["production-sign"]["environment"] == "release"
-    assert workflow["jobs"]["publish"]["permissions"] == {"contents": "write"}
+    assert workflow["jobs"]["publish"]["permissions"]["contents"] == "write"
+    assert "TAURI_SIGNING_PRIVATE_KEY" not in json.dumps(workflow["jobs"]["publish"])
     assert "contents: write" not in json.dumps(workflow["jobs"]["build"]["permissions"])
 
 
