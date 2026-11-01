@@ -137,6 +137,8 @@ jobs:
             -SidecarPath 'frontend/src-tauri/binaries/yijing-backend/yijing-backend.exe' `
             -ReportPath (Join-Path $env:RUNNER_TEMP 'sidecar-smoke.json')
           if ($LASTEXITCODE -ne 0) { throw 'packaged sidecar smoke failed' }
+          $smoke = Get-Content -LiteralPath (Join-Path $env:RUNNER_TEMP 'sidecar-smoke.json') -Raw | ConvertFrom-Json
+          if ($smoke.status -ne 'PASS') { throw 'packaged sidecar smoke failed' }
           Copy-Item -LiteralPath (Join-Path $env:RUNNER_TEMP 'sidecar-smoke.json') -Destination 'sidecar-smoke.json' -Force
 
       - name: Assemble unsigned staging bundle
