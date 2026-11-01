@@ -919,7 +919,8 @@ jobs:
         run: |
           set -euo pipefail
           TAG="v$VERSION"
-          if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" >/dev/null 2>&1; then
+          # releases/tags 看不到尚未打 tag 的 draft；gh release view 能看到。
+          if gh release view "$TAG" >/dev/null 2>&1; then
             echo "release already exists for $TAG" >&2
             exit 1
           fi
@@ -955,8 +956,14 @@ jobs:
           python3 - <<'PY'
           import hashlib, json, os, subprocess, sys
           tag = os.environ["TAG"]
-          repo = os.environ["GITHUB_REPOSITORY"]
-          release = json.loads(subprocess.check_output(["gh", "api", f"repos/{repo}/releases/tags/{tag}"], text=True))
+          # GitHub 在 draft 发布前不创建 tag，releases/tags 会 404。
+          release = json.loads(subprocess.check_output(
+              ["gh", "release", "view", tag, "--json", "assets,isDraft,tagName"],
+              text=True,
+          ))
+          if release.get("tagName") != tag or release.get("isDraft") is not True:
+              print("draft release identity mismatch", file=sys.stderr)
+              sys.exit(1)
           assets = {item["name"]: item for item in release["assets"]}
           required = [
               f"yijing-workbench-{tag.lstrip('v')}-x64-setup.exe",
@@ -1049,7 +1056,7 @@ jobs:
           case "$TAG" in
             v3.3.0|v3.3.1) echo "refusing to delete a historical release" >&2; exit 1 ;;
           esac
-          draft="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq .draft)"
+          draft="$(gh release view "$TAG" --json isDraft --jq .isDraft)"
           test "$draft" = "true"
           gh release delete "$TAG" --yes --cleanup-tag
           branch="release/site-$TAG"
@@ -1085,7 +1092,7 @@ jobs:
           TAG: v${{ inputs.version }}
         run: |
           set -euo pipefail
-          if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" >/dev/null 2>&1; then
+          if gh release view "$TAG" >/dev/null 2>&1; then
             echo "dry run 竟然创建了 release：$TAG" >&2
             exit 1
           fi

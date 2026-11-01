@@ -271,7 +271,8 @@ def test_dry_run_cannot_create_tag_or_release_and_publish_requires_opt_in():
     publish_runs = "\n".join(str(step.get("run") or "") for step in _steps(jobs["publish"]))
     assert "gh release create" in publish_runs
     dry_runs = "\n".join(str(step.get("run") or "") for step in _steps(jobs["dry-run-check"]))
-    assert "releases/tags/" in dry_runs
+    assert "gh release view" in dry_runs
+    assert "releases/tags/" not in dry_runs
     assert "dry run 竟然创建了 release" in dry_runs
     assert "dry run 竟然创建了 tag" in dry_runs
     assert "官网" in dry_runs
