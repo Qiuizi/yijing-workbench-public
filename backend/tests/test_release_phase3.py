@@ -58,6 +58,10 @@ def test_default_dry_run_does_not_enter_the_signing_environment():
     dry_if = load_workflow()["jobs"]["dry-run-check"]["if"]
     assert dry_if.startswith("${{ always() && inputs.dry_run &&")
     assert "needs.production-sign.result == 'skipped'" in dry_if
+    sign_steps = [step.get("name") for step in load_workflow()["jobs"]["production-sign"]["steps"]]
+    assert sign_steps.index("Find and verify the VS2022 VC143 x64 redist") < sign_steps.index(
+        "Write provenance for the signed bundle"
+    )
 
 
 def test_unsigned_override_disables_updater_artifacts_and_rejects_qa_key():

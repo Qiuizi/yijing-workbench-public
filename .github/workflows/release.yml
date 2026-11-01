@@ -179,7 +179,7 @@ jobs:
             --python-version $pythonVersion `
             --node-version $nodeVersion `
             --rust-version $rustVersion `
-            --vc143-dir $env:YIJING_VC_REDIST_DIR `
+            --vc143-dir "$env:YIJING_VC_REDIST_DIR" `
             --signing-mode unsigned_staging `
             --updater-pubkey $pubkey `
             --artifact-name "yijing-workbench-$($env:YIJING_VERSION_INPUT)-windows-x64-staging"
@@ -498,12 +498,18 @@ jobs:
             if (Test-Path -LiteralPath $keyPath) { Remove-Item -LiteralPath $keyPath -Force }
           }
 
+      - name: Find and verify the VS2022 VC143 x64 redist
+        uses: ./.github/actions/discover-vc143
+
       - name: Write provenance for the signed bundle
         env:
           VERSION: ${{ inputs.version }}
         run: |
           if ($env:TAURI_SIGNING_PRIVATE_KEY -or $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD) {
             throw 'provenance step must not see the production private key'
+          }
+          if ([string]::IsNullOrWhiteSpace($env:YIJING_VC_REDIST_DIR)) {
+            throw 'signed provenance requires the verified VC143 directory'
           }
           $pythonVersion = (& python -c "import sys; print(f'{sys.version_info[0]}.{sys.version_info[1]}.{sys.version_info[2]}')").Trim()
           $nodeVersion = (& node -p "process.versions.node").Trim()
@@ -524,7 +530,7 @@ jobs:
             --python-version $pythonVersion `
             --node-version $nodeVersion `
             --rust-version $rustVersion `
-            --vc143-dir $env:YIJING_VC_REDIST_DIR `
+            --vc143-dir "$env:YIJING_VC_REDIST_DIR" `
             --signing-mode production `
             --updater-pubkey $pubkey `
             --artifact-name "yijing-workbench-$env:VERSION-windows-x64-signed"
