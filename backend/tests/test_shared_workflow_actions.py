@@ -277,7 +277,7 @@ def test_release_auth_environment_and_artifact_contracts_are_unchanged():
     assert jobs["publish"]["environment"] == "release"
     assert jobs["publish"]["permissions"] == {"contents": "write"}
     assert jobs["publish"]["needs"] == ["production-sign", "verify-signed"]
-    assert "inputs.dry_run &&" in jobs["dry-run-check"]["if"]
+    assert jobs["dry-run-check"]["if"].startswith("${{ always() && inputs.dry_run &&")
     assert jobs["dry-run-check"]["permissions"] == {"contents": "read"}
     assert "environment" not in jobs["dry-run-check"]
 

@@ -239,7 +239,7 @@ def test_dry_run_cannot_create_tag_or_release_and_publish_requires_opt_in():
 
     jobs = _jobs(workflow)
     assert jobs["publish"]["if"] == "${{ !inputs.dry_run && needs.verify-signed.result == 'success' && needs.production-sign.result == 'success' }}"
-    assert "inputs.dry_run &&" in jobs["dry-run-check"]["if"]
+    assert jobs["dry-run-check"]["if"].startswith("${{ always() && inputs.dry_run &&")
     assert jobs["publish"].get("needs") == ["production-sign", "verify-signed"]
     assert "build" in jobs["dry-run-check"].get("needs")
 
@@ -306,7 +306,7 @@ def test_release_discovers_signed_vc143_before_the_sidecar_build():
     assert workflow["permissions"] == {"contents": "read", "actions": "read"}
     jobs = _jobs(workflow)
     assert "needs.verify-signed.result == 'success'" in jobs["publish"]["if"]
-    assert "inputs.dry_run &&" in jobs["dry-run-check"]["if"]
+    assert jobs["dry-run-check"]["if"].startswith("${{ always() && inputs.dry_run &&")
     assert workflow["on"]["workflow_dispatch"]["inputs"]["dry_run"]["default"] == "true"
 
     build_steps = _steps(jobs["build"])

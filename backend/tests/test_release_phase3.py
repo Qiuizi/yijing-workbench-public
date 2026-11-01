@@ -55,6 +55,9 @@ def test_default_dry_run_does_not_enter_the_signing_environment():
     publish_if = load_workflow()["jobs"]["publish"]["if"]
     assert "!inputs.dry_run" in publish_if
     assert "needs.verify-signed.result == 'success'" in publish_if
+    dry_if = load_workflow()["jobs"]["dry-run-check"]["if"]
+    assert dry_if.startswith("${{ always() && inputs.dry_run &&")
+    assert "needs.production-sign.result == 'skipped'" in dry_if
 
 
 def test_unsigned_override_disables_updater_artifacts_and_rejects_qa_key():
