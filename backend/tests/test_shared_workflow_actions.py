@@ -275,8 +275,16 @@ def test_release_auth_environment_and_artifact_contracts_are_unchanged():
     assert jobs["production-sign"]["environment"] == "release"
     assert "needs.verify-signed.result == 'success'" in jobs["publish"]["if"]
     assert jobs["publish"]["environment"] == "release"
-    assert jobs["publish"]["permissions"] == {"contents": "write"}
-    assert jobs["publish"]["needs"] == ["production-sign", "verify-signed"]
+    assert jobs["publish"]["permissions"] == {
+        "contents": "write",
+        "actions": "read",
+        "attestations": "read",
+        "pull-requests": "write",
+    }
+    assert jobs["publish"]["needs"] == ["build", "production-sign", "verify-signed", "attest-signed"]
+    assert "needs.attest-signed.result == 'success'" in jobs["publish"]["if"]
+    assert "always()" not in jobs["publish"]["if"]
+    assert "HEAD:main" not in "\n".join(str(step.get("run") or "") for step in jobs["publish"]["steps"])
     assert jobs["dry-run-check"]["if"].startswith("${{ always() && inputs.dry_run &&")
     assert jobs["dry-run-check"]["permissions"] == {"contents": "read"}
     assert "environment" not in jobs["dry-run-check"]
