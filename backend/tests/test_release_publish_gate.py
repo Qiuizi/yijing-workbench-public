@@ -219,6 +219,9 @@ def test_publish_writes_happen_after_identity_recheck_and_do_not_push_main():
     assert "git push origin HEAD:main" not in runs
     assert "refs/heads/$branch" in runs
     assert "gh pr create" in runs
+    assert '"gh", "release", "view"' in runs
+    assert "assets,isDraft,tagName" in runs
+    assert "releases/tags/" not in runs
     assert "attestation_identity.py" in runs
     assert "--bundle-profile release-signed" in runs
     assert "--workflow-path .github/workflows/release.yml" in runs
