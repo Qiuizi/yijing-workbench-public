@@ -989,7 +989,7 @@ jobs:
           print("uploaded assets verified:", ", ".join(sorted(assets)))
           PY
 
-      - name: Open a pull request for website release facts
+      - name: Push the website release facts branch and open its pull request
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: v${{ inputs.version }}
@@ -1015,9 +1015,15 @@ jobs:
             echo "site PR #$existing already open"
             exit 0
           fi
-          gh pr create --base main --head "$branch" \
-            --title "release(site): point download to $TAG" \
-            --body "Update the public download fallback after $TAG is published. This pull request does not push to main."
+          # 本仓库关闭了 Actions 创建 PR 的开关，Token 调用会返回 403。
+          # 分支已经推上去；PR 由人工或已授权身份补开，不能因此阻断发布。
+          if gh pr create --base main --head "$branch" \
+              --title "release(site): point download to $TAG" \
+              --body "Update the public download fallback after $TAG is published. This pull request does not push to main."; then
+            echo "site PR created"
+          else
+            echo "site branch $branch is pushed; PR creation was not permitted for GITHUB_TOKEN and must be opened by a reviewer" >&2
+          fi
 
       - name: Publish the release (irreversible; latest.json enters the update channel)
         id: publish-release
@@ -1058,13 +1064,14 @@ jobs:
           esac
           draft="$(gh release view "$TAG" --json isDraft --jq .isDraft)"
           test "$draft" = "true"
-          gh release delete "$TAG" --yes --cleanup-tag
+          # 未发布的 draft 没有 tag，--cleanup-tag 会返回 422 并中断回滚。
+          gh release delete "$TAG" --yes
           branch="release/site-$TAG"
           number="$(gh pr list --head "$branch" --base main --state open --json number --jq '.[0].number // empty')"
           if [ -n "$number" ]; then
             gh pr close "$number" --comment "Release $TAG was not published."
-            git push origin --delete "$branch" || true
           fi
+          git push origin --delete "$branch" || true
           echo "deleted unpublished draft $TAG"
 
   dry-run-check:
