@@ -211,7 +211,7 @@ def test_publish_writes_happen_after_identity_recheck_and_do_not_push_main():
     names = [step.get("name") for step in job["steps"]]
     recheck = names.index("Re-check provenance, signature binding, and attestation identity")
     create = names.index("Create draft release and upload assets")
-    site = names.index("Open a pull request for website release facts")
+    site = names.index("Push the website release facts branch and open its pull request")
     publish = names.index("Publish the release (irreversible; latest.json enters the update channel)")
     assert recheck < create < site < publish
     runs = "\n".join(str(step.get("run") or "") for step in job["steps"])
@@ -219,6 +219,7 @@ def test_publish_writes_happen_after_identity_recheck_and_do_not_push_main():
     assert "git push origin HEAD:main" not in runs
     assert "refs/heads/$branch" in runs
     assert "gh pr create" in runs
+    assert "--cleanup-tag" not in runs
     assert '"gh", "release", "view"' in runs
     assert "assets,isDraft,tagName" in runs
     assert "releases/tags/" not in runs
