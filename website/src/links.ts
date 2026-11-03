@@ -23,7 +23,7 @@ export const LINKS = {
 
 export const GITHUB_API = 'https://api.github.com/repos/Qiuizi/yijing-workbench-public/releases/latest'
 
-// Pinned v3.3.1 facts used as the download-section fallback.
+// Pinned release facts used as the download-section fallback.
 export const RELEASE_STATIC = {
   tag: 'v3.3.2',
   date: '2026-11-02',
