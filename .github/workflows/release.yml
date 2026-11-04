@@ -24,7 +24,7 @@ on:
       notes_file:
         description: 'Release 说明文件（只允许 docs/release-notes-v<版本>.md）'
         required: true
-        default: 'docs/release-notes-v3.3.2.md'
+        default: 'docs/release-notes-v3.3.3.md'
       dry_run:
         description: '只构建与校验，不创建 Release（默认开启）'
         type: boolean

@@ -95,10 +95,10 @@ def test_verify_release_runs_the_content_gate(tmp_path, monkeypatch):
     )
     problems = verify_release.verify(
         release,
-        tag="v3.3.2",
+        tag="v3.3.3",
         repo="Qiuizi/yijing-workbench-public",
         production=False,
-        expected_version="3.3.2",
+        expected_version="3.3.3",
     )
     assert seen
     assert any("缺少主程序" in item for item in problems)

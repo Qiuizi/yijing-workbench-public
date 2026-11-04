@@ -22,9 +22,9 @@ OTHER = "b" * 40
 
 
 def test_valid_inputs_pass():
-    summary = validate_inputs("3.3.2", "3.3.2", "docs/release-notes-v3.3.2.md", REPO_ROOT)
-    assert summary["version"] == "3.3.2"
-    assert summary["repo_version"] == "3.3.2"
+    summary = validate_inputs("3.3.3", "3.3.3", "docs/release-notes-v3.3.3.md", REPO_ROOT)
+    assert summary["version"] == "3.3.3"
+    assert summary["repo_version"] == "3.3.3"
 
 
 @pytest.mark.parametrize(
@@ -56,12 +56,12 @@ def test_bad_version_or_confirm_is_rejected(version: str, confirm: str, keyword:
 )
 def test_unsafe_or_missing_notes_file_is_rejected(notes: str):
     with pytest.raises(PreflightError):
-        validate_inputs("3.3.2", "3.3.2", notes, REPO_ROOT)
+        validate_inputs("3.3.3", "3.3.3", notes, REPO_ROOT)
 
 
 def test_notes_file_with_backslashes_is_normalised():
-    summary = validate_inputs("3.3.2", "3.3.2", "docs\\release-notes-v3.3.2.md", REPO_ROOT)
-    assert summary["notes_file"] == "docs/release-notes-v3.3.2.md"
+    summary = validate_inputs("3.3.3", "3.3.3", "docs\\release-notes-v3.3.3.md", REPO_ROOT)
+    assert summary["notes_file"] == "docs/release-notes-v3.3.3.md"
 
 
 def test_non_main_ref_is_rejected():
@@ -158,9 +158,9 @@ def test_preflight_command_fails_when_github_cli_has_no_credentials(monkeypatch,
     )
     code = main(
         [
-            "--version", "3.3.2",
-            "--confirm", "3.3.2",
-            "--notes-file", "docs/release-notes-v3.3.2.md",
+            "--version", "3.3.3",
+            "--confirm", "3.3.3",
+            "--notes-file", "docs/release-notes-v3.3.3.md",
             "--pinned-sha", SHA,
             "--ref", "refs/heads/main",
             "--repo", "Qiuizi/yijing-workbench-public",
@@ -291,9 +291,9 @@ def test_main_reports_invalid_json_instead_of_a_secondary_exception(monkeypatch,
     )
     code = main(
         [
-            "--version", "3.3.2",
-            "--confirm", "3.3.2",
-            "--notes-file", "docs/release-notes-v3.3.2.md",
+            "--version", "3.3.3",
+            "--confirm", "3.3.3",
+            "--notes-file", "docs/release-notes-v3.3.3.md",
             "--pinned-sha", SHA,
             "--ref", "refs/heads/main",
             "--repo", "Qiuizi/yijing-workbench-public",
