@@ -30,6 +30,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.updater import manifest
+from scripts.updater import installer_contents
 from scripts.updater.keys import app_public_key, describe_public_key, is_qa_key
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -82,6 +83,7 @@ def verify(
     allow_prerelease: bool = False,
     expect_pubkey: str | None = None,
     signature_verifier: Path | None = None,
+    check_installer_contents: bool = True,
 ) -> list[str]:
     problems: list[str] = []
     if not release_dir.is_dir():
@@ -179,6 +181,12 @@ def verify(
     if build_manifest.get("updater_pubkey_is_qa") and production:
         problems.append("manifest 记录的构建使用了 QA 公钥，不能进入正式更新渠道")
 
+    # 哈希/签名只能证明「这个文件没被改过」，不能证明「这个文件里有应用」。
+    # v3.3.2 事故：签名与哈希全对，但 Tauri CLI 把校验器当成主程序，安装包没有
+    # yijing-workbench.exe。这里读取 NSIS 容器，直接检查内容。
+    if check_installer_contents:
+        problems.extend(installer_contents.verify_nsis_contents(asset.path))
+
     return problems
 
 def main(argv: list[str] | None = None) -> int:
@@ -191,6 +199,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--allow-prerelease", action="store_true", help="QA/候选构建允许 3.3.2-qa.N")
     parser.add_argument("--expect-pubkey", default=None, help="本次构建实际注入的 updater 公钥（base64）")
     parser.add_argument("--signature-verifier", type=Path, default=None, help="verify-updater-signature 可执行文件")
+    parser.add_argument(
+        "--skip-installer-contents",
+        action="store_true",
+        help="跳过安装包内容检查（仅供构造假安装包的单元测试；正式/候选发布不得使用）",
+    )
     args = parser.parse_args(argv)
     manifest.enable_utf8_console()
 
@@ -203,6 +216,7 @@ def main(argv: list[str] | None = None) -> int:
         allow_prerelease=args.allow_prerelease,
         expect_pubkey=args.expect_pubkey,
         signature_verifier=args.signature_verifier,
+        check_installer_contents=not args.skip_installer_contents,
     )
     if problems:
         print("发布校验失败：", file=sys.stderr)

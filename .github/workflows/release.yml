@@ -576,7 +576,7 @@ jobs:
         working-directory: frontend/src-tauri
         env:
           YIJING_SKIP_TAURI_BUILD: "1"
-        run: cargo build --release --bin verify-updater-signature
+        run: cargo build --release --features verify --bin verify-updater-signature
 
       - name: Download the exact signed artifact and fail on digest mismatch
         env:

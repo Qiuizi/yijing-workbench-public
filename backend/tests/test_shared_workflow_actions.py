@@ -114,7 +114,7 @@ def test_toolchain_pin_is_single_sourced_and_cache_is_unchanged():
     assert "YIJING_SKIP_TAURI_BUILD" not in "\n".join(str(step.get("run") or "") for step in build_steps)
     verifier = _named(_steps(windows["jobs"]["verify-candidate-artifact"]), "Compile signature verifier from this checkout")
     assert verifier["env"]["YIJING_SKIP_TAURI_BUILD"] == "1"
-    assert verifier["run"] == "cargo build --release --bin verify-updater-signature"
+    assert verifier["run"] == "cargo build --release --features verify --bin verify-updater-signature"
     assert "tauri build" not in verifier["run"]
 
 
