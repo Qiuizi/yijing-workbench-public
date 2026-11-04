@@ -33,7 +33,7 @@ def test_compiled_verifier_accepts_real_signature_and_rejects_tampering(tmp_path
     env = os.environ.copy()
     env["YIJING_SKIP_TAURI_BUILD"] = "1"
     subprocess.run(
-        ["cargo", "build", "--release", "--bin", "verify-updater-signature"],
+        ["cargo", "build", "--release", "--features", "verify", "--bin", "verify-updater-signature"],
         cwd=TAURI,
         env=env,
         check=True,

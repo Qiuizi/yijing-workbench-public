@@ -91,7 +91,7 @@ def test_release_dir_passes_verification(tmp_path):
     from scripts.updater.verify_release import verify
 
     release = _build_release(tmp_path)
-    assert verify(release, tag="v3.3.2", repo="Qiuizi/yijing-workbench-public", production=False, expected_version="3.3.2") == []
+    assert verify(release, tag="v3.3.2", repo="Qiuizi/yijing-workbench-public", production=False, expected_version="3.3.2", check_installer_contents=False) == []
 
 
 def test_tampered_installer_is_rejected(tmp_path):
@@ -101,7 +101,7 @@ def test_tampered_installer_is_rejected(tmp_path):
     installer = next(release.glob("*setup.exe"))
     installer.write_bytes(installer.read_bytes() + b"tampered")
 
-    problems = verify(release, tag="v3.3.2", repo="Qiuizi/yijing-workbench-public", production=False, expected_version="3.3.2")
+    problems = verify(release, tag="v3.3.2", repo="Qiuizi/yijing-workbench-public", production=False, expected_version="3.3.2", check_installer_contents=False)
     assert any("哈希不一致" in item for item in problems)
     assert any("字节数不一致" in item for item in problems)
 
@@ -195,7 +195,7 @@ def test_release_dir_requires_all_documents(tmp_path):
 
     release = _build_release(tmp_path)
     (release / "PROVENANCE.md").unlink()
-    problems = verify(release, tag="v3.3.2", repo="Qiuizi/yijing-workbench-public", production=False, expected_version="3.3.2")
+    problems = verify(release, tag="v3.3.2", repo="Qiuizi/yijing-workbench-public", production=False, expected_version="3.3.2", check_installer_contents=False)
     assert any("PROVENANCE.md" in item for item in problems)
 
 
@@ -208,7 +208,7 @@ def test_signature_mismatch_between_sig_and_latest_json_is_rejected(tmp_path):
     data["platforms"]["windows-x86_64"]["signature"] = base64.b64encode(tampered.encode("utf-8")).decode("ascii")
     (release / "latest.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    problems = verify(release, tag="v3.3.2", repo="Qiuizi/yijing-workbench-public", production=False, expected_version="3.3.2")
+    problems = verify(release, tag="v3.3.2", repo="Qiuizi/yijing-workbench-public", production=False, expected_version="3.3.2", check_installer_contents=False)
     assert any("signature 与 .sig 文件内容不一致" in item for item in problems)
 
 
@@ -225,6 +225,7 @@ def test_production_mode_refuses_qa_public_key(tmp_path, monkeypatch):
         production=True,
         expected_version="3.3.2",
         expect_pubkey=QA_PUBLIC_KEY,
+        check_installer_contents=False,
     )
     assert any("正式发布禁止使用 QA 测试公钥" in item for item in problems)
     assert any("--expect-pubkey 仍是 QA 测试公钥" in item for item in problems)
@@ -240,6 +241,7 @@ def test_production_mode_requires_expect_pubkey(tmp_path):
         repo="Qiuizi/yijing-workbench-public",
         production=True,
         expected_version="3.3.2",
+        check_installer_contents=False,
     )
     assert any("--expect-pubkey" in item for item in problems)
 
@@ -260,6 +262,7 @@ def test_public_key_mismatch_is_rejected(tmp_path):
         production=False,
         expected_version="3.3.2",
         expect_pubkey=other_key,
+        check_installer_contents=False,
     )
     assert any("指纹" in item and "不一致" in item for item in problems)
 

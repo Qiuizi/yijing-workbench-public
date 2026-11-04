@@ -455,7 +455,7 @@ def test_candidate_workflow_uploads_once_and_verify_job_does_not_rebuild():
     assert "YIJING_SKIP_TAURI_BUILD" in joined or any(
         step.get("env", {}).get("YIJING_SKIP_TAURI_BUILD") == "1" for step in verify["steps"]
     )
-    assert "cargo build --release --bin verify-updater-signature" in joined
+    assert "cargo build --release --features verify --bin verify-updater-signature" in joined
     assert "downloaded-verifier" not in joined
     assert "frontend/src-tauri/target/release/verify-updater-signature.exe" in joined
     assert "--expected-version" in joined
