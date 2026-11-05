@@ -61,3 +61,38 @@ jobs:
           name: qa-candidate-evidence-${{ env.QA_ARTIFACT_ID }}
           path: ${{ runner.temp }}/qa-candidate/evidence
           if-no-files-found: warn
+
+  upgrade:
+    name: Official 3.3.1 to 3.3.3 overwrite upgrade
+    runs-on: windows-2022
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      QA_BASELINE_DIGEST: 'sha256:3caecbe2ce7684805ba5fbe2d8f60767101ccd71565a4ec37bacb2181b086b74'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run upgrade script
+        shell: pwsh
+        run: |
+          ./.github/qa/accept-upgrade.ps1 `
+            -CandidateArtifactId '13383072964' `
+            -CandidateDigest 'sha256:f5481c1cfc2f6a4e9d51713df6000ac9c20d77455f06ae5cebc420fdd553fc00' `
+            -CandidateSha '932f0390bdee79068b955f16b0f82cebc56b1ce5' `
+            -CandidateRunId '41955823250' `
+            -BaselineDigest $env:QA_BASELINE_DIGEST
+
+      - name: Show result
+        if: always()
+        shell: pwsh
+        run: |
+          $path = Join-Path $env:RUNNER_TEMP 'qa-upgrade/evidence/upgrade-result.json'
+          if (Test-Path $path) { Get-Content $path -Raw } else { 'upgrade-result.json missing' }
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-upgrade-evidence-13383072964
+          path: ${{ runner.temp }}/qa-upgrade/evidence
+          if-no-files-found: warn
