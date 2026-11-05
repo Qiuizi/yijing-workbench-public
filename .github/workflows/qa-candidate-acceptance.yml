@@ -2,6 +2,8 @@ name: QA candidate acceptance (temporary)
 
 # 临时 QA 工作流：只做隔离环境中的安装/启动/卸载验收，不发布任何东西。
 on:
+  push:
+    branches: [qa/v3.3.3-candidate-acceptance]
   workflow_dispatch:
     inputs:
       artifact_id:
@@ -29,6 +31,10 @@ jobs:
     timeout-minutes: 30
     env:
       GH_TOKEN: ${{ github.token }}
+      QA_ARTIFACT_ID: '13383072964'
+      QA_EXPECTED_DIGEST: 'sha256:f5481c1cfc2f6a4e9d51713df6000ac9c20d77455f06ae5cebc420fdd553fc00'
+      QA_EXPECTED_SHA: '932f0390bdee79068b955f16b0f82cebc56b1ce5'
+      QA_EXPECTED_RUN_ID: '41955823250'
     steps:
       - uses: actions/checkout@v4
 
@@ -36,10 +42,10 @@ jobs:
         shell: pwsh
         run: |
           ./.github/qa/accept-candidate.ps1 `
-            -ArtifactId '${{ inputs.artifact_id }}' `
-            -ExpectedDigest '${{ inputs.expected_digest }}' `
-            -ExpectedSha '${{ inputs.expected_sha }}' `
-            -ExpectedRunId '${{ inputs.expected_run_id }}'
+            -ArtifactId $env:QA_ARTIFACT_ID `
+            -ExpectedDigest $env:QA_EXPECTED_DIGEST `
+            -ExpectedSha $env:QA_EXPECTED_SHA `
+            -ExpectedRunId $env:QA_EXPECTED_RUN_ID
 
       - name: Show result
         if: always()
@@ -52,6 +58,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: qa-candidate-evidence-${{ inputs.artifact_id }}
+          name: qa-candidate-evidence-${{ env.QA_ARTIFACT_ID }}
           path: ${{ runner.temp }}/qa-candidate/evidence
           if-no-files-found: warn
