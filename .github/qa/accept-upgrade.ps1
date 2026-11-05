@@ -120,14 +120,15 @@ try {
   $baselineUrl = "https://github.com/$Repo/releases/download/v3.3.1/yijing-workbench-3.3.1-x64-setup.exe"
   Invoke-WebRequest -Uri $baselineUrl -OutFile $baseline -TimeoutSec 120
   $baselineHash = (Get-FileHash -LiteralPath $baseline -Algorithm SHA256).Hash.ToLower()
+  $baselineExpected = $BaselineDigest.ToLower() -replace '^sha256:', ''
   Note 'baseline' ([ordered]@{
       url = $baselineUrl
       bytes = (Get-Item $baseline).Length
       sha256 = $baselineHash
-      expected = $BaselineDigest.ToLower()
-      match = ($baselineHash -eq $BaselineDigest.ToLower())
+      expected = $baselineExpected
+      match = ($baselineHash -eq $baselineExpected)
     })
-  if ($baselineHash -ne $BaselineDigest.ToLower()) { throw 'baseline digest mismatch' }
+  if ($baselineHash -ne $baselineExpected) { throw 'baseline digest mismatch' }
 
   $zip = Join-Path $work 'candidate.zip'
   $dl = Start-Process -FilePath 'gh' -ArgumentList @('api', "repos/$Repo/actions/artifacts/$CandidateArtifactId/zip") -RedirectStandardOutput $zip -RedirectStandardError (Join-Path $evidence 'download.err') -NoNewWindow -Wait -PassThru
