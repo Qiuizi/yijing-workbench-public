@@ -1,0 +1,57 @@
+name: QA candidate acceptance (temporary)
+
+# 临时 QA 工作流：只做隔离环境中的安装/启动/卸载验收，不发布任何东西。
+on:
+  workflow_dispatch:
+    inputs:
+      artifact_id:
+        description: Exact GitHub Actions artifact ID
+        required: true
+      expected_digest:
+        description: Expected artifact digest (sha256:...)
+        required: true
+      expected_sha:
+        description: Expected source commit SHA
+        required: true
+      expected_run_id:
+        description: Expected workflow run ID that produced the artifact
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+  attestations: read
+
+jobs:
+  accept:
+    name: Isolated official candidate acceptance
+    runs-on: windows-2022
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run acceptance script
+        shell: pwsh
+        run: |
+          ./.github/qa/accept-candidate.ps1 `
+            -ArtifactId '${{ inputs.artifact_id }}' `
+            -ExpectedDigest '${{ inputs.expected_digest }}' `
+            -ExpectedSha '${{ inputs.expected_sha }}' `
+            -ExpectedRunId '${{ inputs.expected_run_id }}'
+
+      - name: Show result
+        if: always()
+        shell: pwsh
+        run: |
+          $path = Join-Path $env:RUNNER_TEMP 'qa-candidate/evidence/result.json'
+          if (Test-Path $path) { Get-Content $path -Raw } else { 'result.json missing' }
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-candidate-evidence-${{ inputs.artifact_id }}
+          path: ${{ runner.temp }}/qa-candidate/evidence
+          if-no-files-found: warn
