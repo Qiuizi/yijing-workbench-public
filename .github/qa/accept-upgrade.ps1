@@ -179,6 +179,7 @@ try {
   $cast331 = $false
   $pref331 = $false
   $key331 = $false
+  $tz331 = $null
   try {
     Invoke-El (Find-Button $root '起卦')
     Start-Sleep -Seconds 2
@@ -192,29 +193,14 @@ try {
 
     Invoke-El (Find-Button $root '设置')
     Start-Sleep -Seconds 2
-    $combo = $root.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
-      (New-Object System.Windows.Automation.AndCondition(
-        (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::ComboBox)),
-        (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::NameProperty, '默认起卦方式'))
-      )))
-    if ($combo) {
-      $current = Get-ComboText $combo
-      if ($current -ne '手动输入') {
-        $ec = $combo.GetCurrentPattern([System.Windows.Automation.ExpandCollapsePattern]::Pattern)
-        if ($ec.Current.ExpandCollapseState -ne [System.Windows.Automation.ExpandCollapseState]::Expanded) { $ec.Expand(); Start-Sleep -Seconds 1 }
-        $lists = $root.FindAll([System.Windows.Automation.TreeScope]::Descendants,
-          (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::List)))
-        foreach ($list in $lists) {
-          $opt = $list.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
-            (New-Object System.Windows.Automation.AndCondition(
-              (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::ListItem)),
-              (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::NameProperty, '手动输入'))
-            )))
-          if ($opt) { $opt.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select(); Start-Sleep -Milliseconds 800; break }
-        }
-      }
+    $tzEdit = $root.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
+      (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::AutomationIdProperty, 'default-timezone')))
+    if ($tzEdit) {
+      $tzEdit.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).SetValue('Asia/Tokyo')
+      Start-Sleep -Milliseconds 500
       Invoke-El (Find-Button $root '保存默认偏好')
       $pref331 = Wait-Text $root '应用偏好已保存' 15
+      $tz331 = $tzEdit.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).Current.Value
     }
 
     $ai = Find-ButtonLike $root 'AI 辅助*'
@@ -273,6 +259,7 @@ try {
   $prefKept = $false
   $keyKept = $false
   $versionOk = $false
+  $tz333 = $null
   try {
     Invoke-El (Find-Button $root2 '历史记录')
     Start-Sleep -Seconds 2
@@ -281,12 +268,9 @@ try {
 
     Invoke-El (Find-Button $root2 '设置')
     Start-Sleep -Seconds 2
-    $combo2 = $root2.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
-      (New-Object System.Windows.Automation.AndCondition(
-        (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::ComboBox)),
-        (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::NameProperty, '默认起卦方式'))
-      )))
-    if ($combo2) { $prefKept = ((Get-ComboText $combo2) -eq '手动输入') }
+    $tz2 = $root2.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
+      (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::AutomationIdProperty, 'default-timezone')))
+    if ($tz2) { $tz333 = $tz2.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).Current.Value }
 
     $ai2 = Find-ButtonLike $root2 'AI 辅助*'
     if ($ai2) {
@@ -308,13 +292,20 @@ try {
   } catch {
     Note 'verify_error' ([ordered]@{ message = $_.Exception.Message; stack = $_.ScriptStackTrace })
   }
+  & python .github/qa/db_snapshot.py upgrade-post-333
+  $preDb = Get-Content (Join-Path $evidence 'upgrade-pre-331.json') -Raw | ConvertFrom-Json
+  $postDb = Get-Content (Join-Path $evidence 'upgrade-post-333.json') -Raw | ConvertFrom-Json
+  $prefKept = (($tz333 -eq 'Asia/Tokyo') -and ($preDb.app_preferences -eq $postDb.app_preferences))
   Note 'verify_333' ([ordered]@{
       history_preserved = $historyOk
       preference_preserved = $prefKept
+      preference_value_331 = $tz331
+      preference_value_333 = $tz333
+      preference_db_331 = $preDb.app_preferences
+      preference_db_333 = $postDb.app_preferences
       key_preserved = $keyKept
       version_3_3_3 = $versionOk
     })
-  & python .github/qa/db_snapshot.py upgrade-post-333
   $close333 = Close-App $app2
   Note 'close_333' $close333
 
