@@ -15,6 +15,8 @@ $evidence = Join-Path $work 'evidence'
 New-Item -ItemType Directory -Force -Path $work, $evidence | Out-Null
 $env:QA_EVIDENCE = $evidence
 $env:PYTHONIOENCODING = 'utf-8'
+# Synthetic-only key used to prove same-user DPAPI round-trip; never printed or uploaded.
+$env:QA_EXPECTED_DPAPI_KEY = 'sk-qa-runner-v333-upgrade-not-a-real-key'
 $result = [ordered]@{
   started_at = (Get-Date).ToString('o')
   candidate_artifact_id = $CandidateArtifactId
@@ -153,7 +155,9 @@ try {
       installer_sha256 = (Get-FileHash $candidate -Algorithm SHA256).Hash.ToLower()
       manifest_installer_sha256 = $manifest.installer.sha256.ToLower()
     })
-  if ($manifest.source_sha -ne $CandidateSha -or $provenance.run_id -ne $CandidateRunId) { throw 'candidate identity mismatch' }
+  if ($manifest.version -ne '3.3.3' -or $manifest.source_sha -ne $CandidateSha -or $provenance.source_sha -ne $CandidateSha -or $provenance.workflow_sha -ne $CandidateSha -or $provenance.run_id -ne $CandidateRunId -or $provenance.run_attempt -ne '1' -or $provenance.signing_mode -ne 'ephemeral_candidate') { throw 'candidate identity mismatch' }
+  $candidateHash = (Get-FileHash $candidate -Algorithm SHA256).Hash.ToLower()
+  if ($candidateHash -ne $manifest.installer.sha256.ToLower() -or (Get-Item $candidate).Length -ne [int64]$manifest.installer.bytes) { throw 'candidate installer bytes do not match manifest' }
 
   # 2) Install the published v3.3.1 baseline into an isolated directory.
   $dir = 'C:\qa\yijing-upgrade'
@@ -167,7 +171,8 @@ try {
       sidecar_exists = (Test-Path $sidecarPath)
       file_version = if (Test-Path $exe) { (Get-Item $exe).VersionInfo.FileVersion } else { $null }
     })
-  if ($install331.ExitCode -ne 0 -or -not (Test-Path $exe)) { throw 'baseline installation failed' }
+  if ($install331.ExitCode -ne 0 -or -not (Test-Path $exe) -or -not (Test-Path $sidecarPath)) { throw 'baseline installation failed' }
+  if ((Get-Item $exe).VersionInfo.FileVersion -ne '3.3.1') { throw 'baseline version is not 3.3.1' }
 
   # 3) Launch v3.3.1 and seed synthetic history, preference and fake DPAPI key.
   $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = '--remote-debugging-port=9223'
@@ -211,7 +216,7 @@ try {
     $keyEdit = $root.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
       (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::AutomationIdProperty, 'deepseek-key')))
     if ($keyEdit) {
-      $fake = 'sk-qa-runner-' + (Get-Date -Format 'yyyyMMddHHmmss') + '-not-a-real-key'
+      $fake = $env:QA_EXPECTED_DPAPI_KEY
       try {
         $keyEdit.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).SetValue($fake)
       } catch {
@@ -231,9 +236,16 @@ try {
     Note 'seed_error' ([ordered]@{ message = $_.Exception.Message; stack = $_.ScriptStackTrace })
   }
   Note 'seed_331' ([ordered]@{ cast = $cast331; preference = $pref331; key_configured = $key331 })
+  if (-not $cast331 -or -not $pref331 -or -not $key331) { throw 'v3.3.1 synthetic data seeding was incomplete' }
   & python .github/qa/db_snapshot.py upgrade-pre-331
+  if ($LASTEXITCODE -ne 0) { throw 'pre-upgrade database snapshot failed' }
+  $preDb = Get-Content (Join-Path $evidence 'upgrade-pre-331.json') -Raw | ConvertFrom-Json
+  if ($preDb.integrity -ne 'ok') { throw 'v3.3.1 database integrity check failed' }
+  if ($preDb.questions -notcontains $question) { throw 'v3.3.1 synthetic history row missing' }
+  if (-not $preDb.key_row_present -or -not $preDb.key_decrypt_ok -or -not $preDb.key_matches_expected) { throw 'v3.3.1 DPAPI key round-trip failed' }
   $close331 = Close-App $app
   Note 'close_331' $close331
+  if (-not $close331.graceful -or $close331.forced -or $close331.sidecar_orphan) { throw 'v3.3.1 app/sidecar did not shut down cleanly' }
 
   # 4) Overwrite upgrade to the official 3.3.3 candidate in the same directory.
   $install333 = Start-Process -FilePath $candidate -ArgumentList @('/S', "/D=$dir") -Wait -PassThru
@@ -247,7 +259,8 @@ try {
       verifier_exists = (Test-Path (Join-Path $dir 'verify-updater-signature.exe'))
       file_version = if (Test-Path $exe) { (Get-Item $exe).VersionInfo.FileVersion } else { $null }
     })
-  if ($install333.ExitCode -ne 0 -or -not (Test-Path $exe)) { throw 'candidate overwrite failed' }
+  $installed333Version = if (Test-Path $exe) { (Get-Item $exe).VersionInfo.FileVersion } else { $null }
+  if ($install333.ExitCode -ne 0 -or -not (Test-Path $exe) -or -not (Test-Path $sidecarPath) -or $sidecarHash -ne $manifest.sidecar_sha256.ToLower() -or (Test-Path (Join-Path $dir 'verify-updater-signature.exe')) -or $installed333Version -ne '3.3.3') { throw 'candidate overwrite content contract failed' }
 
   # 5) Launch 3.3.3 and verify history, preference, key, version.
   $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = '--remote-debugging-port=9224'
@@ -293,7 +306,7 @@ try {
     Note 'verify_error' ([ordered]@{ message = $_.Exception.Message; stack = $_.ScriptStackTrace })
   }
   & python .github/qa/db_snapshot.py upgrade-post-333
-  $preDb = Get-Content (Join-Path $evidence 'upgrade-pre-331.json') -Raw | ConvertFrom-Json
+  if ($LASTEXITCODE -ne 0) { throw 'post-upgrade database snapshot failed' }
   $postDb = Get-Content (Join-Path $evidence 'upgrade-post-333.json') -Raw | ConvertFrom-Json
   $prefKept = (($tz333 -eq 'Asia/Tokyo') -and ($preDb.app_preferences -eq $postDb.app_preferences))
   Note 'verify_333' ([ordered]@{
@@ -303,11 +316,22 @@ try {
       preference_value_333 = $tz333
       preference_db_331 = $preDb.app_preferences
       preference_db_333 = $postDb.app_preferences
-      key_preserved = $keyKept
+      key_preserved_in_ui = $keyKept
+      key_decrypt_ok_before = $preDb.key_decrypt_ok
+      key_decrypt_ok_after = $postDb.key_decrypt_ok
+      key_matches_expected_after = $postDb.key_matches_expected
+      database_integrity_before = $preDb.integrity
+      database_integrity_after = $postDb.integrity
+      divinations_before = $preDb.counts.divinations
+      divinations_after = $postDb.counts.divinations
       version_3_3_3 = $versionOk
     })
+  if ($postDb.integrity -ne 'ok' -or -not $postDb.key_row_present -or -not $postDb.key_decrypt_ok -or -not $postDb.key_matches_expected) { throw 'post-upgrade database integrity or DPAPI round-trip failed' }
+  if ($postDb.questions -notcontains $question -or $preDb.counts.divinations -ne $postDb.counts.divinations) { throw 'post-upgrade history data was not preserved' }
+  if (-not $historyOk -or -not $prefKept -or -not $keyKept -or -not $versionOk) { throw 'post-upgrade UI data-preservation checks failed' }
   $close333 = Close-App $app2
   Note 'close_333' $close333
+  if (-not $close333.graceful -or $close333.forced -or $close333.sidecar_orphan) { throw 'v3.3.3 app/sidecar did not shut down cleanly' }
 
   # 6) Uninstall and verify cleanup.
   $uninstaller = Join-Path $dir 'uninstall.exe'
@@ -327,6 +351,7 @@ try {
       sidecar_removed = -not (Test-Path $sidecarPath)
       shortcut_removed = ($shortcutsAfter.Count -eq 0)
     })
+  if (-not $u -or $u.ExitCode -ne 0 -or (Test-Path $exe) -or (Test-Path $sidecarPath) -or $shortcutsAfter.Count -ne 0) { throw 'QA uninstall cleanup failed' }
 }
 catch {
   Note 'fatal' ([ordered]@{ message = $_.Exception.Message; stack = $_.ScriptStackTrace })
