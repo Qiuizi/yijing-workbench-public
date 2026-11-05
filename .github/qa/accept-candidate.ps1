@@ -108,11 +108,16 @@ try {
   # 5) Silent currentUser install into an isolated directory.
   $installDir = 'C:\qa\yijing-official'
   if (Test-Path $installDir) { Remove-Item -LiteralPath $installDir -Recurse -Force }
-  $install = Start-Process -FilePath $installer -ArgumentList @('/S', '/NS', "/D=$installDir") -Wait -PassThru
+  $install = Start-Process -FilePath $installer -ArgumentList @('/S', "/D=$installDir") -Wait -PassThru
   $exe = Join-Path $installDir 'yijing-workbench.exe'
   $installedSidecar = Join-Path $installDir 'binaries\yijing-backend\yijing-backend.exe'
-  $shortcutRoot = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
-  $shortcuts = @(Get-ChildItem -LiteralPath $shortcutRoot -Recurse -Filter *.lnk -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '易经|Yijing' })
+  $shortcutRoots = @(
+    (Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'),
+    (Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs')
+  )
+  $shortcuts = @($shortcutRoots | Where-Object { Test-Path $_ } | ForEach-Object {
+      Get-ChildItem -LiteralPath $_ -Recurse -Filter *.lnk -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '易经|Yijing' }
+    })
   $uninstallKeys = @(Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall' -ErrorAction SilentlyContinue | ForEach-Object {
       $rp = Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue
       if ($rp.DisplayName -match '易经|Yijing') { [ordered]@{ key = $_.PSChildName; display = $rp.DisplayName; version = $rp.DisplayVersion; location = $rp.InstallLocation } }
@@ -131,7 +136,7 @@ try {
     })
   if ($install.ExitCode -ne 0 -or -not (Test-Path $exe)) { throw 'installation failed' }
 
-  # 6) Launch and observe process, WebView2 CDP, sidecar, data dir.
+  # 6) Launch and observe process, WebView2 CDP, sidecar, data dir, backend health.
   $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = '--remote-debugging-port=9222'
   $app = Start-Process -FilePath $exe -PassThru
   $cdp = $null
@@ -144,55 +149,118 @@ try {
     } catch {}
   }
   $targets = @()
-  if ($cdp) {
-    try { $targets = @(Invoke-RestMethod -Uri 'http://127.0.0.1:9222/json/list' -TimeoutSec 5 | ForEach-Object { [ordered]@{ type = $_.type; title = $_.title; url = $_.url } }) } catch {}
+  $pageReady = $false
+  $pageDeadline = (Get-Date).AddSeconds(45)
+  while ($cdp -and (Get-Date) -lt $pageDeadline) {
+    try {
+      $targets = @(Invoke-RestMethod -Uri 'http://127.0.0.1:9222/json/list' -TimeoutSec 5 | ForEach-Object { [ordered]@{ type = $_.type; title = $_.title; url = $_.url } })
+      if (@($targets | Where-Object { $_.type -eq 'page' -and $_.url -ne 'about:blank' -and $_.title }).Count -gt 0) { $pageReady = $true; break }
+    } catch {}
+    Start-Sleep -Milliseconds 800
   }
   Start-Sleep -Seconds 3
   $sidecar = Get-Process yijing-backend -ErrorAction SilentlyContinue | Select-Object -First 1
   $dataDir = Join-Path $env:LOCALAPPDATA 'cn.yijing.workbench'
   $dataFiles = @()
   if (Test-Path $dataDir) { $dataFiles = @(Get-ChildItem -LiteralPath $dataDir -Recurse -Depth 2 -Force -ErrorAction SilentlyContinue | Select-Object -First 40 | ForEach-Object { $_.FullName }) }
+  $dbFiles = @()
+  if (Test-Path $dataDir) { $dbFiles = @(Get-ChildItem -LiteralPath $dataDir -Filter *.sqlite3 -Force -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName }) }
+  $logPath = Join-Path $dataDir 'yijing-backend.log'
   $logTail = @()
-  $logDir = Join-Path $dataDir 'logs'
-  if (Test-Path $logDir) {
-    $logFile = Get-ChildItem $logDir -Filter *.log -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-    if ($logFile) { $logTail = @(Get-Content $logFile.FullName -Tail 30 -ErrorAction SilentlyContinue) }
+  if (Test-Path $logPath) { $logTail = @(Get-Content -LiteralPath $logPath -Tail 40 -ErrorAction SilentlyContinue) }
+  $sidecarPort = $null
+  $healthStatus = $null
+  if (Test-Path $logPath) {
+    $logText = Get-Content -LiteralPath $logPath -Raw -ErrorAction SilentlyContinue
+    $m = [regex]::Match([string]$logText, 'Uvicorn running on http://127\.0\.0\.1:(\d+)')
+    if ($m.Success) { $sidecarPort = [int]$m.Groups[1].Value }
+  }
+  if ($sidecarPort) {
+    try {
+      $health = Invoke-WebRequest -Uri "http://127.0.0.1:$sidecarPort/api/desktop/health" -TimeoutSec 5 -SkipHttpErrorCheck
+      $healthStatus = $health.StatusCode
+    } catch { $healthStatus = 'error' }
   }
   Note 'launch' ([ordered]@{
       pid = $app.Id
       app_alive = [bool](Get-Process -Id $app.Id -ErrorAction SilentlyContinue)
       cdp_up = [bool]$cdp
+      page_ready = $pageReady
       webview2 = if ($cdp) { $cdp.Browser } else { $null }
       targets = $targets
       sidecar_pid = if ($sidecar) { $sidecar.Id } else { $null }
+      sidecar_port = $sidecarPort
+      health_unauthenticated_status = $healthStatus
       data_dir_exists = (Test-Path $dataDir)
+      db_files = $dbFiles
       data_files = $dataFiles
       log_tail = $logTail
     })
 
-  # 7) Real UI attempt through Windows UI Automation (may be unavailable on a service session).
-  $uia = [ordered]@{ available = $false; window_name = $null; text_lines = @(); cast_ok = $false; error = $null }
+  # 7) Real UI test through Windows UI Automation (interactive runner session).
+  $uia = [ordered]@{ available = $false; window_name = $null; text_lines = @(); nav_ok = $false; cast_ok = $false; result_excerpt = $null; error = $null }
   try {
     Add-Type -AssemblyName UIAutomationClient
     Add-Type -AssemblyName UIAutomationTypes
-    $proc = Get-Process yijing-workbench -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1
-    if ($proc) {
-      $root = [System.Windows.Automation.AutomationElement]::FromHandle($proc.MainWindowHandle)
-      $uia.window_name = $root.Current.Name
+    function Get-UiaNames($root) {
       $all = $root.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition)
       $names = @()
-      for ($i = 0; $i -lt [Math]::Min($all.Count, 120); $i++) {
+      for ($i = 0; $i -lt [Math]::Min($all.Count, 200); $i++) {
         $n = $all.Item($i).Current.Name
         if ($n) { $names += $n }
       }
-      $uia.text_lines = $names
+      return $names
+    }
+    function Find-UiaButton($root, [string]$name) {
+      $buttons = $root.FindAll([System.Windows.Automation.TreeScope]::Descendants,
+        (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button)))
+      foreach ($b in $buttons) { if ($b.Current.Name -eq $name) { return $b } }
+      return $null
+    }
+    $uiaDeadline = (Get-Date).AddSeconds(45)
+    $root = $null
+    while ((Get-Date) -lt $uiaDeadline) {
+      $proc = Get-Process yijing-workbench -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1
+      if ($proc) {
+        try {
+          $candidate = [System.Windows.Automation.AutomationElement]::FromHandle($proc.MainWindowHandle)
+          if ($candidate) {
+            $names = @(Get-UiaNames $candidate)
+            if ($names.Count -gt 5) { $root = $candidate; $uia.text_lines = $names; break }
+          }
+        } catch {}
+      }
+      Start-Sleep -Milliseconds 800
+    }
+    if ($root) {
       $uia.available = $true
-      $castButton = $all | Where-Object { $_.Current.ControlType -eq [System.Windows.Automation.ControlType]::Button -and $_.Current.Name -eq '起卦' } | Select-Object -First 1
-      if ($castButton) {
-        $castButton.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+      $uia.window_name = $root.Current.Name
+      $navButton = Find-UiaButton $root '起卦'
+      if ($navButton) {
+        $navButton.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+        $uia.nav_ok = $true
         Start-Sleep -Seconds 2
-        $uia.text_lines = @($root.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition) | ForEach-Object { $_.Current.Name } | Where-Object { $_ } | Select-Object -First 120)
-        $uia.cast_ok = $true
+      }
+      $edit = $root.FindFirst([System.Windows.Automation.TreeScope]::Descendants,
+        (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::AutomationIdProperty, 'question')))
+      if ($edit) {
+        $edit.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).SetValue('QA-RUNNER 隔离验收：起卦后历史记录必须正常。')
+        Start-Sleep -Milliseconds 500
+        $buttons = $root.FindAll([System.Windows.Automation.TreeScope]::Descendants,
+          (New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button)))
+        $startButton = $null
+        foreach ($b in $buttons) { if ($b.Current.Name -like '开始起卦*') { $startButton = $b; break } }
+        if ($startButton) {
+          $startButton.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+          $castDeadline = (Get-Date).AddSeconds(30)
+          while ((Get-Date) -lt $castDeadline) {
+            Start-Sleep -Milliseconds 800
+            $text = (Get-UiaNames $root) -join "`n"
+            if ($text -match '原文与说明|本卦|卦象') { $uia.cast_ok = $true; break }
+          }
+          $uia.text_lines = @(Get-UiaNames $root)
+          $uia.result_excerpt = (@(Get-UiaNames $root) | Where-Object { $_ -match '乾|卦|原文|说明|QA-RUNNER' } | Select-Object -First 30)
+        }
       }
     }
   } catch {
@@ -201,24 +269,47 @@ try {
   Note 'uia' $uia
   $uia | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $evidence 'uia.json') -Encoding utf8
 
-  # 8) Shutdown and sidecar exit.
+  # 8) Graceful shutdown, then observe sidecar cleanup.
   $appAliveBefore = [bool](Get-Process -Id $app.Id -ErrorAction SilentlyContinue)
-  if ($appAliveBefore) { Stop-Process -Id $app.Id -Force -ErrorAction SilentlyContinue }
+  $gracefulExit = $false
+  $forcedKill = $false
+  if ($appAliveBefore) {
+    try { $null = $app.CloseMainWindow() } catch {}
+    $closeDeadline = (Get-Date).AddSeconds(20)
+    while ((Get-Date) -lt $closeDeadline) {
+      if (-not (Get-Process -Id $app.Id -ErrorAction SilentlyContinue)) { $gracefulExit = $true; break }
+      Start-Sleep -Milliseconds 500
+    }
+    if (-not $gracefulExit) {
+      Stop-Process -Id $app.Id -Force -ErrorAction SilentlyContinue
+      $forcedKill = $true
+    }
+  }
   Start-Sleep -Seconds 6
   $sidecarAfter = @(Get-Process yijing-backend -ErrorAction SilentlyContinue)
+  $sidecarOrphan = $sidecarAfter.Count -gt 0
   Note 'shutdown' ([ordered]@{
       app_alive_before = $appAliveBefore
+      graceful_exit = $gracefulExit
+      forced_kill = $forcedKill
       app_alive_after = [bool](Get-Process -Id $app.Id -ErrorAction SilentlyContinue)
-      sidecar_alive_after = ($sidecarAfter.Count -gt 0)
+      sidecar_alive_after = $sidecarOrphan
       sidecar_pids_after = @($sidecarAfter | ForEach-Object { $_.Id })
+      sidecar_orphan = $sidecarOrphan
     })
+  if ($sidecarOrphan) {
+    $sidecarAfter | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 3
+  }
 
-  # 9) Silent uninstall.
+  # 9) Silent uninstall (after the QA process has been cleaned up).
   $uninstaller = Join-Path $installDir 'uninstall.exe'
   $u = $null
   if (Test-Path $uninstaller) { $u = Start-Process -FilePath $uninstaller -ArgumentList '/S' -Wait -PassThru }
   Start-Sleep -Seconds 6
-  $shortcutsAfter = @(Get-ChildItem -LiteralPath $shortcutRoot -Recurse -Filter *.lnk -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '易经|Yijing' })
+  $shortcutsAfter = @($shortcutRoots | Where-Object { Test-Path $_ } | ForEach-Object {
+      Get-ChildItem -LiteralPath $_ -Recurse -Filter *.lnk -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '易经|Yijing' }
+    })
   Note 'uninstall' ([ordered]@{
       exit_code = if ($u) { $u.ExitCode } else { $null }
       main_removed = -not (Test-Path $exe)
