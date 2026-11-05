@@ -22,8 +22,27 @@ if db.exists():
         out["setting_keys"] = sorted(settings)
         out["key_row_present"] = "deepseek_api_key_protected" in settings
         out["app_preferences"] = settings.get("app_preferences")
+        protected_row = settings.get("deepseek_api_key_protected")
+        out["key_decrypt_ok"] = False
+        out["key_matches_expected"] = False
+        if protected_row is not None:
+            try:
+                # Verify with the same Windows user's DPAPI context. Never emit plaintext.
+                sys.path.insert(0, str(Path.cwd()))
+                from backend.services.ai_secrets import unprotect
+                decrypted = unprotect(json.loads(protected_row))
+                expected = os.environ.get("QA_EXPECTED_DPAPI_KEY")
+                out["key_decrypt_ok"] = isinstance(decrypted, str) and bool(decrypted)
+                out["key_matches_expected"] = decrypted == expected if expected else False
+            except Exception as exc:
+                out["key_decrypt_error"] = type(exc).__name__
     finally:
         con.close()
+backup_dir = data / "backups"
+out["backups"] = sorted(
+    p.name for p in backup_dir.iterdir()
+    if p.is_file() and p.name.startswith("history.pre-update-")
+) if backup_dir.is_dir() else []
 evidence = Path(os.environ["QA_EVIDENCE"])
 evidence.mkdir(parents=True, exist_ok=True)
 (evidence / f"{label}.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
