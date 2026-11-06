@@ -1,0 +1,53 @@
+{
+  "id": 25576382957,
+  "node_id": "EN_kwDOVHV3Q88AAAAF9Hih7Q",
+  "name": "release",
+  "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/environments/release",
+  "html_url": "https://github.com/Qiuizi/yijing-workbench-public/deployments/activity_log?environments_filter=release",
+  "created_at": "2026-10-28T13:29:02Z",
+  "updated_at": "2026-10-29T03:03:03Z",
+  "can_admins_bypass": false,
+  "protection_rules": [
+    {
+      "id": 70494515,
+      "node_id": "GA_kwDOVHV3Q84EM6kz",
+      "type": "branch_policy"
+    },
+    {
+      "id": 70494540,
+      "node_id": "GA_kwDOVHV3Q84EM6lM",
+      "type": "required_reviewers",
+      "prevent_self_review": false,
+      "reviewers": [
+        {
+          "type": "User",
+          "reviewer": {
+            "login": "Qiuizi",
+            "id": 226204836,
+            "node_id": "U_kgDODXucpA",
+            "avatar_url": "https://avatars.githubusercontent.com/u/226204836?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/Qiuizi",
+            "html_url": "https://github.com/Qiuizi",
+            "followers_url": "https://api.github.com/users/Qiuizi/followers",
+            "following_url": "https://api.github.com/users/Qiuizi/following{/other_user}",
+            "gists_url": "https://api.github.com/users/Qiuizi/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/Qiuizi/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/Qiuizi/subscriptions",
+            "organizations_url": "https://api.github.com/users/Qiuizi/orgs",
+            "repos_url": "https://api.github.com/users/Qiuizi/repos",
+            "events_url": "https://api.github.com/users/Qiuizi/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/Qiuizi/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          }
+        }
+      ]
+    }
+  ],
+  "deployment_branch_policy": {
+    "protected_branches": false,
+    "custom_branch_policies": true
+  }
+}

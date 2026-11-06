@@ -1,0 +1,91 @@
+{
+  "offline_backup": "SIGNING_BACKUP_UNVERIFIED",
+  "files": [
+    {
+      "path": "C:\\Users\\123\\.tauri\\yijing-release\\backup-passphrase.txt",
+      "exists": true,
+      "size": 64,
+      "sha256": "c4b1c95f34204e59d30a6c7db34830d6352d1bad7b56804a6487f217158c70cb",
+      "modified_at": "2026-10-29T06:19:18.0969915Z"
+    },
+    {
+      "path": "C:\\Users\\123\\.tauri\\yijing-release\\key-password.txt",
+      "exists": true,
+      "size": 64,
+      "sha256": "b7dbc50d1f7efceb3df72468c2299b6c28d35dd6e0599a720513a7408292c23f",
+      "modified_at": "2026-10-29T06:19:17.4388764Z"
+    },
+    {
+      "path": "C:\\Users\\123\\.tauri\\yijing-release\\reveal-backup-passphrase.ps1",
+      "exists": true,
+      "size": 1567,
+      "sha256": "6635a5822cb4a669455cf72fcc7a55431213908238a506e6b9837a672f262232",
+      "modified_at": "2026-10-29T06:19:19.6146284Z"
+    },
+    {
+      "path": "C:\\Users\\123\\.tauri\\yijing-release\\updater-pubkey.b64",
+      "exists": true,
+      "size": 152,
+      "sha256": "31b9fa380600af3cabfbdb47051346a9120f9879557310004acee0a838ed757c",
+      "modified_at": "2026-10-29T06:19:17.4429295Z"
+    },
+    {
+      "path": "C:\\Users\\123\\.tauri\\yijing-release\\yijing-release.key",
+      "exists": true,
+      "size": 348,
+      "sha256": "00370433a15fab5d3eb8d3d2f6e02a4664952f0b7d86db83a75bdb05590c5354",
+      "modified_at": "2026-10-29T06:19:17.4362964Z"
+    },
+    {
+      "path": "C:\\Users\\123\\.tauri\\yijing-release\\yijing-release.key.pub",
+      "exists": true,
+      "size": 152,
+      "sha256": "31b9fa380600af3cabfbdb47051346a9120f9879557310004acee0a838ed757c",
+      "modified_at": "2026-10-29T06:19:17.4422119Z"
+    },
+    {
+      "path": "D:\\Qiuizi\\project\\yijing\\frontend\\src-tauri\\.updater-qa\\qa.key",
+      "exists": true,
+      "size": 348,
+      "sha256": "7d5264fe4d5342f867c817fda22b6906b210a5e98111acab98097c7438f8dfd8",
+      "modified_at": "2026-10-27T05:14:47.7878647Z"
+    },
+    {
+      "path": "D:\\Qiuizi\\project\\yijing\\frontend\\src-tauri\\.updater-qa\\qa.key.pub",
+      "exists": true,
+      "size": 152,
+      "sha256": "067ddc3105200ed17859095948ae001ed5f3441f8a311a35a809ca4839253afe",
+      "modified_at": "2026-10-27T05:14:47.7878647Z"
+    },
+    {
+      "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\updater-qa\\ephemeral.key",
+      "exists": true,
+      "size": 348,
+      "sha256": "8109a5d8bd7d4be297403e554bf9a39e5b4851efa9a006bbf115184fc3f0c00c",
+      "modified_at": "2026-11-04T13:02:29.7334574Z"
+    },
+    {
+      "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\updater-qa\\ephemeral.key.pub",
+      "exists": true,
+      "size": 152,
+      "sha256": "958d0996914fb1fccd1dc61e4404fbe4a79a00c4f51b5af2e6e15cd4840e585d",
+      "modified_at": "2026-11-04T13:02:29.7334574Z"
+    },
+    {
+      "path": "D:\\Qiuizi\\project\\yijing\\.workbuddy\\post-release-qa\\keys\\postqa.key",
+      "exists": true,
+      "size": 348,
+      "sha256": "f197e24c10dd656c1343e46d0527d6db0f0bed3ab74fb3e5d30e0b6caa34836c",
+      "modified_at": "2026-11-04T11:40:34.4187423Z"
+    },
+    {
+      "path": "D:\\Qiuizi\\project\\yijing\\.workbuddy\\post-release-qa\\keys\\postqa.key.pub",
+      "exists": true,
+      "size": 152,
+      "sha256": "56efb42c07f45e452508360cbd1444e894046bd18c334550c5a45d37a871f2bd",
+      "modified_at": "2026-11-04T11:40:34.4197464Z"
+    }
+  ],
+  "private_content_read": false,
+  "passphrase_separation": "UNVERIFIED"
+}

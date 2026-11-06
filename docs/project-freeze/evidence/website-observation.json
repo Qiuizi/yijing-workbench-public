@@ -1,0 +1,17 @@
+{
+  "observed_at": "2026-11-06T18:09:17.5871341+08:00",
+  "url": "https://qiuizi.github.io/yijing-workbench-public/",
+  "assets": [
+    {
+      "metadata": {
+        "path": "D:\\Qiuizi\\project\\yijing\\docs\\project-freeze\\evidence\\website-live.js",
+        "exists": true,
+        "size": 123716,
+        "sha256": "e50e3d5860b12f6a9ce82997815b8ee201c55df9b056c75848237dd247daa2dd",
+        "modified_at": "2026-11-06T10:09:17.5833120Z"
+      },
+      "url": "https://qiuizi.github.io/yijing-workbench-public/assets/main-GbSR9gj3.js"
+    }
+  ],
+  "status": 200
+}
