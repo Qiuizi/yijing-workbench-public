@@ -1,0 +1,506 @@
+[
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\ACCEPTANCE-REPORT.md",
+    "exists": true,
+    "size": 12355,
+    "sha256": "85eeb1120d054992b1baeb1df836b39a74dae27f7478e92bfd5f247ccabd4038",
+    "modified_at": "2026-11-05T13:58:27.1516499Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\YijingWorkbenchUpdaterQA_3.3.3_x64-setup.exe",
+    "exists": true,
+    "size": 16993895,
+    "sha256": "9cf601d1086632bf8c68f1847a5fbb6dd40c88e66975c8703db247593ed43b02",
+    "modified_at": "2026-11-05T12:41:27.8625086Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\YijingWorkbenchV333QA_3.3.3_x64-setup.exe",
+    "exists": true,
+    "size": 16993107,
+    "sha256": "d9e1501e772bcb2e74a2e1e9459a9a2d8d23a434712f00251d25cd32e6b24f7a",
+    "modified_at": "2026-11-05T02:38:04.2652490Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\upgrade-evidence2\\e.zip",
+    "exists": true,
+    "size": 4933,
+    "sha256": "bca59d5d496c2b5c9db893b7909e30f6321835fa86de67104dab5079aad4fce8",
+    "modified_at": "2026-11-05T13:08:47.0733157Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\upgrade-evidence\\e.zip",
+    "exists": true,
+    "size": 734,
+    "sha256": "03eb28a9fbfa666dcd5d847cb79115143109f6747ba8305a2399ffaf2adefac7",
+    "modified_at": "2026-11-05T13:06:43.1783954Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\runner-evidence2\\evidence.zip",
+    "exists": true,
+    "size": 13928,
+    "sha256": "1592a301d449e2b2d6b5835de9b59462293805c54f341a7377b1676f89d663fe",
+    "modified_at": "2026-11-05T13:04:29.8152755Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\runner-evidence\\evidence.zip",
+    "exists": true,
+    "size": 11456,
+    "sha256": "915e31ab0ca419631665159864f017a524e118580a0ee4e334b440827e24c28f",
+    "modified_at": "2026-11-05T13:02:02.3713610Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\reverify-live\\artifact-13383072964.zip",
+    "exists": true,
+    "size": 16984522,
+    "sha256": "f5481c1cfc2f6a4e9d51713df6000ac9c20d77455f06ae5cebc420fdd553fc00",
+    "modified_at": "2026-11-05T13:34:00.7594348Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\reverify-live\\logs\\job-127266636686.zip",
+    "exists": true,
+    "size": 139385,
+    "sha256": "47bad92af17f5cdc550ed30ffad76b2dfdfe8a24121b0e89dfe71cdcb80c9986",
+    "modified_at": "2026-11-05T13:54:20.5508619Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\reverify-live\\extracted\\latest.json",
+    "exists": true,
+    "size": 827,
+    "sha256": "2eb6ab241f40642fc91a9874e4877a639ec9f55c06b0e9413e621f9fcb7cc58c",
+    "modified_at": "2026-11-05T13:40:49.3494020Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\reverify-live\\extracted\\manifest-rc.json",
+    "exists": true,
+    "size": 910,
+    "sha256": "72efcb909437ce744995bbdd8c322958a71774cc05783fb0fa4418777622c3be",
+    "modified_at": "2026-11-05T13:40:49.3499385Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\reverify-live\\extracted\\manifest.json",
+    "exists": true,
+    "size": 1030,
+    "sha256": "fc77a195520790fe191684fbca6afc2b4c5b1939c4a7b413bf18a90f4145a742",
+    "modified_at": "2026-11-05T13:40:49.3494020Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\reverify-live\\extracted\\provenance.json",
+    "exists": true,
+    "size": 2406,
+    "sha256": "c181164213ffb0c5bf69383c3e3c206f57e7662994ef155a05188914973e048e",
+    "modified_at": "2026-11-05T13:40:49.3499385Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\reverify-live\\extracted\\SHA256SUMS.txt",
+    "exists": true,
+    "size": 104,
+    "sha256": "97ecd4c02b143b3fea536bae4f6afb0fdaf01d2a02f780ba348a0b2b535bee5a",
+    "modified_at": "2026-11-05T13:40:49.3504760Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\reverify-live\\extracted\\yijing-workbench-3.3.3-x64-setup.exe",
+    "exists": true,
+    "size": 16994357,
+    "sha256": "0bedceaa5eec581e92897e9a4856eb55017609168a5ab42aa33110d745312a38",
+    "modified_at": "2026-11-05T13:40:49.3772837Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\reverify-live\\extracted\\yijing-workbench-3.3.3-x64-setup.exe.sig",
+    "exists": true,
+    "size": 458,
+    "sha256": "22e08f7f66d53fbd87bf611773fab9474366f17f622bed5bcc7776db2dfa0310",
+    "modified_at": "2026-11-05T13:40:49.3782909Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\final-evidence.json",
+    "exists": true,
+    "size": 31714,
+    "sha256": "66953271973a88457eceec969071f92b888c89c7d5c66d670f030ea25e264017",
+    "modified_at": "2026-11-05T18:01:20.7559110Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\YijingWorkbenchUpdaterQA_3.3.2_x64-setup.exe",
+    "exists": true,
+    "size": 16995165,
+    "sha256": "f6009a211577d159904de6cd303bf0a361f4e4a7cd0187d33dfe521ac457d896",
+    "modified_at": "2026-11-05T17:06:53.6932272Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\evidence\\failures-timeline.txt",
+    "exists": true,
+    "size": 1639,
+    "sha256": "7f1a2f4915f46b7208cf1389224187950c7dd80be823d0351ebe010ecbaa90f3",
+    "modified_at": "2026-11-05T17:56:51.8494377Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\evidence\\final-timeline.txt",
+    "exists": true,
+    "size": 912,
+    "sha256": "24924e1016b5ef7f8a5da6d56213d8b6ec0546e42e0de0dd55f4c73b29cb1537",
+    "modified_at": "2026-11-05T17:57:31.4157835Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\evidence\\install-timeline.txt",
+    "exists": true,
+    "size": 1046,
+    "sha256": "6d8bbb6e272998e8cbc22eb260e28864605f15e8716470da93ec0866ebc7a507",
+    "modified_at": "2026-11-05T17:16:39.5460440Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\evidence\\sidecar-timeline.txt",
+    "exists": true,
+    "size": 225,
+    "sha256": "68eb44b31dc3fb6362f9fcdc88d6e83f704a601d3cdbccb8d08bf9a4df22cd2e",
+    "modified_at": "2026-11-05T17:48:24.3048783Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\evidence\\upgrade-timeline.txt",
+    "exists": true,
+    "size": 2143,
+    "sha256": "cd872cdc1b44f3574250d6ab6bdd7c60bd1454dda45c0e6d37c92a1366e6ff7b",
+    "modified_at": "2026-11-05T17:52:10.3196016Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\incoming\\RECONSTRUCTED-YijingWorkbenchUpdaterQA_3.3.2_x64-setup.exe",
+    "exists": true,
+    "size": 16995165,
+    "sha256": "f6009a211577d159904de6cd303bf0a361f4e4a7cd0187d33dfe521ac457d896",
+    "modified_at": "2026-11-05T18:00:47.3282218Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\signed-332\\latest.json",
+    "exists": true,
+    "size": 2357,
+    "sha256": "af9ca00b502bf3beff50666b4a65a802467683621a6f8636b1c71624745a7b2e",
+    "modified_at": "2026-11-05T16:23:43.2396919Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\signed-332\\manifest.json",
+    "exists": true,
+    "size": 1073,
+    "sha256": "c64d932cc60d47ad0a2b135fadc591dba7ab8175287dbb84e22f64eaaa90e644",
+    "modified_at": "2026-11-05T16:23:43.2446162Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\signed-332\\provenance.json",
+    "exists": true,
+    "size": 2076,
+    "sha256": "78e48af2f75b21c1a4e4086df8707eed244316bbd200e3540dd4c0082f9952b8",
+    "modified_at": "2026-11-05T16:23:43.2409575Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\signed-332\\SHA256SUMS.txt",
+    "exists": true,
+    "size": 104,
+    "sha256": "eeb452eca2e2f1cd8703dd65f8630235569ad99f749c3c25b520d3f68f961493",
+    "modified_at": "2026-11-05T16:23:43.2479053Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\signed-332\\yijing-workbench-3.3.2-x64-setup.exe",
+    "exists": true,
+    "size": 13469345,
+    "sha256": "bda356afe6ff63086df1608110389067a70a051cdfa187f5ce23e655f273d999",
+    "modified_at": "2026-11-05T16:23:43.3070903Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\signed-332\\yijing-workbench-3.3.2-x64-setup.exe.sig",
+    "exists": true,
+    "size": 448,
+    "sha256": "ddf528d56e2fab949103021d59170ed16acf116f82618567ecc09657791c4f7f",
+    "modified_at": "2026-11-05T16:23:43.3100853Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-final\\latest.json",
+    "exists": true,
+    "size": 827,
+    "sha256": "a0fefc659f7b49d94b43f403b8cad4b9ae15e2810b948169744972b85d1fbfcf",
+    "modified_at": "2026-11-05T16:25:41.3450801Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-final\\manifest-rc.json",
+    "exists": true,
+    "size": 897,
+    "sha256": "a32e2a270967e1c28a1fbdc6597a89449a90e1a8dfd6f09bb06398c6e743d07b",
+    "modified_at": "2026-11-05T16:25:41.3457381Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-final\\manifest.json",
+    "exists": true,
+    "size": 1017,
+    "sha256": "c58f48b6761fe781a8ac7fa208d56bf8aa93e66dd194c70d3541b98c4bdf968e",
+    "modified_at": "2026-11-05T16:25:41.3479475Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-final\\provenance.json",
+    "exists": true,
+    "size": 2393,
+    "sha256": "2f001ce911d6355deb1eab27f9ae135a9f5556c95158601a071d4298a030c769",
+    "modified_at": "2026-11-05T16:25:41.3764261Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-final\\SHA256SUMS.txt",
+    "exists": true,
+    "size": 104,
+    "sha256": "c2a30d3a8917028bca390edfa99cc6afc9361543dd69544923236b99078bc8ed",
+    "modified_at": "2026-11-05T16:25:41.3796218Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-final\\yijing-workbench-3.3.2-x64-setup.exe",
+    "exists": true,
+    "size": 16999173,
+    "sha256": "5de47dc14c1a4c3cea9c0c9732864737d2f97db0ab4cbd392204866d556afe2a",
+    "modified_at": "2026-11-05T16:25:41.4305872Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-final\\yijing-workbench-3.3.2-x64-setup.exe.sig",
+    "exists": true,
+    "size": 458,
+    "sha256": "4c8217419c6c522fe785268aa12daf9775e3e42f3f81f5f28820b5e5c5cf9ea9",
+    "modified_at": "2026-11-05T16:25:41.4325480Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-early\\latest.json",
+    "exists": true,
+    "size": 827,
+    "sha256": "c9811b4ae0a45893d5a54105a8740e88e21c2abf022910d912eddcf0e243105b",
+    "modified_at": "2026-11-05T16:24:36.5542092Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-early\\manifest-rc.json",
+    "exists": true,
+    "size": 816,
+    "sha256": "296e153373c2ed834018a7790db519a5cfdcc8716de080dfb56a900bab3452fe",
+    "modified_at": "2026-11-05T16:24:36.5585838Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-early\\manifest.json",
+    "exists": true,
+    "size": 891,
+    "sha256": "653be1477e9c6a0223ae089e8c3fbcaff05ab38e2e943468d0773840f702cee9",
+    "modified_at": "2026-11-05T16:24:36.5564907Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-early\\SHA256SUMS.txt",
+    "exists": true,
+    "size": 104,
+    "sha256": "32d755325949f748adb9a2da3847ba16c845320338ddc6a3169173b6a9c23131",
+    "modified_at": "2026-11-05T16:24:36.5631332Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-early\\yijing-workbench-3.3.2-x64-setup.exe",
+    "exists": true,
+    "size": 16995927,
+    "sha256": "974dcfab7b1aed5e99b6ed1e902dafbe8240e88669f61894e3c48f24840783d6",
+    "modified_at": "2026-11-05T16:24:36.6141223Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-early\\yijing-workbench-3.3.2-x64-setup.exe.sig",
+    "exists": true,
+    "size": 458,
+    "sha256": "eb2630cfdf47e90b3bd326d4e1863e3d5c2194a4a46fb769a7cb139fb24ac16c",
+    "modified_at": "2026-11-05T16:24:36.5656679Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\evidence\\updater-retry-installfail-timeline.txt",
+    "exists": true,
+    "size": 747,
+    "sha256": "f49d488fde19fe5cfca2d93bfadbf0f4898e5827f8e1fcc2329a74a9f9c79601",
+    "modified_at": "2026-11-05T12:55:38.4489324Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\evidence\\updater-run-timeline.txt",
+    "exists": true,
+    "size": 22071,
+    "sha256": "d82b39646f716690a9df41518b945b0a6d215282f675268d0fb8cf079664fc60",
+    "modified_at": "2026-11-05T12:53:30.4690776Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\candidate\\artifact-13383072964.zip",
+    "exists": true,
+    "size": 16984522,
+    "sha256": "f5481c1cfc2f6a4e9d51713df6000ac9c20d77455f06ae5cebc420fdd553fc00",
+    "modified_at": "2026-11-05T12:46:58.8069194Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\candidate\\extracted\\latest.json",
+    "exists": true,
+    "size": 827,
+    "sha256": "2eb6ab241f40642fc91a9874e4877a639ec9f55c06b0e9413e621f9fcb7cc58c",
+    "modified_at": "2026-11-05T12:47:25.8443630Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\candidate\\extracted\\manifest-rc.json",
+    "exists": true,
+    "size": 910,
+    "sha256": "72efcb909437ce744995bbdd8c322958a71774cc05783fb0fa4418777622c3be",
+    "modified_at": "2026-11-05T12:47:25.8448894Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\candidate\\extracted\\manifest.json",
+    "exists": true,
+    "size": 1030,
+    "sha256": "fc77a195520790fe191684fbca6afc2b4c5b1939c4a7b413bf18a90f4145a742",
+    "modified_at": "2026-11-05T12:47:25.8438171Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\candidate\\extracted\\provenance.json",
+    "exists": true,
+    "size": 2406,
+    "sha256": "c181164213ffb0c5bf69383c3e3c206f57e7662994ef155a05188914973e048e",
+    "modified_at": "2026-11-05T12:47:25.8448894Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\candidate\\extracted\\SHA256SUMS.txt",
+    "exists": true,
+    "size": 104,
+    "sha256": "97ecd4c02b143b3fea536bae4f6afb0fdaf01d2a02f780ba348a0b2b535bee5a",
+    "modified_at": "2026-11-05T12:47:25.8460028Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\candidate\\extracted\\yijing-workbench-3.3.3-x64-setup.exe",
+    "exists": true,
+    "size": 16994357,
+    "sha256": "0bedceaa5eec581e92897e9a4856eb55017609168a5ab42aa33110d745312a38",
+    "modified_at": "2026-11-05T12:47:25.8797437Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\candidate\\extracted\\yijing-workbench-3.3.3-x64-setup.exe.sig",
+    "exists": true,
+    "size": 458,
+    "sha256": "22e08f7f66d53fbd87bf611773fab9474366f17f622bed5bcc7776db2dfa0310",
+    "modified_at": "2026-11-05T12:47:25.8820128Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\candidate\\attestation\\manifest-rc.json.json",
+    "exists": true,
+    "size": 16310,
+    "sha256": "bb91cee291bca85fcf133ddef8fd4a1bdce301681fb4677ee642c5efc2b4cf50",
+    "modified_at": "2026-11-05T12:50:23.1957031Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\candidate\\attestation\\manifest.json.json",
+    "exists": true,
+    "size": 16310,
+    "sha256": "bb91cee291bca85fcf133ddef8fd4a1bdce301681fb4677ee642c5efc2b4cf50",
+    "modified_at": "2026-11-05T12:50:30.8931508Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\updater-qa\\pristine-3.3.3-setup.exe",
+    "exists": true,
+    "size": 16995587,
+    "sha256": "aab99010335cd8053c24f33f7fb2ae3e7641c3626f82417ffb3eb4917b2ce3ff",
+    "modified_at": "2026-11-04T13:06:30.5476691Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\updater-qa\\YijingWorkbenchUpdaterQA_3.3.1_x64-setup.exe",
+    "exists": true,
+    "size": 16996449,
+    "sha256": "692c730704672fe20420cf8e992905d5dc4e80b9ed3898aad56f53d0ef3c044f",
+    "modified_at": "2026-11-04T13:04:37.3704250Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\updater-qa\\update\\installer-3.3.5.exe.sig",
+    "exists": true,
+    "size": 408,
+    "sha256": "6bd90a34c2334550a87469185e811f91e3ac9ab6748da98d0b21259a4000fdcf",
+    "modified_at": "2026-11-04T13:26:46.6988368Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\updater-qa\\update\\latest.json",
+    "exists": true,
+    "size": 795,
+    "sha256": "f017c1eb479d884c173f4733f885198168d1b615c1192976c9e99da1b20f51bf",
+    "modified_at": "2026-11-05T12:56:43.2782229Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\updater-qa\\update\\YijingWorkbenchUpdaterQA_3.3.3_x64-setup.exe",
+    "exists": true,
+    "size": 16995587,
+    "sha256": "aab99010335cd8053c24f33f7fb2ae3e7641c3626f82417ffb3eb4917b2ce3ff",
+    "modified_at": "2026-11-04T13:18:56.0662052Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\updater-qa\\update\\YijingWorkbenchUpdaterQA_3.3.3_x64-setup.exe.sig",
+    "exists": true,
+    "size": 440,
+    "sha256": "a9184512ddb184ea718c3bfbd290bf24a92042014cb0049fe8366922fe9fac26",
+    "modified_at": "2026-11-04T13:08:02.3827870Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\evidence\\updater-install-fail-timeline.txt",
+    "exists": true,
+    "size": 613,
+    "sha256": "c74dd1117cc7d15c695e11a2823fb16e4f11279a74249b9ded93a6d3499a3b11",
+    "modified_at": "2026-11-04T13:30:00.6469311Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\evidence\\updater-retry-timeline.txt",
+    "exists": true,
+    "size": 4194,
+    "sha256": "0d380a8f3f78391216fa0423436e5cde118055dc5475d5a99e07228a15b13292",
+    "modified_at": "2026-11-04T13:21:26.0453809Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\evidence\\updater-run-timeline.txt",
+    "exists": true,
+    "size": 22681,
+    "sha256": "b360d2b37cdf40cab683c5690ec1fdc584c2a9d609391ab9dbfcb29725a6c6d8",
+    "modified_at": "2026-11-04T13:14:41.9357938Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\downloads\\latest.json",
+    "exists": true,
+    "size": 2357,
+    "sha256": "af9ca00b502bf3beff50666b4a65a802467683621a6f8636b1c71624745a7b2e",
+    "modified_at": "2026-11-04T12:15:39.9420974Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\downloads\\manifest.json",
+    "exists": true,
+    "size": 1073,
+    "sha256": "c64d932cc60d47ad0a2b135fadc591dba7ab8175287dbb84e22f64eaaa90e644",
+    "modified_at": "2026-11-04T12:15:39.6698205Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\downloads\\SHA256SUMS.txt",
+    "exists": true,
+    "size": 104,
+    "sha256": "eeb452eca2e2f1cd8703dd65f8630235569ad99f749c3c25b520d3f68f961493",
+    "modified_at": "2026-11-04T12:15:39.4295538Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\downloads\\yijing-workbench-3.3.2-x64-setup.exe",
+    "exists": true,
+    "size": 13469345,
+    "sha256": "bda356afe6ff63086df1608110389067a70a051cdfa187f5ce23e655f273d999",
+    "modified_at": "2026-11-04T12:15:42.6554531Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\downloads\\yijing-workbench-3.3.2-x64-setup.exe.sig",
+    "exists": true,
+    "size": 448,
+    "sha256": "ddf528d56e2fab949103021d59170ed16acf116f82618567ecc09657791c4f7f",
+    "modified_at": "2026-11-04T12:15:41.2681335Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\downloads\\v3.3.1\\manifest-rc.json",
+    "exists": true,
+    "size": 640,
+    "sha256": "50a7a83f318fddd4bc380cb9d217c06bfc6129372a637a0c4bf8c9f98cfd54f5",
+    "modified_at": "2026-11-04T12:15:44.4923837Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\downloads\\v3.3.1\\SHA256SUMS.txt",
+    "exists": true,
+    "size": 103,
+    "sha256": "ccb3eb76c0b7d56e4722003bb7ad15823ae529f1ac84f9a9d4c93127668bfca5",
+    "modified_at": "2026-11-04T12:15:44.4923837Z"
+  },
+  {
+    "path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\downloads\\v3.3.1\\yijing-workbench-3.3.1-x64-setup.exe",
+    "exists": true,
+    "size": 16097113,
+    "sha256": "3caecbe2ce7684805ba5fbe2d8f60767101ccd71565a4ec37bacb2181b086b74",
+    "modified_at": "2026-11-04T12:15:48.2246025Z"
+  }
+]

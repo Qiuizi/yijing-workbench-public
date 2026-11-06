@@ -1,0 +1,202 @@
+[
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.venv",
+    "Kind": "cache",
+    "MB": 58.4
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\website\\dist",
+    "Kind": "cache",
+    "MB": 0.9
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.pytest_cache",
+    "Kind": "cache",
+    "MB": 0.0
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\frontend\\dist",
+    "Kind": "cache",
+    "MB": 1.7
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\scripts\\__pycache__",
+    "Kind": "cache",
+    "MB": 0.0
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\backend\\__pycache__",
+    "Kind": "cache",
+    "MB": 0.1
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\website\\node_modules",
+    "Kind": "cache",
+    "MB": 61.4
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\frontend\\node_modules",
+    "Kind": "cache",
+    "MB": 142.7
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\backend\\core\\__pycache__",
+    "Kind": "cache",
+    "MB": 0.1
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\frontend\\src-tauri\\target",
+    "Kind": "cache",
+    "MB": 7766.4
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\backend\\tests\\__pycache__",
+    "Kind": "cache",
+    "MB": 0.7
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\shim\\target",
+    "Kind": "cache",
+    "MB": 74.3
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\extract-331",
+    "Kind": "install/extract",
+    "MB": 42.0
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\scripts\\updater\\__pycache__",
+    "Kind": "cache",
+    "MB": 0.1
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\backend\\services\\__pycache__",
+    "Kind": "cache",
+    "MB": 0.1
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\install-fresh",
+    "Kind": "install/extract",
+    "MB": 44.9
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\extract-3.3.1",
+    "Kind": "install/extract",
+    "MB": 42.0
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\install-fixqa",
+    "Kind": "install/extract",
+    "MB": 44.9
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\install-upgrade",
+    "Kind": "install/extract",
+    "MB": 44.9
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\install-official",
+    "Kind": "install/extract",
+    "MB": 45.2
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\scripts\\updater\\verifier-proof\\target",
+    "Kind": "cache",
+    "MB": 51.4
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\docs\\review\\ui-audit-vite-cache-backup",
+    "Kind": "install/extract",
+    "MB": 9.0
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\updater-run\\install-331",
+    "Kind": "install/extract",
+    "MB": 44.9
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\docs\\review\\ui-audit-node-modules-backup",
+    "Kind": "install/extract",
+    "MB": 117.8
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\updater-qa\\install-3.3.1",
+    "Kind": "install/extract",
+    "MB": 44.9
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\worktree\\.venv",
+    "Kind": "cache",
+    "MB": 58.4
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\keycheck\\extract-candidate\\binaries",
+    "Kind": "payload",
+    "MB": 31.0
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\worktree\\frontend\\dist",
+    "Kind": "cache",
+    "MB": 1.7
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-final\\extracted\\binaries",
+    "Kind": "payload",
+    "MB": 31.0
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\rc-early\\extracted\\binaries",
+    "Kind": "payload",
+    "MB": 31.0
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\github-audit\\signed-332\\extracted\\binaries",
+    "Kind": "payload",
+    "MB": 31.0
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\worktree\\frontend\\node_modules",
+    "Kind": "cache",
+    "MB": 142.7
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\baseline-check\\extracted\\binaries",
+    "Kind": "payload",
+    "MB": 31.0
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\worktree\\frontend\\src-tauri\\target",
+    "Kind": "cache",
+    "MB": 1834.2
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\prior-qa-data-20261106T010352\\EBWebView",
+    "Kind": "cache",
+    "MB": 45.7
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\install-baseline-pristine-1793898998021",
+    "Kind": "install/extract",
+    "MB": 44.9
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\install-baseline-pristine-1793898975955",
+    "Kind": "install/extract",
+    "MB": 44.9
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\auto-launch-data-20261106T010939\\EBWebView",
+    "Kind": "cache",
+    "MB": 10.8
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\auto-launch-data2-20261106T011055\\EBWebView",
+    "Kind": "cache",
+    "MB": 9.6
+  },
+  {
+    "Path": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.3\\inapp-332\\reconstruct-332\\manual-launch-data-20261106T011524\\EBWebView",
+    "Kind": "cache",
+    "MB": 10.3
+  }
+]

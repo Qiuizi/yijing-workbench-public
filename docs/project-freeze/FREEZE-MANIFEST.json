@@ -1,0 +1,473 @@
+{
+  "schema": "yijing-project-freeze-manifest/1",
+  "project": {
+    "name": "Yijing Workbench",
+    "repository": "Qiuizi/yijing-workbench-public"
+  },
+  "freeze": {
+    "time_local": "2026-11-06T18:08:37.0703784+08:00",
+    "completed_at": "2026-11-06T11:00:33.481Z",
+    "timezone": "Asia/Shanghai",
+    "status": "PROJECT_FROZEN_WITH_WARNINGS",
+    "phase_reached": "Phase 6 completed; no development resumed"
+  },
+  "git": {
+    "head": "932f0390bdee79068b955f16b0f82cebc56b1ce5",
+    "main_commit_date": "2026-11-05T02:31:43Z",
+    "main_commit_subject": "release: prepare v3.3.3 installer packaging fix (#62)",
+    "branch": "main",
+    "ahead_behind": "+0 -0",
+    "local_branches": 26,
+    "remote_tracking_refs": 52,
+    "remote_branches": 51,
+    "tags": [
+      "v3.2.2",
+      "v3.3.0",
+      "v3.3.1",
+      "v3.3.2"
+    ],
+    "worktrees": 11,
+    "substantive_uncommitted_changes": 0,
+    "status_flagged_paths": [
+      "frontend/src-tauri/Cargo.toml (stat-dirty; byte-identical to HEAD)"
+    ],
+    "untracked_directories": [
+      ".workbuddy/",
+      "docs/review/ui-audit/",
+      "docs/review/ui-audit-node-modules-backup/",
+      "docs/review/ui-audit-vite-cache-backup/",
+      "docs/project-freeze/"
+    ]
+  },
+  "releases": {
+    "latest": {
+      "tag": "v3.3.2",
+      "id": 431706476,
+      "published_at": "2026-11-02T16:39:53Z",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/releases/tag/v3.3.2",
+      "assets": [
+        {
+          "name": "latest.json",
+          "size": 2357,
+          "digest": "sha256:af9ca00b502bf3beff50666b4a65a802467683621a6f8636b1c71624745a7b2e"
+        },
+        {
+          "name": "manifest.json",
+          "size": 1073,
+          "digest": "sha256:c64d932cc60d47ad0a2b135fadc591dba7ab8175287dbb84e22f64eaaa90e644"
+        },
+        {
+          "name": "PROVENANCE.md",
+          "size": 327,
+          "digest": "sha256:9fd025a27d4ef91876bf18bb8b0605efd8887f1b2d3316ec62f8b3a5f896b8ae"
+        },
+        {
+          "name": "SHA256SUMS.txt",
+          "size": 104,
+          "digest": "sha256:eeb452eca2e2f1cd8703dd65f8630235569ad99f749c3c25b520d3f68f961493"
+        },
+        {
+          "name": "yijing-workbench-3.3.2-x64-setup.exe",
+          "size": 13469345,
+          "digest": "sha256:bda356afe6ff63086df1608110389067a70a051cdfa187f5ce23e655f273d999"
+        },
+        {
+          "name": "yijing-workbench-3.3.2-x64-setup.exe.sig",
+          "size": 448,
+          "digest": "sha256:ddf528d56e2fab949103021d59170ed16acf116f82618567ecc09657791c4f7f"
+        }
+      ]
+    },
+    "public_tags": [
+      "v3.2.2",
+      "v3.3.0",
+      "v3.3.1",
+      "v3.3.2"
+    ],
+    "v333_public_release": false,
+    "v333_tag": false,
+    "website_serves_version": "3.3.2"
+  },
+  "pull_requests": {
+    "checked": [
+      {
+        "number": 61,
+        "state": "closed",
+        "merged_at": "2026-11-04T16:14:59Z",
+        "head_sha": "c851e502f7f4738aebd7745d4eed7610d062c40e",
+        "title": "fix(ci): ship the desktop binary in NSIS installers"
+      },
+      {
+        "number": 62,
+        "state": "closed",
+        "merged_at": "2026-11-05T02:31:43Z",
+        "head_sha": "b9e2fadff02b1099ac069cfa38d7d870752e766d",
+        "title": "release: prepare v3.3.3 installer packaging fix"
+      },
+      {
+        "number": 51,
+        "state": "closed",
+        "merged_at": "2026-10-31T15:40:50Z",
+        "head_sha": "9fa1a6b8b731a830b160f748504d7ec3d275bd97",
+        "title": "feat(ci): add immutable artifact provenance and verification"
+      },
+      {
+        "number": 56,
+        "state": "closed",
+        "merged_at": "2026-11-01T14:07:45Z",
+        "head_sha": "0dac2cff38d2b50d39db94a15654339b51155e6e",
+        "title": "fix(ci): block publish unless signed attestation succeeds"
+      },
+      {
+        "number": 60,
+        "state": "closed",
+        "merged_at": "2026-11-03T03:03:33Z",
+        "head_sha": "61f0a7e79cf8002df58fe5a82877cabde42e2251",
+        "title": "release(site): point download to v3.3.2"
+      }
+    ],
+    "open": [],
+    "open_issues": [
+      {
+        "number": 28,
+        "title": "content/learning: 第 05–64 卦逐卦审批（文献核读、异文、现代解释）"
+      },
+      {
+        "number": 27,
+        "title": "release/v3.3.0: Windows 隔离账户安装升级与 GUI/DPAPI 最终验收"
+      }
+    ]
+  },
+  "artifacts": {
+    "candidate_13383072964": {
+      "id": 13383072964,
+      "name": "yijing-workbench-3.3.3-windows-x64-rc",
+      "digest": "sha256:f5481c1cfc2f6a4e9d51713df6000ac9c20d77455f06ae5cebc420fdd553fc00",
+      "size": 16984522,
+      "expired": false,
+      "expires_at": "2026-11-19T02:43:13Z",
+      "run_id": 41955823250
+    },
+    "production_staging_13418007574": {
+      "id": 13418007574,
+      "name": "yijing-workbench-3.3.3-windows-x64-staging",
+      "digest": "sha256:8af63639b49ebbf7570c5ce2195f7d893aaae10fb114805691187b2b385995ea",
+      "size": 16987314,
+      "expires_at": "2026-11-19T13:23:20Z"
+    },
+    "unsigned_dry_run_staging_13417456279": {
+      "id": 13417456279,
+      "digest": "sha256:059f9bf35502ca3ad77667e2e1fa97b71e4f1f69154ff276628d0355337cd54d"
+    },
+    "signed_v332_13160435971": {
+      "id": 13160435971,
+      "digest": "sha256:36284ecd725dae6737748786a75b1c1514355804af165096dcaaf487afc7da46"
+    },
+    "total_observed": 166,
+    "local_preservation": {
+      "root": ".qa-work/project-freeze-20261106/remote-archives",
+      "status": "191/191 verified"
+    }
+  },
+  "key_runs": {
+    "candidate_build_41955823250": {
+      "id": 41955823250,
+      "conclusion": "success",
+      "head_sha": "932f0390bdee79068b955f16b0f82cebc56b1ce5"
+    },
+    "unsigned_dry_run_42032014347": {
+      "id": 42032014347,
+      "conclusion": "success",
+      "head_sha": "932f0390bdee79068b955f16b0f82cebc56b1ce5"
+    },
+    "production_sign_dry_run_42033806115": {
+      "id": 42033806115,
+      "raw_status": "completed",
+      "conclusion": "cancelled",
+      "head_sha": "932f0390bdee79068b955f16b0f82cebc56b1ce5",
+      "updated_at": "2026-11-06T10:05:08Z",
+      "cancelled_by": "project freeze"
+    },
+    "qa_acceptance_runs": [
+      {
+        "id": 42031937030,
+        "conclusion": "success"
+      },
+      {
+        "id": 42032346331,
+        "conclusion": "success"
+      },
+      {
+        "id": 42032895209,
+        "conclusion": "success"
+      },
+      {
+        "id": 42033479080,
+        "conclusion": "success"
+      },
+      {
+        "id": 42042680743,
+        "conclusion": "success"
+      },
+      {
+        "id": 42042741115,
+        "conclusion": "success"
+      }
+    ]
+  },
+  "qa": {
+    "summary": "QA acceptance is complete for the v3.3.3 candidate build under temporary candidate signing; in-app 3.3.2->3.3.3 upgrade passed only with a reconstructed QA baseline, temporary QA key and local HTTP; production-signed path NOT_RUN.",
+    "in_app_updater_qa_completed": true,
+    "not_completed_code_applied": false,
+    "matrix": [
+      {
+        "id": "v332-installer-missing-investigation",
+        "status": "FAIL",
+        "severity": "P0",
+        "evidence": [
+          "docs/qa/post-release-qa-3.3.2.md"
+        ],
+        "note": "Official v3.3.2 installer bda356af... lacks main executable"
+      },
+      {
+        "id": "v333-candidate-independent-verification",
+        "status": "PASS",
+        "evidence": [
+          ".qa-work/v3.3.3/reverify-live/reverify-summary.json",
+          ".qa-work/v3.3.3/ACCEPTANCE-REPORT.md"
+        ],
+        "note": "ephemeral candidate signature, not production"
+      },
+      {
+        "id": "v333-nsis-contents",
+        "status": "PASS",
+        "evidence": [
+          ".qa-work/v3.3.3/evidence/candidate-nsis-contents.json"
+        ]
+      },
+      {
+        "id": "v333-official-install-launch-gui-uninstall",
+        "status": "PASS",
+        "evidence": [
+          ".qa-work/v3.3.3/runner-evidence2/extracted/result.json"
+        ],
+        "run_id": 42032346331,
+        "artifact_id": 13415419891
+      },
+      {
+        "id": "sidecar-api",
+        "status": "PASS",
+        "evidence": [
+          ".qa-work/v3.3.3/evidence/api-sidecar-results.json"
+        ],
+        "note": "37/37 ok"
+      },
+      {
+        "id": "webview2",
+        "status": "PASS",
+        "evidence": [
+          ".qa-work/v3.3.3/runner-evidence2/extracted/result.json"
+        ],
+        "note": "existing runtime only"
+      },
+      {
+        "id": "webview2-clean-machine-missing-runtime",
+        "status": "NOT_RUN",
+        "evidence": []
+      },
+      {
+        "id": "database-migration-matrix",
+        "status": "NOT_RUN",
+        "evidence": [
+          ".qa-work/v3.3.3/evidence/api-sidecar-results.json"
+        ],
+        "note": "only schema_migrations count equality"
+      },
+      {
+        "id": "sqlite-backup-restore",
+        "status": "PASS",
+        "evidence": [
+          ".qa-work/v3.3.3/inapp-332/reconstruct-332/evidence/failures-timeline.txt",
+          ".qa-work/v3.3.2/evidence/recovery-results.json"
+        ]
+      },
+      {
+        "id": "dpapi-same-user",
+        "status": "PASS",
+        "evidence": [
+          ".qa-work/v3.3.3/evidence/api-sidecar-results.json",
+          ".qa-work/v3.3.3/inapp-332/reconstruct-332/evidence/upgrade-after-db.json"
+        ]
+      },
+      {
+        "id": "dpapi-cross-user",
+        "status": "NOT_RUN",
+        "evidence": []
+      },
+      {
+        "id": "auto-update",
+        "status": "PASS",
+        "evidence": [
+          ".qa-work/v3.3.3/ACCEPTANCE-REPORT.md",
+          ".qa-work/v3.3.3/inapp-332/reconstruct-332/evidence/failures-timeline.txt"
+        ]
+      },
+      {
+        "id": "inapp-332-to-333-reconstructed-baseline",
+        "status": "PASS",
+        "evidence": [
+          ".qa-work/v3.3.3/inapp-332/reconstruct-332/evidence/upgrade-timeline.txt",
+          ".qa-work/v3.3.3/inapp-332/reconstruct-332/evidence/final-timeline.txt",
+          ".qa-work/v3.3.3/inapp-332/reconstruct-332/evidence/baseline-install.json"
+        ],
+        "scope": "reconstructed QA baseline, temporary QA key, local HTTP; NOT production"
+      },
+      {
+        "id": "official-331-to-333-overlay-upgrade",
+        "status": "PASS",
+        "evidence": [
+          ".qa-work/v3.3.3/upgrade-evidence3/upgrade-result.json"
+        ],
+        "run_id": 42033479080
+      },
+      {
+        "id": "unsigned-dry-run",
+        "status": "PASS",
+        "evidence": [
+          ".qa-work/v3.3.3/ACCEPTANCE-REPORT.md"
+        ],
+        "run_id": 42032014347
+      },
+      {
+        "id": "production-sign-dry-run",
+        "status": "CANCELLED_BY_FREEZE",
+        "evidence": [
+          "docs/project-freeze/evidence/cancelled-production-run.json"
+        ],
+        "run_id": 42033806115
+      },
+      {
+        "id": "production-signed-332-to-333-inapp-upgrade",
+        "status": "NOT_RUN",
+        "evidence": []
+      },
+      {
+        "id": "historical-v332-updaterqa-baseline",
+        "status": "BLOCKED",
+        "evidence": [
+          ".qa-work/v3.3.3/inapp-332/BLOCKED-report.md"
+        ],
+        "note": "never found; replaced by reconstruction"
+      },
+      {
+        "id": "old-qa-upgrade-2026-10-27",
+        "status": "STALE",
+        "evidence": [
+          "docs/updater/qa-upgrade-report.md"
+        ]
+      }
+    ],
+    "evidence_inventory": "docs/project-freeze/evidence/qa-inventory.json",
+    "evidence_hashes": "docs/project-freeze/evidence/qa-critical-hashes.json"
+  },
+  "security": {
+    "signing_backup": "SIGNING_BACKUP_UNVERIFIED",
+    "passphrase_separation": "UNVERIFIED",
+    "private_content_read": false,
+    "production_private_key": {
+      "path": "C:/Users/123/.tauri/yijing-release/yijing-release.key",
+      "exists": true,
+      "bytes": 348,
+      "sha256": "00370433a15fab5d3eb8d3d2f6e02a4664952f0b7d86db83a75bdb05590c5354"
+    },
+    "production_public_key": {
+      "path": "C:/Users/123/.tauri/yijing-release/yijing-release.key.pub",
+      "bytes": 152,
+      "key_id_bytes_hex": "5D79EDB98FE951FF",
+      "minisign_display_key_id": "FF51E98FB9ED795D",
+      "public_text_sha256": "05974a347e99a1d9893e94131c8baa954ae3c3b88dd1a78372231a08e4c81c36",
+      "repository_fingerprint": "05974A347E99A1D9",
+      "matches_embedded": true
+    },
+    "candidate_key": {
+      "key_id_bytes_hex": "36F737BF65941C82",
+      "minisign_display_key_id": "821C9465BF37F736",
+      "repository_fingerprint": "8D11A233DBF9751E"
+    },
+    "github_release_environment": {
+      "exists": true,
+      "required_reviewer": "Qiuizi",
+      "can_admins_bypass": false,
+      "branch_policy": [
+        "main"
+      ],
+      "secret_names": [
+        "TAURI_SIGNING_PRIVATE_KEY",
+        "TAURI_SIGNING_PRIVATE_KEY_PASSWORD",
+        "TAURI_UPDATER_PUBKEY"
+      ]
+    },
+    "repository_secret_count": 0,
+    "actions_default_permission": "read",
+    "sha_pinning_required": false,
+    "evidence": "docs/project-freeze/evidence/public-identities.json"
+  },
+  "unfinished": [
+    "Republish a working official installer (v3.3.2 P0)",
+    "Publish v3.3.3 with production signing (verify signature key id matches SECURITY-INVENTORY)",
+    "Production-signed 3.3.2->3.3.3 in-app upgrade verification",
+    "Verify offline signing backup and passphrase separation",
+    "Database migration matrix, DPAPI cross-user, clean-machine WebView2, AI success path",
+    "Enable requireSignedVersion; localize updater errors; fix aboutVersion display"
+  ],
+  "warnings": [
+    "SIGNING_BACKUP_UNVERIFIED",
+    "v3.3.2 official installer P0",
+    "v3.3.3 not released; production signing cancelled at freeze",
+    "production-signed upgrade NOT_RUN"
+  ],
+  "documents": [
+    {
+      "path": "docs/project-freeze/README.md",
+      "sha256": "f829948dd2a6d823e95c11583744fc7163ee07142cfd207c5db453c8d090028f",
+      "bytes": 5733
+    },
+    {
+      "path": "docs/project-freeze/PROJECT-STATUS.md",
+      "sha256": "c41c7eb22e29cc4ff41d83ac1a7aca53d2568318b8b5d09511dc3ce6e23462a3",
+      "bytes": 6965
+    },
+    {
+      "path": "docs/project-freeze/RELEASE-HISTORY.md",
+      "sha256": "810e5301981c768ef0fc4c7a6f20cd22542a7da9e9be83fe36a15d5c6a324357",
+      "bytes": 8479
+    },
+    {
+      "path": "docs/project-freeze/QA-ACCEPTANCE.md",
+      "sha256": "de880b81e4ba6f43fe2be5c8506c00b9eaf36cdc2c7c25daa53aad8039dbfe59",
+      "bytes": 9897
+    },
+    {
+      "path": "docs/project-freeze/SECURITY-INVENTORY.md",
+      "sha256": "408e2a1c855ffbf8f856d7556f7e4c70df05ffc80bc1e259a0be8eb99a79e3c7",
+      "bytes": 7902
+    },
+    {
+      "path": "docs/project-freeze/KNOWN-ISSUES.md",
+      "sha256": "093030981d1bf17e9a4153e0098d147061c20b9de100e2433ca02abb3127b009",
+      "bytes": 5499
+    },
+    {
+      "path": "docs/project-freeze/RECOVERY-GUIDE.md",
+      "sha256": "8cf2c1e5010d528d8f27026f928480e4fb05783e7a278756a14f61c22b998b02",
+      "bytes": 8360
+    },
+    {
+      "path": "docs/project-freeze/CLEANUP-REPORT.md",
+      "sha256": "37856548daf2ff3b426c8c15eb04f52e3a2ce54ac2f4f2776c2c65a96d46da1e",
+      "bytes": 3867
+    }
+  ],
+  "evidence_directory": "docs/project-freeze/evidence/",
+  "next_action": "Wait for the maintainer to request resumption; do not resume development automatically."
+}

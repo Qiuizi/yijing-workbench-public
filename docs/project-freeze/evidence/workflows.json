@@ -1,0 +1,101 @@
+{
+  "total_count": 8,
+  "workflows": [
+    {
+      "id": 394267019,
+      "node_id": "W_kwDOVHV3Q84XgAmL",
+      "name": "Deploy website to Pages",
+      "path": ".github/workflows/pages.yml",
+      "state": "active",
+      "created_at": "2026-10-24T00:21:02+08:00",
+      "updated_at": "2026-10-24T00:21:02+08:00",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/workflows/394267019",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/blob/main/.github/workflows/pages.yml",
+      "badge_url": "https://github.com/Qiuizi/yijing-workbench-public/workflows/Deploy%20website%20to%20Pages/badge.svg"
+    },
+    {
+      "id": 394211698,
+      "node_id": "W_kwDOVHV3Q84XfzFy",
+      "name": "Publish v3.3.0 (explicitly accepted untested risks)",
+      "path": ".github/workflows/publish-v3.3.0.yml",
+      "state": "active",
+      "created_at": "2026-10-23T23:36:01+08:00",
+      "updated_at": "2026-10-23T23:36:34+08:00",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/workflows/394211698",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/blob/main/.github/workflows/publish-v3.3.0.yml",
+      "badge_url": "https://github.com/Qiuizi/yijing-workbench-public/workflows/Publish%20v3.3.0%20(explicitly%20accepted%20untested%20risks)/badge.svg"
+    },
+    {
+      "id": 394796691,
+      "node_id": "W_kwDOVHV3Q84XiB6T",
+      "name": "Publish v3.3.1 (64 reviewed guides, acknowledged untested risks)",
+      "path": ".github/workflows/publish-v3.3.1.yml",
+      "state": "active",
+      "created_at": "2026-10-24T11:34:39+08:00",
+      "updated_at": "2026-10-24T11:35:14+08:00",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/workflows/394796691",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/blob/main/.github/workflows/publish-v3.3.1.yml",
+      "badge_url": "https://github.com/Qiuizi/yijing-workbench-public/workflows/Publish%20v3.3.1%20(64%20reviewed%20guides,%20acknowledged%20untested%20risks)/badge.svg"
+    },
+    {
+      "id": 408157408,
+      "node_id": "W_kwDOVHV3Q84YU_zg",
+      "name": "QA candidate acceptance (temporary)",
+      "path": ".github/workflows/qa-candidate-acceptance.yml",
+      "state": "active",
+      "created_at": "2026-11-05T21:00:29+08:00",
+      "updated_at": "2026-11-05T21:00:29+08:00",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/workflows/408157408",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/blob/main/.github/workflows/qa-candidate-acceptance.yml",
+      "badge_url": "https://github.com/Qiuizi/yijing-workbench-public/workflows/QA%20candidate%20acceptance%20(temporary)/badge.svg"
+    },
+    {
+      "id": 398160808,
+      "node_id": "W_kwDOVHV3Q84Xu3Oo",
+      "name": "Publish stable release (updater-enabled)",
+      "path": ".github/workflows/release.yml",
+      "state": "active",
+      "created_at": "2026-10-27T19:20:31+08:00",
+      "updated_at": "2026-10-27T19:20:31+08:00",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/workflows/398160808",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/blob/main/.github/workflows/release.yml",
+      "badge_url": "https://github.com/Qiuizi/yijing-workbench-public/workflows/Publish%20stable%20release%20(updater-enabled)/badge.svg"
+    },
+    {
+      "id": 389593788,
+      "node_id": "W_kwDOVHV3Q84XOLq8",
+      "name": "V1 learning content and regression checks",
+      "path": ".github/workflows/v1-learning-ci.yml",
+      "state": "active",
+      "created_at": "2026-10-19T23:54:56+08:00",
+      "updated_at": "2026-10-20T00:51:53+08:00",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/workflows/389593788",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/blob/main/.github/workflows/v1-learning-ci.yml",
+      "badge_url": "https://github.com/Qiuizi/yijing-workbench-public/workflows/V1%20learning%20content%20and%20regression%20checks/badge.svg"
+    },
+    {
+      "id": 394799346,
+      "node_id": "W_kwDOVHV3Q84XiCjy",
+      "name": "Website build and internal link checks",
+      "path": ".github/workflows/website-ci.yml",
+      "state": "active",
+      "created_at": "2026-10-24T11:40:10+08:00",
+      "updated_at": "2026-10-28T19:35:06+08:00",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/workflows/394799346",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/blob/main/.github/workflows/website-ci.yml",
+      "badge_url": "https://github.com/Qiuizi/yijing-workbench-public/workflows/Website%20build%20and%20internal%20link%20checks/badge.svg"
+    },
+    {
+      "id": 389651326,
+      "node_id": "W_kwDOVHV3Q84XOZt-",
+      "name": "Windows x64 candidate build",
+      "path": ".github/workflows/windows-rc.yml",
+      "state": "active",
+      "created_at": "2026-10-20T01:01:27+08:00",
+      "updated_at": "2026-10-27T19:20:31+08:00",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/workflows/389651326",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/blob/main/.github/workflows/windows-rc.yml",
+      "badge_url": "https://github.com/Qiuizi/yijing-workbench-public/workflows/Windows%20x64%20candidate%20build/badge.svg"
+    }
+  ]
+}

@@ -1,0 +1,513 @@
+{
+  "total_count": 8,
+  "jobs": [
+    {
+      "id": 127260570005,
+      "run_id": 42032014347,
+      "workflow_name": "Publish stable release (updater-enabled)",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/runs/42032014347",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVHV3Q88AAAAdoVIxlQ",
+      "head_sha": "932f0390bdee79068b955f16b0f82cebc56b1ce5",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/jobs/127260570005",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/actions/runs/42032014347/job/127260570005",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-05T13:01:00Z",
+      "started_at": "2026-11-05T13:01:02Z",
+      "completed_at": "2026-11-05T13:11:02Z",
+      "name": "Build unsigned staging artifact",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-05T13:01:03Z",
+          "completed_at": "2026-11-05T13:01:04Z"
+        },
+        {
+          "name": "Checkout the exact dispatched commit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-05T13:01:04Z",
+          "completed_at": "2026-11-05T13:01:09Z"
+        },
+        {
+          "name": "Preflight inputs, ref, SHA and tag availability",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-05T13:01:09Z",
+          "completed_at": "2026-11-05T13:01:15Z"
+        },
+        {
+          "name": "Set up Windows toolchain",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-05T13:01:15Z",
+          "completed_at": "2026-11-05T13:01:38Z"
+        },
+        {
+          "name": "Require the committed production public key",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-05T13:01:38Z",
+          "completed_at": "2026-11-05T13:01:38Z"
+        },
+        {
+          "name": "Require green CI for this exact commit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-05T13:01:38Z",
+          "completed_at": "2026-11-05T13:01:40Z"
+        },
+        {
+          "name": "Install dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-05T13:01:40Z",
+          "completed_at": "2026-11-05T13:02:18Z"
+        },
+        {
+          "name": "Regression tests before the release build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-05T13:02:18Z",
+          "completed_at": "2026-11-05T13:08:25Z"
+        },
+        {
+          "name": "Find and verify the VS2022 VC143 x64 redist",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-05T13:08:25Z",
+          "completed_at": "2026-11-05T13:08:26Z"
+        },
+        {
+          "name": "Build sidecar and unsigned NSIS installer",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-05T13:08:26Z",
+          "completed_at": "2026-11-05T13:10:53Z"
+        },
+        {
+          "name": "Smoke-test the packaged sidecar (synthetic profile only)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-05T13:10:53Z",
+          "completed_at": "2026-11-05T13:10:55Z"
+        },
+        {
+          "name": "Assemble unsigned staging bundle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-05T13:10:55Z",
+          "completed_at": "2026-11-05T13:10:55Z"
+        },
+        {
+          "name": "Write provenance for the unsigned staging bundle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-05T13:10:55Z",
+          "completed_at": "2026-11-05T13:10:56Z"
+        },
+        {
+          "name": "Upload unsigned staging artifact",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-05T13:10:56Z",
+          "completed_at": "2026-11-05T13:10:58Z"
+        },
+        {
+          "name": "Post Set up Windows toolchain",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-05T13:10:58Z",
+          "completed_at": "2026-11-05T13:10:59Z"
+        },
+        {
+          "name": "Post Checkout the exact dispatched commit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-05T13:10:59Z",
+          "completed_at": "2026-11-05T13:11:01Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-05T13:11:01Z",
+          "completed_at": "2026-11-05T13:11:01Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/check-runs/127260570005",
+      "labels": [
+        "windows-2022"
+      ],
+      "runner_id": 1000000724,
+      "runner_name": "GitHub Actions 1000000724",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 127265584695,
+      "run_id": 42032014347,
+      "workflow_name": "Publish stable release (updater-enabled)",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/runs/42032014347",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVHV3Q88AAAAdoZ62Nw",
+      "head_sha": "932f0390bdee79068b955f16b0f82cebc56b1ce5",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/jobs/127265584695",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/actions/runs/42032014347/job/127265584695",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-05T13:11:02Z",
+      "started_at": "2026-11-05T13:11:04Z",
+      "completed_at": "2026-11-05T13:11:23Z",
+      "name": "Verify unsigned staging artifact",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-05T13:11:05Z",
+          "completed_at": "2026-11-05T13:11:06Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-05T13:11:06Z",
+          "completed_at": "2026-11-05T13:11:11Z"
+        },
+        {
+          "name": "Download the exact staging artifact and fail on digest mismatch",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-05T13:11:11Z",
+          "completed_at": "2026-11-05T13:11:19Z"
+        },
+        {
+          "name": "Verify staging identity, hashes, manifest and absent signature",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-05T13:11:19Z",
+          "completed_at": "2026-11-05T13:11:19Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-05T13:11:19Z",
+          "completed_at": "2026-11-05T13:11:21Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-05T13:11:21Z",
+          "completed_at": "2026-11-05T13:11:21Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/check-runs/127265584695",
+      "labels": [
+        "windows-2022"
+      ],
+      "runner_id": 1000000732,
+      "runner_name": "GitHub Actions 1000000732",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 127265754719,
+      "run_id": 42032014347,
+      "workflow_name": "Publish stable release (updater-enabled)",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/runs/42032014347",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVHV3Q88AAAAdoaFOXw",
+      "head_sha": "932f0390bdee79068b955f16b0f82cebc56b1ce5",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/jobs/127265754719",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/actions/runs/42032014347/job/127265754719",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-05T13:11:23Z",
+      "started_at": "2026-11-05T13:11:25Z",
+      "completed_at": "2026-11-05T13:12:16Z",
+      "name": "Attest unsigned staging artifact",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-05T13:11:26Z",
+          "completed_at": "2026-11-05T13:11:27Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-05T13:11:27Z",
+          "completed_at": "2026-11-05T13:11:29Z"
+        },
+        {
+          "name": "Download the same staging artifact and fail on digest mismatch",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-05T13:11:29Z",
+          "completed_at": "2026-11-05T13:11:33Z"
+        },
+        {
+          "name": "Attest the verified staging files",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-05T13:11:33Z",
+          "completed_at": "2026-11-05T13:11:35Z"
+        },
+        {
+          "name": "Reject a different workflow, source SHA, or OIDC issuer",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-05T13:11:35Z",
+          "completed_at": "2026-11-05T13:11:47Z"
+        },
+        {
+          "name": "Verify attestation identity, run, and every subject",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-05T13:11:47Z",
+          "completed_at": "2026-11-05T13:12:14Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-05T13:12:14Z",
+          "completed_at": "2026-11-05T13:12:14Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-05T13:12:14Z",
+          "completed_at": "2026-11-05T13:12:14Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/check-runs/127265754719",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "runner_id": 1000000733,
+      "runner_name": "GitHub Actions 1000000733",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 127266206232,
+      "run_id": 42032014347,
+      "workflow_name": "Publish stable release (updater-enabled)",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/runs/42032014347",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVHV3Q88AAAAdoagyGA",
+      "head_sha": "932f0390bdee79068b955f16b0f82cebc56b1ce5",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/jobs/127266206232",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/actions/runs/42032014347/job/127266206232",
+      "status": "completed",
+      "conclusion": "skipped",
+      "created_at": "2026-11-05T13:12:17Z",
+      "started_at": "2026-11-05T13:12:17Z",
+      "completed_at": "2026-11-05T13:12:17Z",
+      "name": "Sign verified staging artifact",
+      "steps": [],
+      "check_run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/check-runs/127266206232",
+      "labels": [
+        "windows-2022"
+      ],
+      "runner_id": null,
+      "runner_name": null,
+      "runner_group_id": null,
+      "runner_group_name": null
+    },
+    {
+      "id": 127266207985,
+      "run_id": 42032014347,
+      "workflow_name": "Publish stable release (updater-enabled)",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/runs/42032014347",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVHV3Q88AAAAdoag48Q",
+      "head_sha": "932f0390bdee79068b955f16b0f82cebc56b1ce5",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/jobs/127266207985",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/actions/runs/42032014347/job/127266207985",
+      "status": "completed",
+      "conclusion": "skipped",
+      "created_at": "2026-11-05T13:12:17Z",
+      "started_at": "2026-11-05T13:12:17Z",
+      "completed_at": "2026-11-05T13:12:17Z",
+      "name": "Verify signed artifact",
+      "steps": [],
+      "check_run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/check-runs/127266207985",
+      "labels": [
+        "windows-2022"
+      ],
+      "runner_id": null,
+      "runner_name": null,
+      "runner_group_id": null,
+      "runner_group_name": null
+    },
+    {
+      "id": 127266209483,
+      "run_id": 42032014347,
+      "workflow_name": "Publish stable release (updater-enabled)",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/runs/42032014347",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVHV3Q88AAAAdoag-yw",
+      "head_sha": "932f0390bdee79068b955f16b0f82cebc56b1ce5",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/jobs/127266209483",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/actions/runs/42032014347/job/127266209483",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-05T13:12:17Z",
+      "started_at": "2026-11-05T13:12:19Z",
+      "completed_at": "2026-11-05T13:12:24Z",
+      "name": "dry-run-check",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-05T13:12:20Z",
+          "completed_at": "2026-11-05T13:12:20Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-05T13:12:20Z",
+          "completed_at": "2026-11-05T13:12:22Z"
+        },
+        {
+          "name": "Prove nothing was published",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-05T13:12:22Z",
+          "completed_at": "2026-11-05T13:12:22Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-05T13:12:22Z",
+          "completed_at": "2026-11-05T13:12:22Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-05T13:12:22Z",
+          "completed_at": "2026-11-05T13:12:23Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/check-runs/127266209483",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "runner_id": 1000000734,
+      "runner_name": "GitHub Actions 1000000734",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 127266210429,
+      "run_id": 42032014347,
+      "workflow_name": "Publish stable release (updater-enabled)",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/runs/42032014347",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVHV3Q88AAAAdoahCfQ",
+      "head_sha": "932f0390bdee79068b955f16b0f82cebc56b1ce5",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/jobs/127266210429",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/actions/runs/42032014347/job/127266210429",
+      "status": "completed",
+      "conclusion": "skipped",
+      "created_at": "2026-11-05T13:12:17Z",
+      "started_at": "2026-11-05T13:12:17Z",
+      "completed_at": "2026-11-05T13:12:17Z",
+      "name": "Attest signed artifact",
+      "steps": [],
+      "check_run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/check-runs/127266210429",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "runner_id": null,
+      "runner_name": null,
+      "runner_group_id": null,
+      "runner_group_name": null
+    },
+    {
+      "id": 127266212658,
+      "run_id": 42032014347,
+      "workflow_name": "Publish stable release (updater-enabled)",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/runs/42032014347",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVHV3Q88AAAAdoahLMg",
+      "head_sha": "932f0390bdee79068b955f16b0f82cebc56b1ce5",
+      "url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/actions/jobs/127266212658",
+      "html_url": "https://github.com/Qiuizi/yijing-workbench-public/actions/runs/42032014347/job/127266212658",
+      "status": "completed",
+      "conclusion": "skipped",
+      "created_at": "2026-11-05T13:12:18Z",
+      "started_at": "2026-11-05T13:12:18Z",
+      "completed_at": "2026-11-05T13:12:17Z",
+      "name": "publish",
+      "steps": [],
+      "check_run_url": "https://api.github.com/repos/Qiuizi/yijing-workbench-public/check-runs/127266212658",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "runner_id": null,
+      "runner_name": null,
+      "runner_group_id": null,
+      "runner_group_name": null
+    }
+  ]
+}

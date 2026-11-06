@@ -1,0 +1,54 @@
+{
+  "fingerprint_definition": "SHA-256 of first two decoded minisign public text lines with LF + final LF; repository_fingerprint is its first 16 uppercase hex characters. Key ID bytes and minisign display order are separately identified.",
+  "identities": [
+    {
+      "purpose": "production-embedded",
+      "source": "frontend/src-tauri/tauri.conf.json",
+      "key_id_bytes_hex": "5D79EDB98FE951FF",
+      "minisign_display_key_id": "FF51E98FB9ED795D",
+      "public_text_sha256": "05974a347e99a1d9893e94131c8baa954ae3c3b88dd1a78372231a08e4c81c36",
+      "repository_fingerprint": "05974A347E99A1D9"
+    },
+    {
+      "purpose": "candidate-ephemeral-41955823250",
+      "source": ".qa-work/v3.3.3/candidate/extracted/provenance.json",
+      "key_id_bytes_hex": "36F737BF65941C82",
+      "minisign_display_key_id": "821C9465BF37F736",
+      "public_text_sha256": "8d11a233dbf9751ec813ffda3f590498341454ce8486181c306265da5dd0c385",
+      "repository_fingerprint": "8D11A233DBF9751E"
+    },
+    {
+      "purpose": "production-public-file",
+      "source": "C:/Users/123/.tauri/yijing-release/yijing-release.key.pub",
+      "key_id_bytes_hex": "5D79EDB98FE951FF",
+      "minisign_display_key_id": "FF51E98FB9ED795D",
+      "public_text_sha256": "05974a347e99a1d9893e94131c8baa954ae3c3b88dd1a78372231a08e4c81c36",
+      "repository_fingerprint": "05974A347E99A1D9"
+    },
+    {
+      "purpose": "isolated-QA",
+      "source": "D:\\Qiuizi\\project\\yijing\\frontend\\src-tauri\\.updater-qa\\qa.key.pub",
+      "key_id_bytes_hex": "7B072FC9CF8B402F",
+      "minisign_display_key_id": "2F408BCFC92F077B",
+      "public_text_sha256": "093e59e9b93fe19e456b0f7680fc45404732ed7da513f7da0b029b0b9450cbe9",
+      "repository_fingerprint": "093E59E9B93FE19E"
+    },
+    {
+      "purpose": "isolated-QA",
+      "source": "D:\\Qiuizi\\project\\yijing\\.qa-work\\v3.3.2\\updater-qa\\ephemeral.key.pub",
+      "key_id_bytes_hex": "4002C7DE3340768D",
+      "minisign_display_key_id": "8D764033DEC70240",
+      "public_text_sha256": "11aa54fc738f5f485d514173ef9e2470f48272b113ce802d7b7e5583357b1a74",
+      "repository_fingerprint": "11AA54FC738F5F48"
+    },
+    {
+      "purpose": "isolated-QA",
+      "source": "D:\\Qiuizi\\project\\yijing\\.workbuddy\\post-release-qa\\keys\\postqa.key.pub",
+      "key_id_bytes_hex": "E96A04C0FFC5456B",
+      "minisign_display_key_id": "6B45C5FFC0046AE9",
+      "public_text_sha256": "d5eda17ad6c664e23f20deaaf875172d19304d7cfceb78a9e6dab8c51b77ba0d",
+      "repository_fingerprint": "D5EDA17AD6C664E2"
+    }
+  ],
+  "production_public_file_matches_embedded": true
+}
